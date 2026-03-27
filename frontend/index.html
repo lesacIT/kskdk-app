@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Khám Sức Khỏe Định Kỳ - TKG TAEKWANG CẦN THƠ</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --primary:#1D9E75;--primary-dark:#0F6E56;--primary-light:#E1F5EE;
+    --accent:#185FA5;--accent-light:#E6F1FB;
+    --warn:#BA7517;--warn-light:#FAEEDA;
+    --danger:#A32D2D;--danger-light:#FCEBEB;
+    --text:#1a1a1a;--text-muted:#666;--text-hint:#999;
+    --bg:#f5f7f5;--card:#fff;--border:#e0e0e0;
+    --radius:12px;--radius-sm:8px;
+  }
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px}
+
+  .app-header{background:var(--primary);color:#fff;padding:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,100,60,.25)}
+  .header-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+  .header-top h1{font-size:17px;font-weight:600}
+  .back-btn{background:rgba(255,255,255,.2);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+  .patient-bar{background:rgba(0,0,0,.15);padding:8px 16px;font-size:13px;display:flex;gap:16px;overflow-x:auto}
+  .patient-bar strong{color:#fff}
+  .progress-bar{height:3px;background:rgba(255,255,255,.25)}
+  .progress-fill{height:100%;background:#fff;transition:width .3s ease}
+
+  .nav-tabs{display:flex;overflow-x:auto;background:#fff;border-bottom:1.5px solid var(--border)}
+  .nav-tab{flex:0 0 auto;padding:10px 14px;border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2.5px solid transparent;position:relative}
+  .nav-tab.active{color:var(--primary-dark);border-bottom-color:var(--primary)}
+  .nav-tab .badge{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--warn);border-radius:50%;display:none}
+  .nav-tab.done .badge{display:block;background:var(--primary)}
+
+  .main{padding:16px;max-width:600px;margin:0 auto}
+  .screen{display:none}
+  .screen.active{display:block}
+
+  .card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:14px;overflow:hidden}
+  .card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+  .card-header h2{font-size:15px;font-weight:600;color:var(--primary-dark)}
+  .card-body{padding:14px 16px}
+
+  .section-label{font-size:12px;font-weight:600;color:var(--text-hint);margin-bottom:8px;margin-top:16px}
+  .form-row{display:grid;gap:10px;margin-bottom:10px}
+  .form-row.cols-2{grid-template-columns:1fr 1fr}
+  .form-group{display:flex;flex-direction:column;gap:4px}
+  .form-group label{font-size:13px;color:var(--text-muted);font-weight:500}
+  .form-group input,.form-group select,.form-group textarea{
+    border:1.5px solid var(--border);border-radius:var(--radius-sm);
+    padding:10px 12px;font-size:15px;width:100%;font-family:inherit;
+  }
+  .form-group input:focus,.form-group select:focus{border-color:var(--primary);outline:none}
+  input[readonly]{background:#f8f8f8}
+
+  .radio-group{display:flex;gap:8px;flex-wrap:wrap}
+  .radio-btn{
+    display:inline-flex;align-items:center;gap:5px;padding:8px 14px;
+    border-radius:20px;border:1.5px solid var(--border);cursor:pointer;
+    background:#fff;color:var(--text-muted);
+  }
+  .radio-btn.selected{background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark)}
+
+  .gender-select{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  .gender-card{border:2px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;background:#fff}
+  .gender-card.selected{border-color:var(--primary);background:var(--primary-light)}
+  .gender-card .gender-icon{font-size:32px;margin-bottom:4px}
+
+  .vital-display{background:var(--primary-light);border-radius:var(--radius-sm);padding:10px 14px;text-align:center}
+  .vital-value{font-size:24px;font-weight:700;color:var(--primary-dark)}
+
+  .bottom-action{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:10px;z-index:50}
+  .btn-primary{flex:1;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:13px;font-weight:600;cursor:pointer}
+  .btn-secondary{background:#fff;color:var(--primary-dark);border:1.5px solid var(--primary);border-radius:var(--radius-sm);padding:13px 18px;cursor:pointer}
+  .btn-success{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:13px;cursor:pointer}
+  .btn-warning{background:var(--warn);color:#fff;border:none;border-radius:var(--radius-sm);padding:13px;cursor:pointer}
+
+  .hero{text-align:center;padding:24px 16px 16px}
+  .hero-icon{font-size:56px;margin-bottom:12px}
+  .hero h2{font-size:22px;color:var(--primary-dark)}
+
+  .emp-card{border:1px solid var(--border);border-radius:var(--radius);padding:16px;background:#fff;margin-top:16px}
+  .emp-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee}
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+  .stat-card{background:white;border-radius:12px;padding:16px;text-align:center;border:1px solid var(--border);cursor:pointer;transition:all 0.3s}
+  .stat-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+  .stat-number{font-size:28px;font-weight:700;color:var(--primary)}
+  .stat-label{font-size:12px;color:var(--text-muted);margin-top:4px}
+
+  .admin-link{position:fixed;bottom:20px;right:20px;background:var(--primary);color:white;padding:10px 16px;border-radius:30px;text-decoration:none;font-size:13px;display:flex;align-items:center;gap:8px;z-index:1000}
+  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;opacity:0;transition:opacity .3s;z-index:999;display:flex;align-items:center;gap:8px}
+  .toast.show{opacity:1}
+
+  @media(max-width:640px){.form-row.cols-2{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="header-top">
+    <button class="back-btn" id="backBtn" onclick="goBack()" style="visibility:hidden">←</button>
+    <h1 id="headerTitle">Khám Sức Khỏe Định Kỳ</h1>
+    <div style="width:36px"></div>
+  </div>
+  <div class="patient-bar" id="patientBar" style="display:none">
+    <span>👤 <strong id="pBarName">—</strong></span>
+    <span>📅 <strong id="pBarDob">—</strong></span>
+    <span>🏷 <strong id="pBarGender">—</strong></span>
+    <span>🆔 <strong id="pBarEmpId">—</strong></span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<div class="nav-tabs" id="navTabs" style="display:none">
+  <button class="nav-tab" data-screen="screen-tq" onclick="goToTab('tq')"><span class="icon">📋</span>Tổng quát<span class="badge"></span></button>
+  <button class="nav-tab" data-screen="screen-nk" onclick="goToTab('nk')"><span class="icon">🫀</span>Nội khoa<span class="badge"></span></button>
+  <button class="nav-tab" data-screen="screen-ng" onclick="goToTab('ng')"><span class="icon">🩺</span>Ngoại/Da<span class="badge"></span></button>
+  <button class="nav-tab" data-screen="screen-sp" onclick="goToTab('sp')"><span class="icon">👶</span>Sản phụ<span class="badge"></span></button>
+  <button class="nav-tab" data-screen="screen-mt" onclick="goToTab('mt')"><span class="icon">👁</span>Mắt<span class="badge"></span></button>
+  <button class="nav-tab" data-screen="screen-tmh" onclick="goToTab('tmh')"><span class="icon">👂</span>TMH<span class="badge"></span></button>
+  <button class="nav-tab" data-screen="screen-rhm" onclick="goToTab('rhm')"><span class="icon">🦷</span>RHM<span class="badge"></span></button>
+  <button class="nav-tab" data-screen="screen-kl" onclick="goToTab('kl')"><span class="icon">📝</span>Kết luận<span class="badge"></span></button>
+</div>
+
+<!-- HOME SCREEN -->
+<div class="screen active main" id="screen-home">
+  <div class="hero">
+    <div class="hero-icon">🏥</div>
+    <h2>CÔNG TY TNHH TKG TAEKWANG CẦN THƠ</h2>
+    <p>Hệ thống khám sức khỏe định kỳ theo TT 56/2025/TT-BYT</p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card" onclick="showTodayRegistrations()">
+      <div class="stat-number" id="totalRegistered">0</div>
+      <div class="stat-label"><i class="fas fa-calendar-day"></i> Đã đăng ký hôm nay</div>
+    </div>
+    <div class="stat-card" onclick="showCompletedExams()">
+      <div class="stat-number" id="totalCompleted">0</div>
+      <div class="stat-label"><i class="fas fa-check-circle"></i> Đã hoàn thành</div>
+    </div>
+    <div class="stat-card" onclick="refreshData()">
+      <div class="stat-number" id="totalEmployees">0</div>
+      <div class="stat-label"><i class="fas fa-users"></i> Tổng nhân viên</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">📝</span><h2>ĐĂNG KÝ KHÁM SỨC KHỎE</h2></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label><i class="fas fa-qrcode"></i> Mã nhân viên</label>
+          <input type="text" id="empId" placeholder="Nhập mã nhân viên (VD: 19000000)" autocomplete="off">
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Họ tên</label>
+          <input type="text" id="patientName" readonly placeholder="Tự động hiển thị">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-building"></i> Bộ phận</label>
+          <input type="text" id="patientDept" readonly placeholder="Tự động hiển thị">
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label><i class="fas fa-birthday-cake"></i> Ngày sinh</label>
+          <input type="date" id="patientDob">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-chart-line"></i> Tuổi</label>
+          <input type="text" id="patientAge" readonly>
+        </div>
+      </div>
+      <div class="section-label"><i class="fas fa-venus-mars"></i> Giới tính</div>
+      <div class="gender-select">
+        <div class="gender-card" id="genderNam" onclick="selectGender('Nam')">
+          <div class="gender-icon">👨</div>
+          <span>Nam</span>
+        </div>
+        <div class="gender-card" id="genderNu" onclick="selectGender('Nữ')">
+          <div class="gender-icon">👩</div>
+          <span>Nữ</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-briefcase"></i> Vị trí công việc</label>
+        <input type="text" id="patientJob" placeholder="VD: Kỹ sư, Công nhân...">
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-notes-medical"></i> Tiền sử bệnh</label>
+        <textarea id="patientHistory" rows="2" placeholder="Ghi tên bệnh/hội chứng đã mắc..."></textarea>
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-exclamation-triangle"></i> Yếu tố có hại</label>
+        <textarea id="hazardFactors" rows="2" placeholder="Mô tả yếu tố nguy hại tại nơi làm việc..."></textarea>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn-secondary" onclick="searchEmployee()" style="flex:1"><i class="fas fa-search"></i> Tra cứu</button>
+        <button class="btn-primary" onclick="registerExam()" style="flex:1"><i class="fas fa-calendar-check"></i> Đăng ký khám</button>
+        <button class="btn-success" onclick="resetForm()" style="flex:1"><i class="fas fa-sync-alt"></i> Làm mới</button>
+      </div>
+    </div>
+  </div>
+  <div id="empInfo"></div>
+</div>
+
+<!-- TỔNG QUÁT -->
+<div class="screen" id="screen-tq">
+  <div class="main">
+    <div class="info-strip" style="background:var(--primary-light);padding:12px;border-radius:8px;margin-bottom:16px">
+      <i class="fas fa-info-circle"></i> Nhập nhanh – hệ thống tự tính BMI và phân loại
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">📏</span><h2>Nhân trắc học</h2></div>
+      <div class="card-body">
+        <div class="form-row cols-2">
+          <div class="form-group"><label>Chiều cao (cm)</label><input type="number" id="height" placeholder="170" oninput="calcBMI()"></div>
+          <div class="form-group"><label>Cân nặng (kg)</label><input type="number" id="weight" placeholder="65" oninput="calcBMI()"></div>
+        </div>
+        <div id="bmiCard" class="vital-display" style="display:none">
+          <div class="vital-value" id="bmiValue">—</div>
+          <div>BMI • <span id="bmiStatus">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">💓</span><h2>Sinh hiệu</h2></div>
+      <div class="card-body">
+        <div class="form-row cols-2">
+          <div class="form-group"><label>Mạch (lần/phút)</label><input type="number" id="pulse" placeholder="72"></div>
+          <div class="form-group"><label>Huyết áp tâm thu</label><input type="number" id="bpSys" placeholder="120" oninput="checkBP()"></div>
+        </div>
+        <div class="form-row cols-2">
+          <div class="form-group"><label>Huyết áp tâm trương</label><input type="number" id="bpDia" placeholder="80" oninput="checkBP()"></div>
+          <div class="form-group"><label>HA hiển thị</label><input type="text" id="bpDisplay" readonly placeholder="mmHg"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">🏃</span><h2>Phân loại thể lực</h2></div>
+      <div class="card-body">
+        <div class="radio-group" id="physicalClass">
+          <label class="radio-btn" onclick="selectRadio(this,'physicalClass')"><input type="radio" value="Loại I">Loại I – Rất tốt</label>
+          <label class="radio-btn" onclick="selectRadio(this,'physicalClass')"><input type="radio" value="Loại II">Loại II – Tốt</label>
+          <label class="radio-btn" onclick="selectRadio(this,'physicalClass')"><input type="radio" value="Loại III">Loại III – Trung bình</label>
+          <label class="radio-btn" onclick="selectRadio(this,'physicalClass')"><input type="radio" value="Loại IV">Loại IV – Kém</label>
+          <label class="radio-btn" onclick="selectRadio(this,'physicalClass')"><input type="radio" value="Loại V">Loại V – Rất kém</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-action">
+    <button class="btn-secondary" onclick="goToTab('home')"><i class="fas fa-arrow-left"></i> Quay lại</button>
+    <button class="btn-primary" onclick="saveSectionAndNext('tq','nk')"><i class="fas fa-save"></i> Lưu & Tiếp →</button>
+  </div>
+</div>
+
+<!-- Các màn hình khám -->
+<div class="screen" id="screen-nk">
+  <div class="main">
+    <div class="card"><div class="card-header"><span class="icon">🫀</span><h2>Nội khoa</h2></div><div class="card-body"><textarea id="nkContent" rows="8" placeholder="Ghi nhận kết quả khám nội khoa..."></textarea></div></div>
+  </div>
+  <div class="bottom-action"><button class="btn-secondary" onclick="goToTab('tq')">← Trước</button><button class="btn-primary" onclick="saveSectionAndNext('nk','ng')">Lưu & Tiếp →</button></div>
+</div>
+
+<div class="screen" id="screen-ng">
+  <div class="main">
+    <div class="card"><div class="card-header"><span class="icon">🩺</span><h2>Ngoại khoa & Da liễu</h2></div><div class="card-body"><textarea id="ngContent" rows="8" placeholder="Ghi nhận kết quả khám ngoại khoa và da liễu..."></textarea></div></div>
+  </div>
+  <div class="bottom-action"><button class="btn-secondary" onclick="goToTab('nk')">← Trước</button><button class="btn-primary" onclick="saveSectionAndNext('ng','sp')">Lưu & Tiếp →</button></div>
+</div>
+
+<div class="screen" id="screen-sp">
+  <div class="main">
+    <div class="card"><div class="card-header"><span class="icon">👶</span><h2>Sản phụ khoa</h2></div><div class="card-body"><textarea id="spContent" rows="8" placeholder="Ghi nhận kết quả khám sản phụ khoa..."></textarea></div></div>
+  </div>
+  <div class="bottom-action"><button class="btn-secondary" onclick="goToTab('ng')">← Trước</button><button class="btn-primary" onclick="saveSectionAndNext('sp','mt')">Lưu & Tiếp →</button></div>
+</div>
+
+<div class="screen" id="screen-mt">
+  <div class="main">
+    <div class="card"><div class="card-header"><span class="icon">👁</span><h2>Mắt</h2></div><div class="card-body"><textarea id="mtContent" rows="8" placeholder="Ghi nhận kết quả khám mắt..."></textarea></div></div>
+  </div>
+  <div class="bottom-action"><button class="btn-secondary" onclick="goToTab('sp')">← Trước</button><button class="btn-primary" onclick="saveSectionAndNext('mt','tmh')">Lưu & Tiếp →</button></div>
+</div>
+
+<div class="screen" id="screen-tmh">
+  <div class="main">
+    <div class="card"><div class="card-header"><span class="icon">👂</span><h2>Tai Mũi Họng</h2></div><div class="card-body"><textarea id="tmhContent" rows="8" placeholder="Ghi nhận kết quả khám TMH..."></textarea></div></div>
+  </div>
+  <div class="bottom-action"><button class="btn-secondary" onclick="goToTab('mt')">← Trước</button><button class="btn-primary" onclick="saveSectionAndNext('tmh','rhm')">Lưu & Tiếp →</button></div>
+</div>
+
+<div class="screen" id="screen-rhm">
+  <div class="main">
+    <div class="card"><div class="card-header"><span class="icon">🦷</span><h2>Răng Hàm Mặt</h2></div><div class="card-body"><textarea id="rhmContent" rows="8" placeholder="Ghi nhận kết quả khám RHM..."></textarea></div></div>
+  </div>
+  <div class="bottom-action"><button class="btn-secondary" onclick="goToTab('tmh')">← Trước</button><button class="btn-primary" onclick="saveSectionAndNext('rhm','kl')">Lưu & Tiếp →</button></div>
+</div>
+
+<div class="screen" id="screen-kl">
+  <div class="main">
+    <div class="card">
+      <div class="card-header"><span class="icon">📝</span><h2>Kết luận</h2></div>
+      <div class="card-body">
+        <div class="form-group"><label>Kết luận sức khỏe</label><textarea id="klConclusion" rows="5" placeholder="Kết luận và chỉ định..."></textarea></div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-action"><button class="btn-secondary" onclick="goToTab('rhm')">← Trước</button><button class="btn-primary" onclick="finishExam()"><i class="fas fa-check-circle"></i> Hoàn tất & In phiếu</button></div>
+</div>
+
+<div class="toast" id="toast"><i class="fas fa-info-circle"></i> <span id="toastMessage"></span></div>
+<a href="employee-manager.html" class="admin-link"><i class="fas fa-users"></i> Quản lý nhân viên</a>
+
+<script>
+let employees = [];
+let registeredCount = 0;
+let completedCount = 0;
+
+const state = { 
+  patient: {}, 
+  currentScreen: 'home', 
+  doneSections: new Set(),
+  examData: {}
+};
+const screenOrder = ['home','tq','nk','ng','sp','mt','tmh','rhm','kl'];
+const sectionNames = { tq:'Tổng quát',nk:'Nội khoa',ng:'Ngoại/Da',sp:'Sản phụ',mt:'Mắt',tmh:'TMH',rhm:'RHM',kl:'Kết luận' };
+
+// ========== ĐỒNG BỘ DỮ LIỆU ==========
+function loadEmployees() {
+  const stored = localStorage.getItem('employees');
+  if(stored) {
+    employees = JSON.parse(stored);
+  } else {
+    employees = [
+      { id:"19000000", name:"NGUYỄN VĂN A", gender:"Nam", dob:"1990-05-15", dept:"Chuyền May 1", position:"Chuyền trưởng", phone:"0901234567", email:"nguyenvana@tkg.com" },
+      { id:"19000001", name:"TRẦN THỊ B", gender:"Nữ", dob:"1985-08-22", dept:"Chuyền May 1", position:"Thợ may", phone:"0901234568", email:"tranthib@tkg.com" },
+      { id:"19000002", name:"LÊ VĂN C", gender:"Nam", dob:"1992-03-10", dept:"Chuyền May 2", position:"Thợ may", phone:"0901234569", email:"levanc@tkg.com" }
+    ];
+    localStorage.setItem('employees', JSON.stringify(employees));
+  }
+  document.getElementById('totalEmployees').textContent = employees.length;
+}
+
+function refreshData() {
+  loadEmployees();
+  loadStats();
+  showToast('Đã làm mới dữ liệu! Tổng số nhân viên: ' + employees.length, 'success');
+}
+
+// ========== THỐNG KÊ ==========
+function loadStats() {
+  const registrations = JSON.parse(localStorage.getItem('todayRegistrations') || '[]');
+  const today = new Date().toISOString().slice(0,10);
+  registeredCount = registrations.filter(r => r.date === today).length;
+  
+  const completed = JSON.parse(localStorage.getItem('completedExams') || '[]');
+  completedCount = completed.length;
+  
+  document.getElementById('totalRegistered').textContent = registeredCount;
+  document.getElementById('totalCompleted').textContent = completedCount;
+}
+
+function saveRegistration(patientData) {
+  const registrations = JSON.parse(localStorage.getItem('todayRegistrations') || '[]');
+  const today = new Date().toISOString().slice(0,10);
+  registrations.push({
+    ...patientData,
+    date: today,
+    registerTime: new Date().toISOString()
+  });
+  localStorage.setItem('todayRegistrations', JSON.stringify(registrations));
+  loadStats();
+}
+
+function saveCompletedExam(examData) {
+  const completed = JSON.parse(localStorage.getItem('completedExams') || '[]');
+  completed.push({
+    ...examData,
+    completeDate: new Date().toISOString()
+  });
+  localStorage.setItem('completedExams', JSON.stringify(completed));
+  loadStats();
+}
+
+function showTodayRegistrations() {
+  const registrations = JSON.parse(localStorage.getItem('todayRegistrations') || '[]');
+  const today = new Date().toISOString().slice(0,10);
+  const todayRegs = registrations.filter(r => r.date === today);
+  
+  if(todayRegs.length === 0) {
+    alert('📋 Hôm nay chưa có ca đăng ký nào!');
+    return;
+  }
+  
+  let msg = `📋 DANH SÁCH ĐĂNG KÝ HÔM NAY (${todayRegs.length} ca):\n\n`;
+  todayRegs.forEach((r, i) => {
+    msg += `${i+1}. ${r.name} (${r.empId}) - ${r.dept || 'N/A'}\n`;
+  });
+  alert(msg);
+}
+
+function showCompletedExams() {
+  const completed = JSON.parse(localStorage.getItem('completedExams') || '[]');
+  if(completed.length === 0) {
+    alert('✅ Chưa có ca khám nào hoàn thành!');
+    return;
+  }
+  
+  let msg = `✅ DANH SÁCH ĐÃ HOÀN THÀNH (${completed.length} ca):\n\n`;
+  completed.forEach((c, i) => {
+    msg += `${i+1}. ${c.patient?.name || 'N/A'} - ${new Date(c.completeDate).toLocaleString()}\n`;
+  });
+  alert(msg);
+}
+
+// ========== TRA CỨU NHÂN VIÊN ==========
+function searchEmployee() {
+  const empId = document.getElementById('empId').value.trim();
+  if(!empId) { 
+    showToast('Vui lòng nhập mã nhân viên', 'warning');
+    document.getElementById('empId').focus();
+    return; 
+  }
+  
+  loadEmployees();
+  const emp = employees.find(e => e.id === empId);
+  const infoDiv = document.getElementById('empInfo');
+  
+  if(!emp) { 
+    // Không tìm thấy - Hiển thị form đăng ký nhân viên mới
+    infoDiv.innerHTML = `
+      <div class="emp-card" style="border-color:var(--warn); background:var(--warn-light);">
+        <h3 style="color:var(--warn);"><i class="fas fa-user-plus"></i> NHÂN VIÊN MỚI</h3>
+        <p>Mã nhân viên <strong>${empId}</strong> chưa có trong hệ thống.</p>
+        <p>Vui lòng nhập đầy đủ thông tin để đăng ký:</p>
+        <div style="margin-top: 12px;">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Họ tên <span style="color:red">*</span></label>
+              <input type="text" id="newEmpName" placeholder="Họ và tên" style="width:100%">
+            </div>
+          </div>
+          <div class="form-row cols-2">
+            <div class="form-group">
+              <label>Giới tính</label>
+              <select id="newEmpGender" style="width:100%">
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Ngày sinh</label>
+              <input type="date" id="newEmpDob" style="width:100%">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phòng ban</label>
+              <input type="text" id="newEmpDept" placeholder="Phòng ban" style="width:100%">
+            </div>
+            <div class="form-group">
+              <label>Chức vụ</label>
+              <input type="text" id="newEmpPosition" placeholder="Chức vụ" style="width:100%">
+            </div>
+          </div>
+          <div class="form-row cols-2">
+            <div class="form-group">
+              <label>Số điện thoại</label>
+              <input type="text" id="newEmpPhone" placeholder="Số điện thoại" style="width:100%">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="newEmpEmail" placeholder="Email" style="width:100%">
+            </div>
+          </div>
+          <button class="btn-primary" onclick="registerNewEmployee('${empId}')" style="margin-top: 12px; width:100%">
+            <i class="fas fa-save"></i> Đăng ký nhân viên mới
+          </button>
+        </div>
+      </div>
+    `;
+    
+    // Xóa thông tin cũ
+    document.getElementById('patientName').value = '';
+    document.getElementById('patientDept').value = '';
+    document.getElementById('patientDob').value = '';
+    document.getElementById('patientAge').value = '';
+    document.getElementById('genderNam').classList.remove('selected');
+    document.getElementById('genderNu').classList.remove('selected');
+    
+    showToast('Nhân viên chưa có trong hệ thống. Vui lòng đăng ký thông tin!', 'warning');
+    return; 
+  }
+  
+  // Tìm thấy nhân viên
+  infoDiv.innerHTML = `
+    <div class="emp-card">
+      <h3 style="color:var(--primary-dark);"><i class="fas fa-check-circle"></i> Thông tin nhân viên</h3>
+      <div class="emp-row"><span>Họ tên</span><span><strong>${emp.name}</strong></span></div>
+      <div class="emp-row"><span>Mã NV</span><span>${emp.id}</span></div>
+      <div class="emp-row"><span>Phòng ban</span><span>${emp.dept || '—'}</span></div>
+      <div class="emp-row"><span>Chức vụ</span><span>${emp.position || '—'}</span></div>
+      <div class="emp-row"><span>SĐT</span><span>${emp.phone || '—'}</span></div>
+      <div class="emp-row"><span>Email</span><span>${emp.email || '—'}</span></div>
+    </div>
+  `;
+  
+  document.getElementById('patientName').value = emp.name;
+  document.getElementById('patientDept').value = emp.dept || '';
+  if(emp.dob) document.getElementById('patientDob').value = emp.dob;
+  if(emp.gender) selectGender(emp.gender);
+  calculateAge();
+  showToast(`Đã tìm thấy: ${emp.name}`, 'success');
+}
+
+// Đăng ký nhân viên mới
+function registerNewEmployee(empId) {
+  const name = document.getElementById('newEmpName').value.trim();
+  if(!name) {
+    showToast('Vui lòng nhập họ tên nhân viên', 'error');
+    document.getElementById('newEmpName').focus();
+    return;
+  }
+  
+  const newEmp = {
+    id: empId,
+    name: name.toUpperCase(),
+    gender: document.getElementById('newEmpGender').value,
+    dob: document.getElementById('newEmpDob').value,
+    dept: document.getElementById('newEmpDept').value.trim(),
+    position: document.getElementById('newEmpPosition').value.trim(),
+    phone: document.getElementById('newEmpPhone').value.trim(),
+    email: document.getElementById('newEmpEmail').value.trim(),
+    note: 'Đăng ký từ trang khám'
+  };
+  
+  // Thêm vào danh sách nhân viên
+  employees.push(newEmp);
+  localStorage.setItem('employees', JSON.stringify(employees));
+  
+  // Cập nhật thống kê
+  document.getElementById('totalEmployees').textContent = employees.length;
+  
+  // Cập nhật giao diện
+  document.getElementById('patientName').value = newEmp.name;
+  document.getElementById('patientDept').value = newEmp.dept;
+  if(newEmp.dob) document.getElementById('patientDob').value = newEmp.dob;
+  if(newEmp.gender) selectGender(newEmp.gender);
+  calculateAge();
+  
+  document.getElementById('empInfo').innerHTML = `
+    <div class="emp-card" style="background:var(--primary-light); border-color:var(--primary);">
+      <h3 style="color:var(--primary-dark);"><i class="fas fa-check-circle"></i> Đã đăng ký thành công!</h3>
+      <div class="emp-row"><span>Mã NV</span><span><strong>${empId}</strong></span></div>
+      <div class="emp-row"><span>Họ tên</span><span><strong>${newEmp.name}</strong></span></div>
+      <div class="emp-row"><span>Phòng ban</span><span>${newEmp.dept || '—'}</span></div>
+    </div>
+  `;
+  
+  showToast(`Đã thêm nhân viên mới: ${newEmp.name}`, 'success');
+  
+  // Hỏi có muốn tiếp tục đăng ký khám không
+  setTimeout(() => {
+    if(confirm(`Đã thêm nhân viên ${newEmp.name}. Tiếp tục đăng ký khám?`)) {
+      registerExam();
+    }
+  }, 500);
+}
+
+// ========== FORM HELPERS ==========
+function resetForm() {
+  document.getElementById('empId').value = '';
+  document.getElementById('patientName').value = '';
+  document.getElementById('patientDept').value = '';
+  document.getElementById('patientDob').value = '';
+  document.getElementById('patientAge').value = '';
+  document.getElementById('patientJob').value = '';
+  document.getElementById('patientHistory').value = '';
+  document.getElementById('hazardFactors').value = '';
+  document.getElementById('empInfo').innerHTML = '';
+  document.getElementById('genderNam').classList.remove('selected');
+  document.getElementById('genderNu').classList.remove('selected');
+  showToast('Đã làm mới form', 'info');
+}
+
+function calculateAge() {
+  const dob = document.getElementById('patientDob').value;
+  if(dob) {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    document.getElementById('patientAge').value = age > 0 ? age + ' tuổi' : '';
+  }
+}
+
+function selectGender(g) {
+  document.getElementById('genderNam').classList.toggle('selected', g==='Nam');
+  document.getElementById('genderNu').classList.toggle('selected', g==='Nữ');
+}
+
+function registerExam() {
+  const empId = document.getElementById('empId').value.trim();
+  const name = document.getElementById('patientName').value.trim();
+  
+  if(!empId) { 
+    showToast('Vui lòng nhập mã nhân viên', 'warning'); 
+    document.getElementById('empId').focus();
+    return; 
+  }
+  
+  if(!name) { 
+    showToast('Vui lòng tra cứu hoặc đăng ký thông tin nhân viên trước', 'warning'); 
+    return; 
+  }
+  
+  const patientData = {
+    empId: empId,
+    name: name,
+    gender: document.querySelector('.gender-card.selected span')?.textContent || '',
+    dob: document.getElementById('patientDob').value,
+    age: document.getElementById('patientAge').value,
+    job: document.getElementById('patientJob').value,
+    history: document.getElementById('patientHistory').value,
+    hazard: document.getElementById('hazardFactors').value,
+    dept: document.getElementById('patientDept').value
+  };
+  
+  saveRegistration(patientData);
+  localStorage.setItem('currentExam', JSON.stringify(patientData));
+  
+  document.getElementById('pBarName').textContent = name;
+  document.getElementById('pBarDob').textContent = patientData.dob || '—';
+  document.getElementById('pBarGender').textContent = patientData.gender || '—';
+  document.getElementById('pBarEmpId').textContent = empId;
+  
+  showToast('Đăng ký khám thành công!', 'success');
+  goToTab('tq');
+}
+
+// ========== ĐIỀU HƯỚNG ==========
+function goToTab(section) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(`screen-${section === 'home' ? 'home' : section}`).classList.add('active');
+  state.currentScreen = section;
+  const navTabs = document.getElementById('navTabs');
+  const patientBar = document.getElementById('patientBar');
+  if(section === 'home') { 
+    navTabs.style.display = 'none'; 
+    patientBar.style.display = 'none';
+    loadStats();
+  } else { 
+    navTabs.style.display = 'flex'; 
+    patientBar.style.display = 'flex'; 
+  }
+  updateProgress();
+}
+
+function goBack() { 
+  const idx = screenOrder.indexOf(state.currentScreen); 
+  if(idx > 0) goToTab(screenOrder[idx-1]); 
+}
+
+function updateProgress() {
+  const total = screenOrder.length-1;
+  const done = state.doneSections.size;
+  document.getElementById('progressFill').style.width = Math.round((done/total)*100)+'%';
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    const s = t.getAttribute('data-screen').replace('screen-','');
+    if(state.doneSections.has(s)) t.classList.add('done');
+    else t.classList.remove('done');
+  });
+}
+
+function saveSectionAndNext(current, next) {
+  const examData = JSON.parse(localStorage.getItem('currentExam') || '{}');
+  if(current === 'tq') {
+    examData.height = document.getElementById('height').value;
+    examData.weight = document.getElementById('weight').value;
+    examData.bmi = document.getElementById('bmiValue').textContent;
+    examData.pulse = document.getElementById('pulse').value;
+    examData.bp = document.getElementById('bpDisplay').value;
+    examData.physicalClass = document.querySelector('#physicalClass .selected input')?.value;
+  } else {
+    const contentId = current === 'nk' ? 'nkContent' : 
+                      current === 'ng' ? 'ngContent' : 
+                      current === 'sp' ? 'spContent' : 
+                      current === 'mt' ? 'mtContent' : 
+                      current === 'tmh' ? 'tmhContent' : 
+                      current === 'rhm' ? 'rhmContent' : '';
+    if(contentId) examData[current] = document.getElementById(contentId).value;
+  }
+  localStorage.setItem('currentExam', JSON.stringify(examData));
+  
+  state.doneSections.add(current);
+  updateProgress();
+  showToast('✓ Đã lưu ' + sectionNames[current], 'success');
+  goToTab(next);
+}
+
+function finishExam() {
+  const examData = JSON.parse(localStorage.getItem('currentExam') || '{}');
+  examData.conclusion = document.getElementById('klConclusion').value;
+  
+  saveCompletedExam({ patient: examData, conclusion: examData.conclusion });
+  
+  state.doneSections.add('kl');
+  updateProgress();
+  showToast('✅ Phiếu khám đã hoàn tất!', 'success');
+  localStorage.removeItem('currentExam');
+  setTimeout(() => window.print(), 800);
+}
+
+// ========== KHÁM TỔNG QUÁT ==========
+function calcBMI() {
+  const h = parseFloat(document.getElementById('height').value);
+  const w = parseFloat(document.getElementById('weight').value);
+  const card = document.getElementById('bmiCard');
+  if(h > 0 && w > 0) {
+    const bmi = w / (h/100)**2;
+    document.getElementById('bmiValue').textContent = bmi.toFixed(1);
+    let status = '';
+    if(bmi < 18.5) status = 'Thiếu cân';
+    else if(bmi < 23) status = 'Bình thường';
+    else if(bmi < 25) status = 'Thừa cân';
+    else status = 'Béo phì';
+    document.getElementById('bmiStatus').textContent = status;
+    card.style.display = 'block';
+  } else {
+    card.style.display = 'none';
+  }
+}
+
+function checkBP() {
+  const s = document.getElementById('bpSys').value;
+  const d = document.getElementById('bpDia').value;
+  if(s && d) document.getElementById('bpDisplay').value = s + '/' + d + ' mmHg';
+}
+
+function selectRadio(label, groupId) {
+  document.querySelectorAll('#'+groupId+' .radio-btn').forEach(l => l.classList.remove('selected'));
+  label.classList.add('selected');
+}
+
+function showToast(msg, type = 'info') {
+  const toast = document.getElementById('toast');
+  const toastMessage = document.getElementById('toastMessage');
+  const icon = toast.querySelector('i');
+  
+  toastMessage.textContent = msg;
+  
+  if(type === 'success') {
+    icon.className = 'fas fa-check-circle';
+    toast.style.background = '#10B981';
+  } else if(type === 'error') {
+    icon.className = 'fas fa-exclamation-triangle';
+    toast.style.background = '#EF4444';
+  } else if(type === 'warning') {
+    icon.className = 'fas fa-exclamation-circle';
+    toast.style.background = '#F59E0B';
+  } else {
+    icon.className = 'fas fa-info-circle';
+    toast.style.background = '#1F2937';
+  }
+  
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function checkSelectedEmployee() {
+  const selected = localStorage.getItem('selectedEmployee');
+  if(selected) {
+    const emp = JSON.parse(selected);
+    document.getElementById('empId').value = emp.id;
+    document.getElementById('patientName').value = emp.name;
+    document.getElementById('patientDept').value = emp.dept;
+    if(emp.dob) document.getElementById('patientDob').value = emp.dob;
+    if(emp.gender) selectGender(emp.gender);
+    calculateAge();
+    document.getElementById('empInfo').innerHTML = `
+      <div class="emp-card">
+        <h3><i class="fas fa-check-circle"></i> Đã chọn nhân viên</h3>
+        <div class="emp-row"><span>Họ tên</span><span><strong>${emp.name}</strong></span></div>
+        <div class="emp-row"><span>Phòng ban</span><span>${emp.dept}</span></div>
+      </div>
+    `;
+    localStorage.removeItem('selectedEmployee');
+    showToast(`Đã chọn nhân viên: ${emp.name}`, 'success');
+  }
+}
+
+// ========== KHỞI TẠO ==========
+document.addEventListener('DOMContentLoaded', () => {
+  loadEmployees();
+  loadStats();
+  document.getElementById('patientDob').addEventListener('change', calculateAge);
+  checkSelectedEmployee();
+  
+  const currentExam = localStorage.getItem('currentExam');
+  if(currentExam && state.currentScreen === 'home') {
+    const exam = JSON.parse(currentExam);
+    if(confirm(`Bạn có phiếu khám của ${exam.name} đang dang dở. Tiếp tục?`)) {
+      document.getElementById('empId').value = exam.empId;
+      document.getElementById('patientName').value = exam.name;
+      document.getElementById('patientDept').value = exam.dept;
+      document.getElementById('patientDob').value = exam.dob;
+      document.getElementById('patientAge').value = exam.age;
+      document.getElementById('patientJob').value = exam.job;
+      document.getElementById('patientHistory').value = exam.history;
+      document.getElementById('hazardFactors').value = exam.hazard;
+      if(exam.gender) selectGender(exam.gender);
+      calculateAge();
+      goToTab('tq');
+    }
+  }
+});
+</script>
+</body>
+</html>
