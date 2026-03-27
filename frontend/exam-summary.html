@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Tổng hợp kết quả khám - TKG TAEKWANG CẦN THƠ</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --primary:#1D9E75;--primary-dark:#0F6E56;--primary-light:#E1F5EE;
+    --accent:#185FA5;--accent-light:#E6F1FB;
+    --warn:#BA7517;--warn-light:#FAEEDA;
+    --danger:#A32D2D;--danger-light:#FCEBEB;
+    --text:#1a1a1a;--text-muted:#666;--text-hint:#999;
+    --bg:#f5f7f5;--card:#fff;--border:#e0e0e0;
+    --radius:12px;--radius-sm:8px;
+  }
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+  /* Header */
+  .header{
+    background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);
+    color:#fff;padding:20px;margin-bottom:20px;
+  }
+  .header-content{max-width:1200px;margin:0 auto}
+  .header h1{font-size:24px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+  .header p{opacity:0.9}
+  .back-link{display:inline-flex;align-items:center;gap:8px;color:#fff;text-decoration:none;background:rgba(255,255,255,0.2);padding:8px 16px;border-radius:30px;margin-bottom:16px;transition:all .3s}
+  .back-link:hover{background:rgba(255,255,255,0.3)}
+
+  /* Main */
+  .main{max-width:1200px;margin:0 auto;padding:0 20px 40px}
+
+  /* Stats cards */
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .stat-card{background:#fff;border-radius:var(--radius);padding:20px;text-align:center;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+  .stat-number{font-size:32px;font-weight:700;color:var(--primary)}
+  .stat-label{font-size:13px;color:var(--text-muted);margin-top:8px}
+
+  /* Search bar */
+  .search-bar{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+  .search-bar input{flex:2;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px}
+  .search-bar select{flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#fff}
+  .search-bar button{padding:12px 24px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;gap:8px}
+
+  /* Table */
+  .table-container{overflow-x:auto;background:#fff;border-radius:var(--radius);border:1px solid var(--border)}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border)}
+  th{background:#f8f9fa;font-weight:600;color:var(--primary-dark);position:sticky;top:0}
+  tr:hover{background:#f9fafb}
+  .clickable{cursor:pointer;color:var(--primary);text-decoration:underline}
+
+  /* Modal detail */
+  .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center}
+  .modal.active{display:flex}
+  .modal-content{background:#fff;border-radius:var(--radius);max-width:800px;width:90%;max-height:90vh;overflow-y:auto}
+  .modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  .modal-body{padding:20px}
+  .modal-footer{padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:12px;justify-content:flex-end}
+
+  /* Exam detail */
+  .detail-section{margin-bottom:20px}
+  .detail-section h3{color:var(--primary-dark);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--primary-light)}
+  .detail-row{display:flex;padding:8px 0;border-bottom:1px solid #eee}
+  .detail-label{width:150px;font-weight:600;color:var(--text-muted)}
+  .detail-value{flex:1;color:var(--text)}
+  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px}
+  .badge-ok{background:var(--primary-light);color:var(--primary-dark)}
+  .badge-warn{background:var(--warn-light);color:var(--warn)}
+  .badge-danger{background:var(--danger-light);color:var(--danger)}
+  .badge-pending{background:#f0f0f0;color:#999}
+
+  /* Print button */
+  .print-btn{position:fixed;bottom:20px;right:20px;background:var(--primary);color:#fff;padding:12px 20px;border-radius:40px;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,0.2);z-index:100}
+  
+  @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.detail-label{width:120px}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-content">
+    <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Quay lại trang khám</a>
+    <h1><i class="fas fa-chart-line"></i> TỔNG HỢP KẾT QUẢ KHÁM</h1>
+    <p>Thống kê và xem chi tiết kết quả khám sức khỏe định kỳ</p>
+  </div>
+</div>
+
+<div class="main">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number" id="totalExams">0</div>
+      <div class="stat-label">Tổng lượt khám</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="totalPatients">0</div>
+      <div class="stat-label">Bệnh nhân đã khám</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="todayExams">0</div>
+      <div class="stat-label">Hôm nay</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="avgComplete">0</div>
+      <div class="stat-label">TB khoa/phiếu</div>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm theo mã NV, họ tên, phòng ban..." onkeyup="renderExamTable()">
+    <select id="dateFilter" onchange="renderExamTable()">
+      <option value="">Tất cả thời gian</option>
+      <option value="today">Hôm nay</option>
+      <option value="week">7 ngày qua</option>
+      <option value="month">30 ngày qua</option>
+    </select>
+    <button onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Xuất Excel</button>
+  </div>
+
+  <div class="table-container">
+    <table id="examTable">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Ngày khám</th>
+          <th>Mã NV</th>
+          <th>Họ tên</th>
+          <th>Phòng ban</th>
+          <th>Kết luận</th>
+          <th>Phân loại SK</th>
+          <th>Bác sĩ</th>
+          <th>Chi tiết</th>
+        </tr>
+      </thead>
+      <tbody id="examTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<button class="print-btn" onclick="window.print()"><i class="fas fa-print"></i> In báo cáo</button>
+
+<!-- Modal chi tiết -->
+<div id="detailModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3><i class="fas fa-file-medical"></i> Chi tiết phiếu khám</h3>
+      <button class="btn-secondary" onclick="closeModal()" style="padding:6px 12px;border:1px solid var(--border);background:#fff;border-radius:8px;cursor:pointer">✖</button>
+    </div>
+    <div class="modal-body" id="detailModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Đóng</button>
+      <button class="btn-primary" onclick="printExam()" style="background:var(--primary);color:#fff;padding:8px 16px;border:none;border-radius:8px;cursor:pointer"><i class="fas fa-print"></i> In phiếu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let allExams = [];
+let currentExamDetail = null;
+
+// ========== TẢI DỮ LIỆU ==========
+function loadExams() {
+  const stored = localStorage.getItem('completedExams');
+  if(stored) {
+    allExams = JSON.parse(stored);
+  } else {
+    // Dữ liệu mẫu
+    allExams = [
+      {
+        patient: { empId: "19000000", name: "NGUYỄN VĂN A", gender: "Nam", dob: "1990-05-15", dept: "Chuyền May 1" },
+        examData: {
+          tq: { height: "170", weight: "65", bmi: "22.5", pulse: "72", bpDisplay: "120/80", physicalClass: "Loại II" },
+          nk: { th_class: "Bình thường", hh_class: "Bình thường", thoa_class: "Bình thường", ttn_class: "Bình thường", nt_class: "Bình thường", cxk_class: "Bình thường", tk_class: "Bình thường", tthan_class: "Bình thường" },
+          ng: { ngoai_class: "Bình thường", da_class: "Bình thường" },
+          mt: { class: "Bình thường" },
+          tmh: { class: "Bình thường" },
+          rhm: { class: "Bình thường" },
+          kl: { diseases: "", fit: "Đủ sức khỏe", resolution: "", doctor: "BS. Nguyễn Văn A", clinic: "Trung tâm y tế" }
+        },
+        completedSections: ["tq","nk","ng","mt","tmh","rhm","kl"],
+        completeDate: new Date().toISOString()
+      }
+    ];
+    localStorage.setItem('completedExams', JSON.stringify(allExams));
+  }
+  updateStats();
+  renderExamTable();
+}
+
+function updateStats() {
+  document.getElementById('totalExams').textContent = allExams.length;
+  const uniquePatients = [...new Set(allExams.map(e => e.patient?.empId))];
+  document.getElementById('totalPatients').textContent = uniquePatients.length;
+  
+  const today = new Date().toISOString().slice(0,10);
+  const todayExams = allExams.filter(e => e.completeDate?.slice(0,10) === today);
+  document.getElementById('todayExams').textContent = todayExams.length;
+  
+  const avgSections = allExams.reduce((sum, e) => sum + (e.completedSections?.length || 0), 0) / (allExams.length || 1);
+  document.getElementById('avgComplete').textContent = avgSections.toFixed(1);
+}
+
+function renderExamTable() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const dateFilter = document.getElementById('dateFilter').value;
+  const today = new Date().toISOString().slice(0,10);
+  const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString().slice(0,10);
+  const monthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString().slice(0,10);
+  
+  let filtered = allExams.filter(exam => {
+    const matchSearch = exam.patient?.empId?.toLowerCase().includes(searchTerm) ||
+                        exam.patient?.name?.toLowerCase().includes(searchTerm) ||
+                        exam.patient?.dept?.toLowerCase().includes(searchTerm);
+    const examDate = exam.completeDate?.slice(0,10) || '';
+    let matchDate = true;
+    if(dateFilter === 'today') matchDate = examDate === today;
+    else if(dateFilter === 'week') matchDate = examDate >= weekAgo;
+    else if(dateFilter === 'month') matchDate = examDate >= monthAgo;
+    return matchSearch && matchDate;
+  });
+  
+  filtered.sort((a,b) => new Date(b.completeDate) - new Date(a.completeDate));
+  
+  const tbody = document.getElementById('examTableBody');
+  tbody.innerHTML = '';
+  
+  filtered.forEach((exam, idx) => {
+    const row = tbody.insertRow();
+    row.insertCell(0).textContent = idx + 1;
+    row.insertCell(1).textContent = exam.completeDate ? new Date(exam.completeDate).toLocaleDateString('vi-VN') : '—';
+    row.insertCell(2).textContent = exam.patient?.empId || '—';
+    row.insertCell(3).innerHTML = `<strong>${exam.patient?.name || '—'}</strong>`;
+    row.insertCell(4).textContent = exam.patient?.dept || '—';
+    
+    const fitClass = exam.examData?.kl?.fit === 'Đủ sức khỏe' ? 'badge-ok' : (exam.examData?.kl?.fit === 'Không đủ sức khỏe' ? 'badge-danger' : 'badge-warn');
+    row.insertCell(5).innerHTML = `<span class="badge ${fitClass}">${exam.examData?.kl?.fit || '—'}</span>`;
+    
+    const healthClass = exam.examData?.kl?.healthClass;
+    let healthText = '';
+    if(healthClass === 1) healthText = 'I - Rất tốt';
+    else if(healthClass === 2) healthText = 'II - Tốt';
+    else if(healthClass === 3) healthText = 'III - Trung bình';
+    else if(healthClass === 4) healthText = 'IV - Kém';
+    else if(healthClass === 5) healthText = 'V - Rất kém';
+    else healthText = '—';
+    row.insertCell(6).innerHTML = `<span class="badge badge-ok">${healthText}</span>`;
+    row.insertCell(7).textContent = exam.examData?.kl?.doctor || '—';
+    row.insertCell(8).innerHTML = `<button class="btn-primary" onclick="showExamDetail(${idx})" style="background:var(--primary);color:#fff;border:none;padding:4px 12px;border-radius:6px;cursor:pointer"><i class="fas fa-eye"></i> Xem</button>`;
+  });
+}
+
+// ========== HIỂN THỊ CHI TIẾT ==========
+function showExamDetail(index) {
+  const filtered = getFilteredExams();
+  currentExamDetail = filtered[index];
+  if(!currentExamDetail) return;
+  
+  const exam = currentExamDetail;
+  const patient = exam.patient || {};
+  const data = exam.examData || {};
+  const tq = data.tq || {};
+  const nk = data.nk || {};
+  const ng = data.ng || {};
+  const mt = data.mt || {};
+  const tmh = data.tmh || {};
+  const rhm = data.rhm || {};
+  const kl = data.kl || {};
+  
+  let html = `
+    <div class="detail-section">
+      <h3><i class="fas fa-user-circle"></i> Thông tin bệnh nhân</h3>
+      <div class="detail-row"><div class="detail-label">Mã nhân viên:</div><div class="detail-value">${patient.empId || '—'}</div></div>
+      <div class="detail-row"><div class="detail-label">Họ tên:</div><div class="detail-value"><strong>${patient.name || '—'}</strong></div></div>
+      <div class="detail-row"><div class="detail-label">Giới tính:</div><div class="detail-value">${patient.gender || '—'}</div></div>
+      <div class="detail-row"><div class="detail-label">Ngày sinh:</div><div class="detail-value">${patient.dob || '—'}</div></div>
+      <div class="detail-row"><div class="detail-label">Phòng ban:</div><div class="detail-value">${patient.dept || '—'}</div></div>
+      <div class="detail-row"><div class="detail-label">Ngày khám:</div><div class="detail-value">${exam.completeDate ? new Date(exam.completeDate).toLocaleString('vi-VN') : '—'}</div></div>
+    </div>
+    
+    <div class="detail-section">
+      <h3><i class="fas fa-heartbeat"></i> Kết quả khám tổng quát</h3>
+      <div class="detail-row"><div class="detail-label">Chiều cao:</div><div class="detail-value">${tq.height ? tq.height + ' cm' : '—'}</div></div>
+      <div class="detail-row"><div class="detail-label">Cân nặng:</div><div class="detail-value">${tq.weight ? tq.weight + ' kg' : '—'}</div></div>
+      <div class="detail-row"><div class="detail-label">BMI:</div><div class="detail-value">${tq.bmi || '—'}</div></div>
+      <div class="detail-row"><div class="detail-label">Mạch:</div><div class="detail-value">${tq.pulse || '—'} lần/phút</div></div>
+      <div class="detail-row"><div class="detail-label">Huyết áp:</div><div class="detail-value">${tq.bpDisplay || '—'}</div></div>
+      <div class="detail-row"><div class="detail-label">Thể lực:</div><div class="detail-value">${tq.physicalClass || '—'}</div></div>
+    </div>
+  `;
+  
+  // Nội khoa
+  if(nk) {
+    html += `<div class="detail-section"><h3><i class="fas fa-heart"></i> Nội khoa</h3>`;
+    if(nk.th_class) html += `<div class="detail-row"><div class="detail-label">Tuần hoàn:</div><div class="detail-value"><span class="badge ${nk.th_class === 'Bình thường' ? 'badge-ok' : 'badge-danger'}">${nk.th_class}</span></div></div>`;
+    if(nk.hh_class) html += `<div class="detail-row"><div class="detail-label">Hô hấp:</div><div class="detail-value"><span class="badge ${nk.hh_class === 'Bình thường' ? 'badge-ok' : 'badge-danger'}">${nk.hh_class}</span></div></div>`;
+    if(nk.thoa_class) html += `<div class="detail-row"><div class="detail-label">Tiêu hóa:</div><div class="detail-value"><span class="badge ${nk.thoa_class === 'Bình thường' ? 'badge-ok' : 'badge-danger'}">${nk.thoa_class}</span></div></div>`;
+    if(nk.ttn_class) html += `<div class="detail-row"><div class="detail-label">Thận-TN:</div><div class="detail-value"><span class="badge ${nk.ttn_class === 'Bình thường' ? 'badge-ok' : 'badge-danger'}">${nk.ttn_class}</span></div></div>`;
+    if(nk.nt_class) html += `<div class="detail-row"><div class="detail-label">Nội tiết:</div><div class="detail-value"><span class="badge ${nk.nt_class === 'Bình thường' ? 'badge-ok' : 'badge-danger'}">${nk.nt_class}</span></div></div>`;
+    if(nk.cxk_class) html += `<div class="detail-row"><div class="detail-label">CXK:</div><div class="detail-value"><span class="badge ${nk.cxk_class === 'Bình thường' ? 'badge-ok' : 'badge-danger'}">${nk.cxk_class}</span></div></div>`;
+    if(nk.tk_class) html += `<div class="detail-row"><div class="detail-label">Thần kinh:</div><div class="detail-value"><span class="badge ${nk.tk_class === 'Bình thường' ? 'badge-ok' : 'badge-danger'}">${nk.tk_class}</span></div></div>`;
+    if(nk.tthan_class) html += `<div class="detail-row"><div class="detail-label">Tâm thần:</div><div class="detail-value"><span class="badge ${nk.tthan_class === 'Bình thường' ? 'badge-ok' : 'badge-danger'}">${nk.tthan_class}</span></div></div>`;
+    html += `</div>`;
+  }
+  
+  // Ngoại khoa
+  if(ng) {
+    html += `<div class="detail-section"><h3><i class="fas fa-band-aid"></i> Ngoại khoa & Da liễu</h3>`;
+    if(ng.ngoai_class) html += `<div class="detail-row"><div class="detail-label">Ngoại khoa:</div><div class="detail-value"><span class="badge ${ng.ngoai_class === 'Bình thường' ? 'badge-ok' : 'badge-danger'}">${ng.ngoai_class}</span></div></div>`;
+    if(ng.da_class) html += `<div class="detail-row"><div class="detail-label">Da liễu:</div><div class="detail-value"><span class="badge ${ng.da_class === 'Bình thường' ? 'badge-ok' : 'badge-danger'}">${ng.da_class}</span></div></div>`;
+    html += `</div>`;
+  }
+  
+  // Mắt
+  if(mt) {
+    html += `<div class="detail-section"><h3><i class="fas fa-eye"></i> Mắt</h3>`;
+    if(mt.class) html += `<div class="detail-row"><div class="detail-label">Kết luận:</div><div class="detail-value"><span class="badge ${mt.class === 'Bình thường' ? 'badge-ok' : mt.class === 'Có kính đạt' ? 'badge-warn' : 'badge-danger'}">${mt.class}</span></div></div>`;
+    html += `</div>`;
+  }
+  
+  // TMH
+  if(tmh) {
+    html += `<div class="detail-section"><h3><i class="fas fa-ear-deaf"></i> Tai Mũi Họng</h3>`;
+    if(tmh.class) html += `<div class="detail-row"><div class="detail-label">Kết luận:</div><div class="detail-value"><span class="badge ${tmh.class === 'Bình thường' ? 'badge-ok' : tmh.class === 'Cần theo dõi' ? 'badge-warn' : 'badge-danger'}">${tmh.class}</span></div></div>`;
+    html += `</div>`;
+  }
+  
+  // RHM
+  if(rhm) {
+    html += `<div class="detail-section"><h3><i class="fas fa-tooth"></i> Răng Hàm Mặt</h3>`;
+    if(rhm.class) html += `<div class="detail-row"><div class="detail-label">Kết luận:</div><div class="detail-value"><span class="badge ${rhm.class === 'Bình thường' ? 'badge-ok' : rhm.class === 'Cần điều trị' ? 'badge-warn' : 'badge-danger'}">${rhm.class}</span></div></div>`;
+    html += `</div>`;
+  }
+  
+  // Kết luận
+  html += `<div class="detail-section"><h3><i class="fas fa-clipboard-list"></i> Kết luận của bác sĩ</h3>`;
+  if(kl.diseases) html += `<div class="detail-row"><div class="detail-label">Bệnh tật:</div><div class="detail-value">${kl.diseases}</div></div>`;
+  if(kl.fit) html += `<div class="detail-row"><div class="detail-label">Kết luận:</div><div class="detail-value"><span class="badge ${kl.fit === 'Đủ sức khỏe' ? 'badge-ok' : 'badge-danger'}">${kl.fit}</span></div></div>`;
+  if(kl.resolution) html += `<div class="detail-row"><div class="detail-label">Hướng giải quyết:</div><div class="detail-value">${kl.resolution}</div></div>`;
+  if(kl.doctor) html += `<div class="detail-row"><div class="detail-label">Bác sĩ:</div><div class="detail-value">${kl.doctor}</div></div>`;
+  if(kl.clinic) html += `<div class="detail-row"><div class="detail-label">Cơ sở khám:</div><div class="detail-value">${kl.clinic}</div></div>`;
+  html += `</div>`;
+  
+  document.getElementById('detailModalBody').innerHTML = html;
+  document.getElementById('detailModal').classList.add('active');
+}
+
+function getFilteredExams() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const dateFilter = document.getElementById('dateFilter').value;
+  const today = new Date().toISOString().slice(0,10);
+  const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString().slice(0,10);
+  const monthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString().slice(0,10);
+  
+  return allExams.filter(exam => {
+    const matchSearch = exam.patient?.empId?.toLowerCase().includes(searchTerm) ||
+                        exam.patient?.name?.toLowerCase().includes(searchTerm) ||
+                        exam.patient?.dept?.toLowerCase().includes(searchTerm);
+    const examDate = exam.completeDate?.slice(0,10) || '';
+    let matchDate = true;
+    if(dateFilter === 'today') matchDate = examDate === today;
+    else if(dateFilter === 'week') matchDate = examDate >= weekAgo;
+    else if(dateFilter === 'month') matchDate = examDate >= monthAgo;
+    return matchSearch && matchDate;
+  }).sort((a,b) => new Date(b.completeDate) - new Date(a.completeDate));
+}
+
+function closeModal() {
+  document.getElementById('detailModal').classList.remove('active');
+}
+
+function printExam() {
+  if(currentExamDetail) {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>Phiếu khám - ${currentExamDetail.patient?.name}</title>
+      <style>
+        body{font-family:Arial,sans-serif;padding:20px}
+        h1{color:#1D9E75;text-align:center}
+        table{width:100%;border-collapse:collapse;margin:10px 0}
+        th,td{border:1px solid #ddd;padding:8px;text-align:left}
+        th{background:#f5f5f5}
+      </style>
+      </head>
+      <body>
+        <h1>PHIẾU KHÁM SỨC KHỎE ĐỊNH KỲ</h1>
+        <h3>Thông tin bệnh nhân</h3>
+        <p><strong>Mã NV:</strong> ${currentExamDetail.patient?.empId}</p>
+        <p><strong>Họ tên:</strong> ${currentExamDetail.patient?.name}</p>
+        <p><strong>Phòng ban:</strong> ${currentExamDetail.patient?.dept}</p>
+        <p><strong>Ngày khám:</strong> ${new Date(currentExamDetail.completeDate).toLocaleString('vi-VN')}</p>
+        <hr>
+        <h3>Kết quả khám</h3>
+        <pre>${document.getElementById('detailModalBody').innerText}</pre>
+        <hr>
+        <p><em>Chữ ký bác sĩ: ${currentExamDetail.examData?.kl?.doctor || '______________'}</em></p>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  }
+}
+
+function exportToExcel() {
+  const filtered = getFilteredExams();
+  let csv = "STT,Ngày khám,Mã NV,Họ tên,Phòng ban,Kết luận,Phân loại SK,Bác sĩ\n";
+  filtered.forEach((exam, idx) => {
+    const healthClass = exam.examData?.kl?.healthClass;
+    let healthText = '';
+    if(healthClass === 1) healthText = 'I - Rất tốt';
+    else if(healthClass === 2) healthText = 'II - Tốt';
+    else if(healthClass === 3) healthText = 'III - Trung bình';
+    else if(healthClass === 4) healthText = 'IV - Kém';
+    else if(healthClass === 5) healthText = 'V - Rất kém';
+    else healthText = '—';
+    
+    csv += `${idx+1},"${exam.completeDate ? new Date(exam.completeDate).toLocaleDateString('vi-VN') : '—'}","${exam.patient?.empId || '—'}","${exam.patient?.name || '—'}","${exam.patient?.dept || '—'}","${exam.examData?.kl?.fit || '—'}","${healthText}","${exam.examData?.kl?.doctor || '—'}"\n`;
+  });
+  
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.href = url;
+  link.setAttribute("download", `tong_hop_kham_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  alert('Xuất danh sách thành công!');
+}
+
+loadExams();
+</script>
+</body>
+</html>

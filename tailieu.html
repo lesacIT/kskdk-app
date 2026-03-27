@@ -1,0 +1,193 @@
+function downloadWordDoc() {
+  const content = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Tai lieu huong dan KSKDK</title>
+<style>
+  body { font-family: 'Times New Roman', serif; margin: 40px; line-height: 1.5; }
+  h1 { color: #1D9E75; text-align: center; font-size: 24pt; }
+  h2 { color: #0F6E56; border-bottom: 2px solid #1D9E75; padding-bottom: 5px; margin-top: 30px; }
+  h3 { color: #185FA5; margin-top: 20px; }
+  table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+  th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+  th { background: #1D9E75; color: white; }
+  code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+  pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
+  .footer { text-align: center; margin-top: 50px; font-size: 12px; color: #666; }
+</style>
+</head>
+<body>
+<h1>TÀI LIỆU HƯỚNG DẪN ỨNG DỤNG</h1>
+<h1 style="font-size: 20pt;">QUẢN LÝ KHÁM SỨC KHỎE ĐỊNH KỲ</h1>
+<h1 style="font-size: 16pt;">CÔNG TY TNHH TKG TAEKWANG CẦN THƠ</h1>
+
+<h2>I. GIỚI THIỆU TỔNG QUAN</h2>
+<h3>1.1. Tên ứng dụng</h3>
+<p><strong>Hệ thống quản lý khám sức khỏe định kỳ - Công ty TNHH TKG Taekwang Cần Thơ</strong></p>
+
+<h3>1.2. Mục đích</h3>
+<ul>
+<li>Quản lý danh sách nhân viên và đăng ký khám sức khỏe định kỳ</li>
+<li>Lưu trữ kết quả khám sức khỏe theo Thông tư 56/2025/TT-BYT</li>
+<li>Thống kê số lượng đăng ký và hoàn thành khám</li>
+<li>Xuất báo cáo và in phiếu khám</li>
+</ul>
+
+<h3>1.3. Đối tượng sử dụng</h3>
+<ul>
+<li>Nhân viên y tế, bác sĩ</li>
+<li>Quản trị viên hệ thống</li>
+<li>Nhân sự công ty</li>
+</ul>
+
+<h2>II. CÔNG NGHỆ SỬ DỤNG</h2>
+<h3>2.1. Frontend (Giao diện người dùng)</h3>
+<table>
+<tr><th>STT</th><th>Công nghệ</th><th>Phiên bản</th><th>Mục đích sử dụng</th></tr>
+<tr><td>1</td><td>HTML5</td><td>-</td><td>Cấu trúc giao diện người dùng</td></tr>
+<tr><td>2</td><td>CSS3</td><td>-</td><td>Thiết kế giao diện, responsive</td></tr>
+<tr><td>3</td><td>JavaScript</td><td>ES6+</td><td>Xử lý logic, tương tác người dùng</td></tr>
+<tr><td>4</td><td>Font Awesome</td><td>6.4.0</td><td>Biểu tượng icon đẹp mắt</td></tr>
+<tr><td>5</td><td>XLSX (SheetJS)</td><td>0.18.5</td><td>Import/Export file Excel</td></tr>
+</table>
+
+<h3>2.2. Backend (Xử lý dữ liệu)</h3>
+<table>
+<tr><th>STT</th><th>Công nghệ</th><th>Phiên bản</th><th>Mục đích sử dụng</th></tr>
+<tr><td>1</td><td>Node.js</td><td>14.x trở lên</td><td>Môi trường chạy JavaScript phía server</td></tr>
+<tr><td>2</td><td>Express.js</td><td>4.18.2</td><td>Framework web cho Node.js</td></tr>
+<tr><td>3</td><td>SQLite3</td><td>5.1.6</td><td>Cơ sở dữ liệu nhẹ, không cần cài đặt</td></tr>
+<tr><td>4</td><td>CORS</td><td>2.8.5</td><td>Xử lý chia sẻ tài nguyên giữa các domain</td></tr>
+<tr><td>5</td><td>dotenv</td><td>16.3.1</td><td>Quản lý biến môi trường</td></tr>
+<tr><td>6</td><td>uuid</td><td>9.0.1</td><td>Tạo mã định danh duy nhất</td></tr>
+</table>
+
+<h3>2.3. Lưu trữ dữ liệu</h3>
+<table>
+<tr><th>Phương thức</th><th>Vị trí</th><th>Dữ liệu lưu trữ</th></tr>
+<tr><td>SQLite</td><td>backend/kskdk.db</td><td>Dữ liệu bệnh nhân và phiếu khám</td></tr>
+<tr><td>localStorage</td><td>Trình duyệt</td><td>Danh sách nhân viên, thống kê tạm thời</td></tr>
+</table>
+
+<h2>III. CẤU TRÚC DỰ ÁN</h2>
+<pre>
+kskdk-app/
+├── backend/                      # Backend Node.js
+│   ├── server.js                 # File chính khởi tạo server
+│   ├── database.js               # Kết nối và cấu hình database
+│   ├── package.json              # Thông tin và dependencies
+│   ├── .env                      # Biến môi trường
+│   ├── models/                   # Model xử lý dữ liệu
+│   │   ├── patient.js            # Model bệnh nhân
+│   │   └── examination.js        # Model phiếu khám
+│   ├── routes/                   # API routes
+│   │   ├── patients.js           # API quản lý bệnh nhân
+│   │   └── exams.js              # API quản lý phiếu khám
+│   └── kskdk.db                  # Database SQLite (tự động tạo)
+│
+├── frontend/                     # Frontend giao diện
+│   ├── index.html                # Trang đăng ký khám chính
+│   ├── employee-manager.html     # Trang quản lý nhân viên
+│   └── css/                      # (tùy chọn) Thư mục CSS
+│
+└── README.md                     # Tài liệu hướng dẫn
+</pre>
+
+<h2>IV. HƯỚNG DẪN CÀI ĐẶT</h2>
+<h3>4.1. Yêu cầu hệ thống</h3>
+<ul>
+<li>Node.js phiên bản 14.x trở lên</li>
+<li>npm phiên bản 6.x trở lên</li>
+<li>Trình duyệt web hiện đại (Chrome, Firefox, Edge)</li>
+</ul>
+
+<h3>4.2. Các bước cài đặt</h3>
+<p><strong>Bước 1:</strong> Tải mã nguồn</p>
+<pre>git clone &lt;repository-url&gt;
+cd kskdk-app</pre>
+
+<p><strong>Bước 2:</strong> Cài đặt dependencies cho backend</p>
+<pre>cd backend
+npm install</pre>
+
+<p><strong>Bước 3:</strong> Cấu hình biến môi trường</p>
+<p>Tạo file <code>.env</code> trong thư mục <code>backend</code> với nội dung:</p>
+<pre>PORT=3000
+NODE_ENV=development
+DB_PATH=./kskdk.db
+CORS_ORIGIN=*</pre>
+
+<p><strong>Bước 4:</strong> Khởi chạy ứng dụng</p>
+<pre>npm run dev</pre>
+
+<p><strong>Bước 5:</strong> Truy cập ứng dụng</p>
+<p>Mở trình duyệt và truy cập: <strong>http://localhost:3000</strong></p>
+
+<h2>V. HƯỚNG DẪN SỬ DỤNG</h2>
+<h3>5.1. Trang đăng ký khám (<code>index.html</code>)</h3>
+<p><strong>Tra cứu nhân viên:</strong></p>
+<ol>
+<li>Nhập Mã nhân viên vào ô tìm kiếm</li>
+<li>Click nút "Tra cứu"</li>
+<li>Nếu tìm thấy: Thông tin nhân viên hiển thị và tự động điền vào form</li>
+<li>Nếu không tìm thấy: Hiển thị form đăng ký nhân viên mới</li>
+</ol>
+
+<p><strong>Đăng ký nhân viên mới (khi tra cứu không thấy):</strong></p>
+<ol>
+<li>Điền đầy đủ thông tin (Họ tên bắt buộc)</li>
+<li>Click "Đăng ký nhân viên mới"</li>
+<li>Hệ thống sẽ thêm nhân viên và tự động chuyển sang đăng ký khám</li>
+</ol>
+
+<p><strong>Các tab khám:</strong></p>
+<ul>
+<li><strong>Tổng quát:</strong> Chiều cao, cân nặng, BMI, mạch, huyết áp, phân loại thể lực</li>
+<li><strong>Nội khoa:</strong> Kết quả khám nội khoa</li>
+<li><strong>Ngoại/Da:</strong> Kết quả khám ngoại khoa và da liễu</li>
+<li><strong>Sản phụ:</strong> Kết quả khám sản phụ khoa (chỉ hiển thị với nữ)</li>
+<li><strong>Mắt:</strong> Kết quả khám mắt</li>
+<li><strong>TMH:</strong> Kết quả khám tai mũi họng</li>
+<li><strong>RHM:</strong> Kết quả khám răng hàm mặt</li>
+<li><strong>Kết luận:</strong> Kết luận sức khỏe và chỉ định</li>
+</ul>
+
+<h3>5.2. Trang quản lý nhân viên (<code>employee-manager.html</code>)</h3>
+<ul>
+<li><strong>Xem danh sách:</strong> Hiển thị bảng danh sách nhân viên với đầy đủ thông tin</li>
+<li><strong>Tìm kiếm:</strong> Nhập từ khóa vào ô tìm kiếm</li>
+<li><strong>Lọc:</strong> Chọn phòng ban từ dropdown</li>
+<li><strong>Thêm nhân viên:</strong> Click "Thêm NV" → Điền thông tin → Lưu</li>
+<li><strong>Sửa nhân viên:</strong> Click "Sửa" → Chỉnh sửa → Lưu</li>
+<li><strong>Xóa nhân viên:</strong> Click "Xóa" → Xác nhận</li>
+<li><strong>Import Excel:</strong> Click "Import Excel" → Chọn file Excel</li>
+<li><strong>Export Excel:</strong> Click "Xuất Excel" → Tải file</li>
+<li><strong>Chuyển sang khám:</strong> Click "Khám" → Chuyển sang trang đăng ký</li>
+</ul>
+
+<h2>VI. API ENDPOINTS</h2>
+<h3>Quản lý bệnh nhân (<code>/api/patients</code>)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Mô tả</th></tr>
+<tr><td>GET</td><td>/api/patients</td><td>Lấy danh sách bệnh nhân</td></tr>
+<tr><td>GET</td><td>/api/patients/:code</td><td>Lấy thông tin bệnh nhân theo mã</td></tr>
+<tr><td>POST</td><td>/api/patients</td><td>Tạo bệnh nhân mới</td></tr>
+<tr><td>PUT</td><td>/api/patients/:id</td><td>Cập nhật thông tin bệnh nhân</td></tr>
+</table>
+
+<h3>Quản lý phiếu khám (<code>/api/exams</code>)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Mô tả</th></tr>
+<tr><td>POST</td><td>/api/exams</td><td>Lưu phiếu khám</td></tr>
+<tr><td>GET</td><td>/api/exams/patient/:code</td><td>Lấy phiếu khám mới nhất của bệnh nhân</td></tr>
+</table>
+
+<h3>Hệ thống (<code>/api</code>)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Mô tả</th></tr>
+<tr><td>GET</td><td>/api/health</td><td>Kiểm tra trạng thái server</td></tr>
+<tr><td>GET</td><td>/api/info</td><td>Thông tin ứng dụng</td></tr>
+</table>
+
+<h2>VII. XỬ LÝ LỖI THƯỜ
