@@ -197,9 +197,9 @@
         <div class="gender-card" id="genderNam" onclick="selectGender('Nam')"><div class="gender-icon">👨</div><span>Nam</span></div>
         <div class="gender-card" id="genderNu" onclick="selectGender('Nữ')"><div class="gender-icon">👩</div><span>Nữ</span></div>
       </div>
-      <div class="form-group"><label><i class="fas fa-briefcase"></i> Vị trí công việc</label><input type="text" id="patientJob" placeholder="VD: Kỹ sư, Công nhân..."></div>
+      <!-- <div class="form-group"><label><i class="fas fa-briefcase"></i> Vị trí công việc</label><input type="text" id="patientJob" placeholder="VD: Kỹ sư, Công nhân..."></div>
       <div class="form-group"><label><i class="fas fa-notes-medical"></i> Tiền sử bệnh</label><textarea id="patientHistory" rows="2"></textarea></div>
-      <div class="form-group"><label><i class="fas fa-exclamation-triangle"></i> Yếu tố có hại</label><textarea id="hazardFactors" rows="2"></textarea></div>
+      <div class="form-group"><label><i class="fas fa-exclamation-triangle"></i> Yếu tố có hại</label><textarea id="hazardFactors" rows="2"></textarea></div> -->
       <div style="display:flex;gap:10px;margin-top:16px">
         <button class="btn-secondary" onclick="searchEmployee()" style="flex:1"><i class="fas fa-search"></i> Tra cứu</button>
         <button class="btn-primary" onclick="registerExam()" style="flex:1"><i class="fas fa-calendar-check"></i> Đăng ký khám</button>
@@ -850,24 +850,56 @@ function selectGender(g) {
 }
 
 function registerExam() {
-  const empId = document.getElementById('empId').value.trim();
-  const name = document.getElementById('patientName').value.trim();
-  if(!empId || !name) { showToast('Vui lòng tra cứu nhân viên trước', 'warning'); return; }
+  // Lấy giá trị với kiểm tra an toàn
+  const empIdInput = document.getElementById('empId');
+  const patientNameInput = document.getElementById('patientName');
+  
+  if(!empIdInput || !patientNameInput) {
+    showToast('Lỗi: Không tìm thấy form đăng ký', 'error');
+    return;
+  }
+  
+  const empId = empIdInput.value.trim();
+  const name = patientNameInput.value.trim();
+  
+  if(!empId || !name) { 
+    showToast('Vui lòng tra cứu nhân viên trước', 'warning'); 
+    return; 
+  }
+  
+  // Lấy các giá trị khác với kiểm tra an toàn
+  const patientDob = document.getElementById('patientDob');
+  const patientAge = document.getElementById('patientAge');
+  const patientJob = document.getElementById('patientJob');
+  const patientHistory = document.getElementById('patientHistory');
+  const hazardFactors = document.getElementById('hazardFactors');
+  const patientDept = document.getElementById('patientDept');
+  
   state.patient = {
-    empId, name,
+    empId: empId,
+    name: name,
     gender: document.querySelector('.gender-card.selected span')?.textContent || '',
-    dob: document.getElementById('patientDob').value,
-    age: document.getElementById('patientAge').value,
-    job: document.getElementById('patientJob').value,
-    history: document.getElementById('patientHistory').value,
-    hazard: document.getElementById('hazardFactors').value,
-    dept: document.getElementById('patientDept').value
+    dob: patientDob ? patientDob.value : '',
+    age: patientAge ? patientAge.value : '',
+    job: patientJob ? patientJob.value : '',
+    history: patientHistory ? patientHistory.value : '',
+    hazard: hazardFactors ? hazardFactors.value : '',
+    dept: patientDept ? patientDept.value : ''
   };
+  
   saveRegistration(state.patient);
-  document.getElementById('pBarName').textContent = name;
-  document.getElementById('pBarDob').textContent = state.patient.dob || '—';
-  document.getElementById('pBarGender').textContent = state.patient.gender || '—';
-  document.getElementById('pBarEmpId').textContent = empId;
+  
+  // Cập nhật thanh thông tin với kiểm tra an toàn
+  const pBarName = document.getElementById('pBarName');
+  const pBarDob = document.getElementById('pBarDob');
+  const pBarGender = document.getElementById('pBarGender');
+  const pBarEmpId = document.getElementById('pBarEmpId');
+  
+  if(pBarName) pBarName.textContent = name;
+  if(pBarDob) pBarDob.textContent = state.patient.dob || '—';
+  if(pBarGender) pBarGender.textContent = state.patient.gender || '—';
+  if(pBarEmpId) pBarEmpId.textContent = empId;
+  
   showToast('Đăng ký khám thành công!', 'success');
   goToTab('tq');
 }
