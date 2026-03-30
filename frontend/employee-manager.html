@@ -25,7 +25,7 @@
   .stat-label{font-size:13px;color:#6B7280;margin-top:8px}
   
   .card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
-  .card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:#F9FAFB}
+  .card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:#F9FAFB;flex-wrap:wrap;gap:10px}
   .card-header h2{font-size:18px;color:var(--primary-dark);display:flex;align-items:center;gap:8px}
   .card-body{padding:20px}
   
@@ -89,6 +89,7 @@
     <div class="card-header">
       <h2><i class="fas fa-list"></i> Danh sách nhân viên</h2>
       <div>
+        <button class="btn-success" onclick="downloadSampleExcel()" style="margin-right:8px"><i class="fas fa-download"></i> Tải mẫu Excel</button>
         <label class="btn-success" style="cursor:pointer;padding:8px 16px;border-radius:8px;display:inline-flex;align-items:center;gap:6px">
           <i class="fas fa-file-import"></i> Import Excel
           <input type="file" id="importExcel" accept=".xlsx,.xls,.csv" style="display:none" onchange="importExcel(this)">
@@ -107,7 +108,7 @@
       <div class="table-container">
         <table id="employeeTable">
           <thead>
-            <tr><th>STT</th><th>Mã NV</th><th>Họ tên</th><th>Giới tính</th><th>Ngày sinh</th><th>Phòng ban</th><th>Chức vụ</th><th>Điện thoại</th><th>Thao tác</th></tr>
+            <tr><th>STT</th><th>Mã NV</th><th>Họ tên</th><th>Giới tính</th><th>Ngày sinh</th><th>Phòng ban</th><th>Chức vụ</th><th>Điện thoại</th><th>Thao tác</th> </tr>
           </thead>
           <tbody id="employeeTableBody"></tbody>
         </table>
@@ -136,22 +137,30 @@
 let employees = [];
 let currentEditId = null;
 
+// ==================== DỮ LIỆU KHỞI TẠO ====================
 function loadEmployees() {
   const stored = localStorage.getItem('employees');
   if(stored) {
     employees = JSON.parse(stored);
   } else {
+    // Dữ liệu mẫu ban đầu (mã bắt đầu 20000000)
     employees = [
-      { id:"19000000", name:"NGUYỄN VĂN A", gender:"Nam", dob:"1990-05-15", dept:"Khoa Nội", position:"Trưởng phòng", phone:"0901234567", email:"nguyenvana@company.com" },
-      { id:"19000001", name:"TRẦN THỊ B", gender:"Nữ", dob:"1985-08-22", dept:"Khoa Ngoại", position:"Phó phòng", phone:"0901234568", email:"tranthib@company.com" },
-      { id:"19000002", name:"LÊ VĂN C", gender:"Nam", dob:"1992-03-10", dept:"Hành chính", position:"Nhân viên", phone:"0901234569", email:"levanc@company.com" },
-      { id:"19000003", name:"PHẠM THỊ D", gender:"Nữ", dob:"1988-11-30", dept:"Kế toán", position:"Kế toán trưởng", phone:"0901234570", email:"phamthid@company.com" },
-      { id:"19000004", name:"HOÀNG VĂN E", gender:"Nam", dob:"1995-07-18", dept:"Kỹ thuật", position:"Kỹ sư", phone:"0901234571", email:"hoangvane@company.com" }
+      { id:"20000001", name:"NGUYỄN VĂN HÙNG", gender:"Nam", dob:"1995-03-10", dept:"Chuyền May 1", position:"Thợ may", phone:"0902000001", email:"nguyenvanhung@tkg.com", note:"" },
+      { id:"20000002", name:"TRẦN THỊ LAN", gender:"Nữ", dob:"1992-07-15", dept:"Chuyền May 1", position:"Thợ may", phone:"0902000002", email:"tranthilan@tkg.com", note:"" },
+      { id:"20000003", name:"LÊ VĂN THÀNH", gender:"Nam", dob:"1988-11-22", dept:"Chuyền May 2", position:"Chuyền trưởng", phone:"0902000003", email:"levanthanh@tkg.com", note:"" },
+      { id:"20000004", name:"PHẠM THỊ HOA", gender:"Nữ", dob:"1993-05-05", dept:"Chuyền May 2", position:"Thợ may", phone:"0902000004", email:"phamthihoa@tkg.com", note:"" },
+      { id:"20000005", name:"HOÀNG VĂN TÂM", gender:"Nam", dob:"1990-09-18", dept:"Chuyền Cắt", position:"Thợ cắt", phone:"0902000005", email:"hoangvantam@tkg.com", note:"" },
+      { id:"20000006", name:"NGÔ THỊ MAI", gender:"Nữ", dob:"1991-12-30", dept:"Chuyền Cắt", position:"Thợ cắt", phone:"0902000006", email:"ngothimai@tkg.com", note:"" },
+      { id:"20000007", name:"ĐẶNG VĂN PHÚC", gender:"Nam", dob:"1987-04-12", dept:"Chuyền Là", position:"Chuyền trưởng", phone:"0902000007", email:"dangvanphuc@tkg.com", note:"" },
+      { id:"20000008", name:"BÙI THỊ THU", gender:"Nữ", dob:"1994-08-25", dept:"Chuyền Là", position:"Thợ là", phone:"0902000008", email:"buithithu@tkg.com", note:"" },
+      { id:"20000009", name:"VŨ VĂN LONG", gender:"Nam", dob:"1989-10-09", dept:"Chuyền KCS", position:"Kiểm tra viên", phone:"0902000009", email:"vuvanlong@tkg.com", note:"" },
+      { id:"20000010", name:"LÝ THỊ HẰNG", gender:"Nữ", dob:"1996-02-28", dept:"Chuyền KCS", position:"Kiểm tra viên", phone:"0902000010", email:"lythihang@tkg.com", note:"" }
     ];
     localStorage.setItem('employees', JSON.stringify(employees));
   }
   updateDeptFilter();
   updateStats();
+  renderEmployeeTable();
 }
 
 function updateDeptFilter() {
@@ -211,10 +220,12 @@ function goToExam(id) {
   }
 }
 
+// ==================== THÊM / SỬA / XÓA ====================
 function showAddEmployeeModal() {
   currentEditId = null;
   document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-plus"></i> Thêm nhân viên';
-  document.getElementById('empIdInput').value = ''; document.getElementById('empIdInput').readOnly = false;
+  document.getElementById('empIdInput').value = '';
+  document.getElementById('empIdInput').readOnly = false;
   document.getElementById('empNameInput').value = '';
   document.getElementById('empGenderInput').value = 'Nam';
   document.getElementById('empDobInput').value = '';
@@ -231,7 +242,8 @@ function editEmployee(id) {
   if(!emp) return;
   currentEditId = id;
   document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-edit"></i> Sửa nhân viên';
-  document.getElementById('empIdInput').value = emp.id; document.getElementById('empIdInput').readOnly = true;
+  document.getElementById('empIdInput').value = emp.id;
+  document.getElementById('empIdInput').readOnly = true;
   document.getElementById('empNameInput').value = emp.name;
   document.getElementById('empGenderInput').value = emp.gender;
   document.getElementById('empDobInput').value = emp.dob || '';
@@ -285,39 +297,81 @@ function deleteEmployee(id) {
 
 function closeModal() { document.getElementById('employeeModal').classList.remove('active'); }
 
+// ==================== IMPORT / EXPORT EXCEL ====================
+function downloadSampleExcel() {
+  const sampleData = [
+    { 'Mã NV': '20000100', 'Họ tên': 'NGUYỄN VĂN MẪU', 'Giới tính': 'Nam', 'Ngày sinh': '1990-01-01', 'Phòng ban': 'Chuyền May 1', 'Chức vụ': 'Thợ may', 'SĐT': '0900000000', 'Email': 'mau@tkg.com' },
+    { 'Mã NV': '20000101', 'Họ tên': 'TRẦN THỊ MẪU', 'Giới tính': 'Nữ', 'Ngày sinh': '1995-02-02', 'Phòng ban': 'Chuyền May 2', 'Chức vụ': 'Thợ may', 'SĐT': '0900000001', 'Email': 'thimau@tkg.com' }
+  ];
+  const ws = XLSX.utils.json_to_sheet(sampleData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'MauNhanVien');
+  XLSX.writeFile(wb, 'mau_nhan_vien_TKG.xlsx');
+  showToast('Đã tải file mẫu Excel!', 'success');
+}
+
 function importExcel(input) {
   const file = input.files[0];
   if(!file) return;
   const reader = new FileReader();
   reader.onload = function(e) {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, {type:'array'});
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const json = XLSX.utils.sheet_to_json(sheet);
-    let imported=0, skipped=0;
-    json.forEach(row => {
-      const id = row['Mã NV'] || row['Mã nhân viên'] || row['id'];
-      const name = row['Họ tên'] || row['Họ và tên'] || row['name'];
-      if(id && name && !employees.find(e=>e.id===id.toString())) {
-        employees.push({
-          id: id.toString(),
-          name: name.toString().toUpperCase(),
-          gender: row['Giới tính'] || row['gender'] || 'Nam',
-          dob: row['Ngày sinh'] || row['dob'] || '',
-          dept: row['Phòng ban'] || row['dept'] || '',
-          position: row['Chức vụ'] || row['position'] || '',
-          phone: row['SĐT'] || row['Điện thoại'] || row['phone'] || '',
-          email: row['Email'] || row['email'] || '',
-          note: row['Ghi chú'] || row['note'] || ''
-        });
-        imported++;
-      } else skipped++;
-    });
-    localStorage.setItem('employees', JSON.stringify(employees));
-    updateDeptFilter();
-    updateStats();
-    renderEmployeeTable();
-    showToast(`Import thành công ${imported} nhân viên!`, 'success');
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      console.log('Dữ liệu import:', json);
+      if(json.length === 0) {
+        showToast('File không có dữ liệu!', 'error');
+        return;
+      }
+      let imported = 0;
+      let skipped = 0;
+      // Tìm cột chứa mã và tên (linh hoạt)
+      const firstRow = json[0];
+      const idKeys = ['Mã NV', 'Mã nhân viên', 'id', 'ID', 'ma_nv', 'ma'];
+      const nameKeys = ['Họ tên', 'Họ và tên', 'name', 'Name', 'ten'];
+      let idKey = null, nameKey = null;
+      for(let key in firstRow) {
+        if(idKeys.some(k => key.toLowerCase().includes(k.toLowerCase()))) idKey = key;
+        if(nameKeys.some(k => key.toLowerCase().includes(k.toLowerCase()))) nameKey = key;
+      }
+      if(!idKey) idKey = Object.keys(firstRow)[0]; // cột đầu tiên làm mã
+      if(!nameKey) nameKey = Object.keys(firstRow)[1]; // cột thứ hai làm tên
+      console.log('Dùng cột mã:', idKey, 'cột tên:', nameKey);
+      json.forEach(row => {
+        const id = row[idKey];
+        const name = row[nameKey];
+        if(id && name && !employees.find(e=>e.id===id.toString())) {
+          employees.push({
+            id: id.toString(),
+            name: name.toString().toUpperCase(),
+            gender: row['Giới tính'] || row['gender'] || row['gioi_tinh'] || 'Nam',
+            dob: row['Ngày sinh'] || row['dob'] || row['ngay_sinh'] || '',
+            dept: row['Phòng ban'] || row['dept'] || row['phong_ban'] || '',
+            position: row['Chức vụ'] || row['position'] || row['chuc_vu'] || '',
+            phone: row['SĐT'] || row['Điện thoại'] || row['phone'] || row['sdt'] || '',
+            email: row['Email'] || row['email'] || '',
+            note: row['Ghi chú'] || row['note'] || ''
+          });
+          imported++;
+        } else {
+          skipped++;
+        }
+      });
+      if(imported > 0) {
+        localStorage.setItem('employees', JSON.stringify(employees));
+        updateDeptFilter();
+        updateStats();
+        renderEmployeeTable();
+        showToast(`✅ Import thành công ${imported} nhân viên! (Bỏ qua ${skipped} dòng không hợp lệ)`, 'success');
+      } else {
+        showToast(`⚠️ Không có dữ liệu hợp lệ để import. Kiểm tra file có cột "Mã NV" và "Họ tên" không.`, 'error');
+      }
+    } catch (error) {
+      console.error('Import lỗi:', error);
+      showToast('Lỗi khi đọc file: ' + error.message, 'error');
+    }
   };
   reader.readAsArrayBuffer(file);
   input.value = '';
@@ -325,8 +379,15 @@ function importExcel(input) {
 
 function exportToExcel() {
   const data = employees.map(e => ({
-    'Mã NV': e.id, 'Họ tên': e.name, 'Giới tính': e.gender, 'Ngày sinh': e.dob,
-    'Phòng ban': e.dept, 'Chức vụ': e.position, 'SĐT': e.phone, 'Email': e.email, 'Ghi chú': e.note
+    'Mã NV': e.id,
+    'Họ tên': e.name,
+    'Giới tính': e.gender,
+    'Ngày sinh': e.dob,
+    'Phòng ban': e.dept,
+    'Chức vụ': e.position,
+    'SĐT': e.phone,
+    'Email': e.email,
+    'Ghi chú': e.note
   }));
   const ws = XLSX.utils.json_to_sheet(data);
   const wb = XLSX.utils.book_new();
@@ -335,6 +396,7 @@ function exportToExcel() {
   showToast('Xuất Excel thành công!', 'success');
 }
 
+// ==================== TIỆN ÍCH ====================
 function showToast(msg, type='info') {
   const toast = document.getElementById('toast');
   const toastMsg = document.getElementById('toastMessage');
@@ -347,7 +409,9 @@ function showToast(msg, type='info') {
   setTimeout(()=>toast.classList.remove('show'), 3000);
 }
 
-document.addEventListener('DOMContentLoaded', () => { loadEmployees(); renderEmployeeTable(); });
+document.addEventListener('DOMContentLoaded', () => {
+  loadEmployees();
+});
 </script>
 </body>
 </html>

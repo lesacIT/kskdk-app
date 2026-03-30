@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lịch sử khám - TKG TAEKWANG CẦN THƠ</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--primary:#1D9E75;--primary-dark:#0F6E56;--primary-light:#E1F5EE;--bg:#F5F7F5;--card:#fff;--border:#E0E0E0;--radius:12px}
+  body{font-family:'Segoe UI',sans-serif;background:var(--bg);min-height:100vh}
+  
+  .header{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:white;padding:20px;margin-bottom:20px}
+  .header-content{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
+  .back-link{background:rgba(255,255,255,0.2);padding:8px 16px;border-radius:30px;color:white;text-decoration:none}
+  .main{max-width:1200px;margin:0 auto;padding:20px}
+  
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:30px}
+  .stat-card{background:white;border-radius:var(--radius);padding:20px;text-align:center;border:1px solid var(--border)}
+  .stat-number{font-size:32px;font-weight:700;color:var(--primary)}
+  
+  .search-card{background:white;border-radius:var(--radius);padding:20px;margin-bottom:20px;border:1px solid var(--border)}
+  .search-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .search-bar input{flex:2;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:15px}
+  .search-bar button{padding:12px 24px;background:var(--primary);color:white;border:none;border-radius:10px;cursor:pointer}
+  .search-by-id{background:#F59E0B}
+  
+  .filter-bar{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;align-items:center}
+  .filter-bar select{padding:10px 16px;border:1.5px solid var(--border);border-radius:10px;background:white}
+  
+  .table-container{overflow-x:auto;background:white;border-radius:var(--radius);border:1px solid var(--border)}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border)}
+  th{background:#f8f9fa;color:var(--primary-dark);font-weight:600}
+  tr:hover{background:#f9fafb}
+  .badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px}
+  .badge-ok{background:var(--primary-light);color:var(--primary-dark)}
+  .badge-warn{background:#FAEEDA;color:#BA7517}
+  
+  .btn-import{background:#10B981;color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer}
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:10px 20px;border-radius:30px;opacity:0;transition:opacity .3s;z-index:1000}
+  .toast.show{opacity:1}
+  
+  @media(max-width:768px){.stats-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-content">
+    <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Quay lại trang chủ</a>
+    <h1><i class="fas fa-history"></i> LỊCH SỬ KHÁM</h1>
+    <label class="btn-import" style="cursor:pointer"><i class="fas fa-file-import"></i> Import dữ liệu cũ
+      <input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="importOldData(this)">
+    </label>
+  </div>
+</div>
+
+<div class="main">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-number" id="totalRecords">0</div><div>Tổng lượt khám</div></div>
+    <div class="stat-card"><div class="stat-number" id="totalPatients">0</div><div>Bệnh nhân đã khám</div></div>
+    <div class="stat-card"><div class="stat-number" id="recentCount">0</div><div>6 tháng gần đây</div></div>
+  </div>
+
+  <div class="search-card">
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="🔍 Tìm theo mã nhân viên, họ tên, phòng ban...">
+      <button onclick="searchRecords()"><i class="fas fa-search"></i> Tìm kiếm</button>
+      <button onclick="resetSearch()" class="search-by-id"><i class="fas fa-undo"></i> Reset</button>
+    </div>
+    <div class="filter-bar">
+      <span><i class="fas fa-calendar-alt"></i> Lọc theo thời gian:</span>
+      <select id="timeFilter" onchange="filterByTime()">
+        <option value="all">Tất cả</option>
+        <option value="6months">6 tháng gần đây</option>
+        <option value="12months">12 tháng gần đây</option>
+        <option value="year2023">Năm 2023</option>
+        <option value="year2024">Năm 2024</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table id="examTable">
+      <thead>
+        <tr><th>STT</th><th>Mã NV</th><th>Họ tên</th><th>Giới tính</th><th>Ngày khám</th><th>Kết luận chính</th><th>Phân loại</th><th>Chi tiết</th></tr>
+      </thead>
+      <tbody id="examTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="fas fa-info-circle"></i> <span id="toastMsg"></span></div>
+
+<script>
+let allExams = [];  // Lưu tất cả bản ghi khám
+
+// ========== TẢI DỮ LIỆU HIỆN CÓ ==========
+function loadExistingExams() {
+  const stored = localStorage.getItem('completedExams');
+  if(stored) {
+    allExams = JSON.parse(stored);
+  } else {
+    allExams = [];
+  }
+  updateStats();
+  renderTable(allExams);
+}
+
+function updateStats() {
+  document.getElementById('totalRecords').textContent = allExams.length;
+  const uniquePatients = [...new Map(allExams.map(e => [e.patient?.empId, e.patient])).values()];
+  document.getElementById('totalPatients').textContent = uniquePatients.length;
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  const recent = allExams.filter(e => new Date(e.completeDate) >= sixMonthsAgo).length;
+  document.getElementById('recentCount').textContent = recent;
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('examTableBody');
+  tbody.innerHTML = '';
+  data.forEach((exam, idx) => {
+    const row = tbody.insertRow();
+    row.insertCell(0).textContent = idx+1;
+    row.insertCell(1).innerHTML = `<strong>${exam.patient?.id || exam.patient?.empId || '—'}</strong>`;
+    row.insertCell(2).innerHTML = `<strong>${exam.patient?.name || '—'}</strong>`;
+    row.insertCell(3).textContent = exam.patient?.gender || '—';
+    row.insertCell(4).textContent = exam.completeDate ? new Date(exam.completeDate).toLocaleDateString('vi-VN') : '—';
+    const kl = exam.examData?.kl;
+    const fit = kl?.fit || (kl?.ketluan ? (kl.ketluan.includes('đủ') ? 'Đủ sức khỏe' : 'Không đủ') : '—');
+    const healthClass = kl?.healthClass;
+    let healthText = '';
+    if(healthClass === 1) healthText = 'I - Rất tốt';
+    else if(healthClass === 2) healthText = 'II - Tốt';
+    else if(healthClass === 3) healthText = 'III - Trung bình';
+    else if(healthClass === 4) healthText = 'IV - Kém';
+    else if(healthClass === 5) healthText = 'V - Rất kém';
+    else healthText = '—';
+    row.insertCell(5).innerHTML = `<span class="badge ${fit === 'Đủ sức khỏe' ? 'badge-ok' : 'badge-warn'}">${fit}</span>`;
+    row.insertCell(6).innerHTML = healthText;
+    row.insertCell(7).innerHTML = `<button onclick="showDetail(${idx})" style="background:var(--primary);color:white;border:none;padding:4px 10px;border-radius:6px;cursor:pointer">Xem</button>`;
+  });
+}
+
+// ========== TÌM KIẾM & LỌC ==========
+let currentFiltered = [];
+
+function searchRecords() {
+  const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+  if(!keyword) {
+    applyTimeFilter();
+    return;
+  }
+  let filtered = allExams.filter(e => {
+    const id = (e.patient?.id || e.patient?.empId || '').toLowerCase();
+    const name = (e.patient?.name || '').toLowerCase();
+    return id.includes(keyword) || name.includes(keyword);
+  });
+  currentFiltered = filtered;
+  renderTable(currentFiltered);
+}
+
+function filterByTime() {
+  const filter = document.getElementById('timeFilter').value;
+  let filtered = allExams;
+  const now = new Date();
+  if(filter === '6months') {
+    const sixMonthsAgo = new Date(); sixMonthsAgo.setMonth(now.getMonth() - 6);
+    filtered = allExams.filter(e => new Date(e.completeDate) >= sixMonthsAgo);
+  } else if(filter === '12months') {
+    const yearAgo = new Date(); yearAgo.setFullYear(now.getFullYear() - 1);
+    filtered = allExams.filter(e => new Date(e.completeDate) >= yearAgo);
+  } else if(filter === 'year2023') {
+    filtered = allExams.filter(e => new Date(e.completeDate).getFullYear() === 2023);
+  } else if(filter === 'year2024') {
+    filtered = allExams.filter(e => new Date(e.completeDate).getFullYear() === 2024);
+  }
+  currentFiltered = filtered;
+  renderTable(currentFiltered);
+}
+
+function applyTimeFilter() {
+  filterByTime();
+}
+
+function resetSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('timeFilter').value = 'all';
+  filterByTime();
+}
+
+// ========== CHI TIẾT BẢN GHI ==========
+function showDetail(index) {
+  const exam = currentFiltered[index];
+  if(!exam) return;
+  let detailHtml = `<div style="padding:16px;"><h3>Chi tiết phiếu khám</h3>`;
+  detailHtml += `<p><strong>Mã NV:</strong> ${exam.patient?.id || exam.patient?.empId}</p>`;
+  detailHtml += `<p><strong>Họ tên:</strong> ${exam.patient?.name}</p>`;
+  detailHtml += `<p><strong>Ngày khám:</strong> ${new Date(exam.completeDate).toLocaleString('vi-VN')}</p>`;
+  detailHtml += `<hr><h4>Kết quả khám tổng quát</h4>`;
+  const tq = exam.examData?.tq;
+  if(tq) {
+    detailHtml += `<p>Chiều cao: ${tq.height || '—'} cm, Cân nặng: ${tq.weight || '—'} kg, BMI: ${tq.bmi || '—'}</p>`;
+    detailHtml += `<p>Mạch: ${tq.pulse || '—'}, Huyết áp: ${tq.bpDisplay || '—'}</p>`;
+    detailHtml += `<p>Phân loại thể lực: ${tq.physicalClass || '—'}</p>`;
+  } else {
+    detailHtml += `<p>Chưa có dữ liệu tổng quát.</p>`;
+  }
+  detailHtml += `<hr><h4>Kết luận</h4>`;
+  const kl = exam.examData?.kl;
+  if(kl) {
+    detailHtml += `<p>Phân loại sức khỏe: ${kl.healthClass ? 'Loại ' + kl.healthClass : '—'}</p>`;
+    detailHtml += `<p>Kết luận: ${kl.fit || '—'}</p>`;
+    detailHtml += `<p>Hướng giải quyết: ${kl.resolution || '—'}</p>`;
+    detailHtml += `<p>Bác sĩ: ${kl.doctor || '—'}</p>`;
+  } else {
+    detailHtml += `<p>Chưa có kết luận.</p>`;
+  }
+  detailHtml += `<div style="margin-top:20px;text-align:right"><button onclick="this.closest('.modal').remove()" style="background:var(--primary);color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer">Đóng</button></div></div>`;
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center';
+  const content = document.createElement('div');
+  content.style.cssText = 'background:white;border-radius:12px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto';
+  content.innerHTML = detailHtml;
+  modal.appendChild(content);
+  document.body.appendChild(modal);
+  modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
+}
+
+// ========== IMPORT DỮ LIỆU CŨ ==========
+function importOldData(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      console.log('Dữ liệu import:', rows);
+      if(rows.length === 0) { showToast('File không có dữ liệu!', true); return; }
+      
+      let imported = 0;
+      let skipped = 0;
+      for(let row of rows) {
+        // Ánh xạ các cột
+        const empId = row['id'] || row['ID'] || row['Mã NV'] || row['ma_nv'];
+        const name = row['ename'] || row['Họ tên'] || row['name'];
+        const gender = row['sex'] || row['Giới tính'];
+        const dob = row['BIRTHDAT'] || row['Ngày sinh'];
+        const dept = row['PLANT'] || row['DEPT NAME'] || row['Phòng ban'];
+        const examDate = row['ngaykham'] || row['Ngày khám'];
+        
+        if(!empId || !name) { skipped++; continue; }
+        
+        // Chuyển đổi ngày khám
+        let completeDate = null;
+        if(examDate) {
+          if(typeof examDate === 'number') completeDate = new Date((examDate - 25569) * 86400 * 1000).toISOString();
+          else completeDate = new Date(examDate).toISOString();
+        } else {
+          completeDate = new Date().toISOString();
+        }
+        
+        // Tạo cấu trúc examData
+        const examData = {
+          tq: {
+            height: row['Chieucao'] || row['Chiều cao'] || '',
+            weight: row['Cannang'] || row['Cân nặng'] || '',
+            bmi: row['BMI'] || '',
+            pulse: row['Noi+mach'] || row['Mạch'] || '',
+            bpDisplay: row['Noi+HAmax'] && row['Noi+HAmin'] ? `${row['Noi+HAmax']}/${row['Noi+HAmin']}` : '',
+            physicalClass: row['PLTL'] || ''
+          },
+          kl: {
+            healthClass: row['HC'] ? parseInt(row['HC']) : null,
+            fit: row['Ketluan'] ? (row['Ketluan'].includes('đủ') ? 'Đủ sức khỏe' : 'Không đủ sức khỏe') : '',
+            resolution: row['Huonggiaiquyet'] || '',
+            doctor: 'BS. Hệ thống',
+            signDate: completeDate.slice(0,10),
+            clinic: 'TKG Taekwang Cần Thơ'
+          }
+        };
+        
+        // Thêm các chuyên khoa nếu có
+        if(row['Tuanhoan'] || row['PLTH']) examData.nk = { th_class: row['Tuanhoan'] || row['PLTH'] };
+        if(row['Hohap'] || row['PLHH']) examData.nk = { ...examData.nk, hh_class: row['Hohap'] || row['PLHH'] };
+        if(row['Tieuhoa'] || row['PLTHOA']) examData.nk = { ...examData.nk, thoa_class: row['Tieuhoa'] || row['PLTHOA'] };
+        if(row['Than-TN-SD'] || row['PLTN-SD']) examData.nk = { ...examData.nk, ttn_class: row['Than-TN-SD'] || row['PLTN-SD'] };
+        if(row['Noitiet'] || row['PLNT']) examData.nk = { ...examData.nk, nt_class: row['Noitiet'] || row['PLNT'] };
+        if(row['Coxuongkhop'] || row['PLCXK']) examData.nk = { ...examData.nk, cxk_class: row['Coxuongkhop'] || row['PLCXK'] };
+        if(row['Thankinh'] || row['PLTK']) examData.nk = { ...examData.nk, tk_class: row['Thankinh'] || row['PLTK'] };
+        if(row['Tamthan'] || row['PLTT']) examData.nk = { ...examData.nk, tthan_class: row['Tamthan'] || row['PLTT'] };
+        
+        if(row['Dalieu'] || row['PLDL']) examData.ng = { da_class: row['Dalieu'] || row['PLDL'] };
+        if(row['Ngoaikhoa']) examData.ng = { ...examData.ng, ngoai_class: row['Ngoaikhoa'] };
+        
+        if(row['Benhmat'] || row['PLMat']) examData.mt = { class: row['Benhmat'] || row['PLMat'] };
+        if(row['Taimuihong'] || row['PLTMH']) examData.tmh = { class: row['Taimuihong'] || row['PLTMH'] };
+        if(row['Ranghammat'] || row['PLRHM']) examData.rhm = { class: row['Ranghammat'] || row['PLRHM'] };
+        if(row['Sanphukhoa'] || row['PLSPK']) examData.sp = { class: row['Sanphukhoa'] || row['PLSPK'] };
+        
+        // Tạo bản ghi đầy đủ
+        const examRecord = {
+          patient: {
+            id: empId.toString(),
+            name: name.toString().toUpperCase(),
+            gender: gender || '',
+            dob: dob || '',
+            dept: dept || ''
+          },
+          examData: examData,
+          completedSections: [],
+          completeDate: completeDate
+        };
+        
+        // Đánh dấu các khoa đã hoàn thành
+        if(examData.tq && examData.tq.height) examRecord.completedSections.push('tq');
+        if(examData.nk && Object.keys(examData.nk).length) examRecord.completedSections.push('nk');
+        if(examData.ng && Object.keys(examData.ng).length) examRecord.completedSections.push('ng');
+        if(examData.mt && examData.mt.class) examRecord.completedSections.push('mt');
+        if(examData.tmh && examData.tmh.class) examRecord.completedSections.push('tmh');
+        if(examData.rhm && examData.rhm.class) examRecord.completedSections.push('rhm');
+        if(examData.sp && examData.sp.class) examRecord.completedSections.push('sp');
+        if(examData.kl && examData.kl.healthClass) examRecord.completedSections.push('kl');
+        
+        // Kiểm tra trùng (cùng bệnh nhân và cùng ngày khám) - tạm thời bỏ qua nếu trùng
+        const exists = allExams.some(e => e.patient?.id === examRecord.patient.id && e.completeDate === examRecord.completeDate);
+        if(!exists) {
+          allExams.push(examRecord);
+          imported++;
+        } else {
+          skipped++;
+        }
+      }
+      
+      if(imported > 0) {
+        localStorage.setItem('completedExams', JSON.stringify(allExams));
+        updateStats();
+        resetSearch();
+        showToast(`✅ Import thành công ${imported} phiếu khám! (Bỏ qua ${skipped} bản ghi trùng)`, false);
+      } else {
+        showToast(`⚠️ Không có dữ liệu mới để import.`, true);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Lỗi khi đọc file: ' + err.message, true);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  input.value = '';
+}
+
+function showToast(msg, isError) {
+  const toast = document.getElementById('toast');
+  const toastMsg = document.getElementById('toastMsg');
+  toastMsg.textContent = msg;
+  toast.style.background = isError ? '#EF4444' : '#10B981';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadExistingExams();
+});
+</script>
+</body>
+</html>
