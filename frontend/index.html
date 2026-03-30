@@ -90,7 +90,6 @@
   .stat-number{font-size:28px;font-weight:700;color:var(--primary)}
   .stat-label{font-size:12px;color:var(--text-muted);margin-top:4px}
 
-  .admin-link{position:fixed;bottom:20px;right:20px;background:var(--primary);color:white;padding:10px 16px;border-radius:30px;text-decoration:none;font-size:13px;display:flex;align-items:center;gap:8px;z-index:1000}
   .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;opacity:0;transition:opacity .3s;z-index:999;display:flex;align-items:center;gap:8px}
   .toast.show{opacity:1}
   
@@ -120,8 +119,67 @@
   .tooth-box{width:28px;height:28px;border:1.5px solid var(--border);border-radius:4px;cursor:pointer;background:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;transition:all .15s}
   .tooth-box.tooth-ok{background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark)}
   .tooth-box.tooth-issue{background:var(--danger-light);border-color:var(--danger);color:var(--danger)}
+  
+  .action-buttons-group{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+  .nav-buttons{position:fixed;bottom:20px;left:0;right:0;display:flex;justify-content:center;gap:12px;z-index:1000;padding:0 16px}
+  .nav-btn{background:white;color:var(--primary-dark);border:1.5px solid var(--primary);border-radius:30px;padding:10px 20px;text-decoration:none;font-size:13px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:all 0.3s}
+  .nav-btn:hover{background:var(--primary);color:white;transform:translateY(-2px)}
 
   @media(max-width:640px){.form-row.cols-2{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr}}
+  /* Sidebar Navigation */
+  .sidebar-nav{
+    position:fixed;
+    left:20px;
+    top:50%;
+    transform:translateY(-50%);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    z-index:1000;
+  }
+  .nav-circle{
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    color:var(--primary);
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+    transition:all 0.3s;
+    font-size:22px;
+  }
+  .nav-circle:hover{
+    transform:scale(1.1);
+    background:var(--primary);
+    color:white;
+  }
+  .nav-tooltip{
+    position:absolute;
+    left:60px;
+    background:#333;
+    color:white;
+    padding:5px 10px;
+    border-radius:8px;
+    font-size:12px;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.3s;
+  }
+  .nav-circle:hover .nav-tooltip{
+    opacity:1;
+  }
+  
+  @media(max-width:768px){
+    .stats-grid{grid-template-columns:1fr}
+    .sidebar-nav{left:10px}
+    .nav-circle{width:40px;height:40px;font-size:18px}
+    .nav-tooltip{left:50px;font-size:10px}
+    .header-content{flex-direction:column;text-align:center}
+  }
 </style>
 </head>
 <body>
@@ -130,7 +188,9 @@
   <div class="header-top">
     <button class="back-btn" id="backBtn" onclick="goBack()" style="visibility:hidden">←</button>
     <h1 id="headerTitle">Khám Sức Khỏe Định Kỳ</h1>
-    <div style="width:36px"></div>
+    <a href="login.html" class="doctor-login-btn" style="background:rgba(255,255,255,0.2);color:white;padding:6px 12px;border-radius:20px;text-decoration:none;font-size:13px;display:flex;align-items:center;gap:6px">
+      <i class="fas fa-user-md"></i> BS
+    </a>
   </div>
   <div class="patient-bar" id="patientBar" style="display:none">
     <span>👤 <strong id="pBarName">—</strong></span>
@@ -152,7 +212,7 @@
   <button class="nav-tab" data-screen="screen-kl" onclick="goToTab('kl')"><span class="icon">📝</span>Kết luận<span class="badge"></span></button>
 </div>
 
-<!-- HOME SCREEN (GIỮ NGUYÊN) -->
+<!-- HOME SCREEN -->
 <div class="screen active main" id="screen-home">
   <div class="hero">
     <div class="hero-icon">🏥</div>
@@ -197,8 +257,8 @@
         <div class="gender-card" id="genderNam" onclick="selectGender('Nam')"><div class="gender-icon">👨</div><span>Nam</span></div>
         <div class="gender-card" id="genderNu" onclick="selectGender('Nữ')"><div class="gender-icon">👩</div><span>Nữ</span></div>
       </div>
-      <!-- <div class="form-group"><label><i class="fas fa-briefcase"></i> Vị trí công việc</label><input type="text" id="patientJob" placeholder="VD: Kỹ sư, Công nhân..."></div>
-      <div class="form-group"><label><i class="fas fa-notes-medical"></i> Tiền sử bệnh</label><textarea id="patientHistory" rows="2"></textarea></div>
+      <div class="form-group"><label><i class="fas fa-briefcase"></i> Vị trí công việc</label><input type="text" id="patientJob" placeholder="VD: Kỹ sư, Công nhân..."></div>
+      <!-- <div class="form-group"><label><i class="fas fa-notes-medical"></i> Tiền sử bệnh</label><textarea id="patientHistory" rows="2"></textarea></div>
       <div class="form-group"><label><i class="fas fa-exclamation-triangle"></i> Yếu tố có hại</label><textarea id="hazardFactors" rows="2"></textarea></div> -->
       <div style="display:flex;gap:10px;margin-top:16px">
         <button class="btn-secondary" onclick="searchEmployee()" style="flex:1"><i class="fas fa-search"></i> Tra cứu</button>
@@ -210,7 +270,7 @@
   <div id="empInfo"></div>
 </div>
 
-<!-- ============== TỔNG QUÁT (có phân loại thể lực) ============== -->
+<!-- ============== TỔNG QUÁT ============== -->
 <div class="screen" id="screen-tq">
   <div class="main">
     <div class="progress-info"><span><i class="fas fa-chart-line"></i> <span id="tqStatus">Chưa khám</span></span><button class="btn-warning" onclick="saveCurrentData('tq')" style="padding:4px 12px;font-size:12px"><i class="fas fa-save"></i> Lưu tạm</button></div>
@@ -254,7 +314,7 @@
   </div>
 </div>
 
-<!-- ============== NỘI KHOA (8 mục có phân loại) ============== -->
+<!-- ============== NỘI KHOA ============== -->
 <div class="screen" id="screen-nk">
   <div class="main">
     <div class="progress-info"><span><i class="fas fa-chart-line"></i> <span id="nkStatus">Chưa khám</span></span><button class="btn-warning" onclick="saveCurrentData('nk')" style="padding:4px 12px;font-size:12px"><i class="fas fa-save"></i> Lưu tạm</button></div>
@@ -310,7 +370,7 @@
   <div class="bottom-action"><button class="btn-secondary" onclick="goToTab('home')"><i class="fas fa-home"></i> Trang chủ</button><button class="btn-primary" onclick="completeSection('nk')"><i class="fas fa-check-circle"></i> Hoàn thành</button></div>
 </div>
 
-<!-- ============== NGOẠI KHOA / DA LIỄU (2 mục có phân loại) ============== -->
+<!-- ============== NGOẠI KHOA / DA LIỄU ============== -->
 <div class="screen" id="screen-ng">
   <div class="main">
     <div class="progress-info"><span><i class="fas fa-chart-line"></i> <span id="ngStatus">Chưa khám</span></span><button class="btn-warning" onclick="saveCurrentData('ng')" style="padding:4px 12px;font-size:12px"><i class="fas fa-save"></i> Lưu tạm</button></div>
@@ -330,7 +390,7 @@
   <div class="bottom-action"><button class="btn-secondary" onclick="goToTab('home')"><i class="fas fa-home"></i> Trang chủ</button><button class="btn-primary" onclick="completeSection('ng')"><i class="fas fa-check-circle"></i> Hoàn thành</button></div>
 </div>
 
-<!-- ============== SẢN PHỤ KHOA (có phân loại) ============== -->
+<!-- ============== SẢN PHỤ KHOA ============== -->
 <div class="screen" id="screen-sp">
   <div class="main">
     <div class="progress-info"><span><i class="fas fa-chart-line"></i> <span id="spStatus">Chưa khám</span></span><button class="btn-warning" onclick="saveCurrentData('sp')" style="padding:4px 12px;font-size:12px"><i class="fas fa-save"></i> Lưu tạm</button></div>
@@ -345,7 +405,7 @@
   <div class="bottom-action"><button class="btn-secondary" onclick="goToTab('home')"><i class="fas fa-home"></i> Trang chủ</button><button class="btn-primary" onclick="completeSection('sp')"><i class="fas fa-check-circle"></i> Hoàn thành</button></div>
 </div>
 
-<!-- ============== MẮT (có phân loại) ============== -->
+<!-- ============== MẮT ============== -->
 <div class="screen" id="screen-mt">
   <div class="main">
     <div class="progress-info"><span><i class="fas fa-chart-line"></i> <span id="mtStatus">Chưa khám</span></span><button class="btn-warning" onclick="saveCurrentData('mt')" style="padding:4px 12px;font-size:12px"><i class="fas fa-save"></i> Lưu tạm</button></div>
@@ -365,7 +425,7 @@
   <div class="bottom-action"><button class="btn-secondary" onclick="goToTab('home')"><i class="fas fa-home"></i> Trang chủ</button><button class="btn-primary" onclick="completeSection('mt')"><i class="fas fa-check-circle"></i> Hoàn thành</button></div>
 </div>
 
-<!-- ============== TAI MŨI HỌNG (có phân loại) ============== -->
+<!-- ============== TAI MŨI HỌNG ============== -->
 <div class="screen" id="screen-tmh">
   <div class="main">
     <div class="progress-info"><span><i class="fas fa-chart-line"></i> <span id="tmhStatus">Chưa khám</span></span><button class="btn-warning" onclick="saveCurrentData('tmh')" style="padding:4px 12px;font-size:12px"><i class="fas fa-save"></i> Lưu tạm</button></div>
@@ -385,7 +445,7 @@
   <div class="bottom-action"><button class="btn-secondary" onclick="goToTab('home')"><i class="fas fa-home"></i> Trang chủ</button><button class="btn-primary" onclick="completeSection('tmh')"><i class="fas fa-check-circle"></i> Hoàn thành</button></div>
 </div>
 
-<!-- ============== RĂNG HÀM MẶT (có phân loại + bảng răng) ============== -->
+<!-- ============== RĂNG HÀM MẶT ============== -->
 <div class="screen" id="screen-rhm">
   <div class="main">
     <div class="progress-info"><span><i class="fas fa-chart-line"></i> <span id="rhmStatus">Chưa khám</span></span><button class="btn-warning" onclick="saveCurrentData('rhm')" style="padding:4px 12px;font-size:12px"><i class="fas fa-save"></i> Lưu tạm</button></div>
@@ -450,16 +510,30 @@
 </div>
 
 <div class="toast" id="toast"><i class="fas fa-info-circle"></i> <span id="toastMessage"></span></div>
-<!-- <a href="employee-manager.html" class="admin-link"><i class="fas fa-users"></i> Quản lý nhân viên</a> -->
- <!-- Thêm nút Tổng hợp kết quả bên trái -->
-<a href="exam-summary.html" class="summary-link" style="position:fixed;bottom:20px;left:20px;background:var(--accent);color:white;padding:10px 16px;border-radius:30px;text-decoration:none;font-size:13px;display:flex;align-items:center;gap:8px;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,0.2)">
-  <i class="fas fa-chart-line"></i> Tổng hợp kết quả
-</a>
 
-<!-- Nút quản lý nhân viên bên phải (giữ nguyên) -->
-<a href="employee-manager.html" class="admin-link" style="position:fixed;bottom:20px;right:20px;background:var(--primary);color:white;padding:10px 16px;border-radius:30px;text-decoration:none;font-size:13px;display:flex;align-items:center;gap:8px;z-index:1000">
-  <i class="fas fa-users"></i> Quản lý nhân viên
-</a>
+<!-- Nút điều hướng cố định -->
+<div class="sidebar-nav">
+  <a href="index.html" class="nav-circle">
+    <i class="fas fa-home"></i>
+    <span class="nav-tooltip">Trang chủ</span>
+  </a>
+  <a href="exam-summary.html" class="nav-circle">
+    <i class="fas fa-chart-line"></i>
+    <span class="nav-tooltip">Tổng hợp</span>
+  </a>
+  <a href="employee-manager.html" class="nav-circle">
+    <i class="fas fa-users"></i>
+    <span class="nav-tooltip">Quản lý NV</span>
+  </a>
+  <a href="doctor-dashboard.html" class="nav-circle" style="background:var(--primary);color:white">
+    <i class="fas fa-stethoscope"></i>
+    <span class="nav-tooltip">Dashboard BS</span>
+  </a>
+  <a href="login.html" class="nav-circle" onclick="logout(); return false;">
+    <i class="fas fa-sign-out-alt"></i>
+    <span class="nav-tooltip">Đăng xuất</span>
+  </a>
+</div>
 
 <script>
 let employees = [];
@@ -750,7 +824,7 @@ function finishExam() {
   setTimeout(() => { if(confirm('In phiếu khám?')) window.print(); goToTab('home'); resetForm(); }, 500);
 }
 
-// ========== CÁC HÀM KHÁC GIỮ NGUYÊN ==========
+// ========== CÁC HÀM KHÁC ==========
 function loadEmployees() {
   const stored = localStorage.getItem('employees');
   if(stored) employees = JSON.parse(stored);
@@ -850,7 +924,6 @@ function selectGender(g) {
 }
 
 function registerExam() {
-  // Lấy giá trị với kiểm tra an toàn
   const empIdInput = document.getElementById('empId');
   const patientNameInput = document.getElementById('patientName');
   
@@ -867,7 +940,6 @@ function registerExam() {
     return; 
   }
   
-  // Lấy các giá trị khác với kiểm tra an toàn
   const patientDob = document.getElementById('patientDob');
   const patientAge = document.getElementById('patientAge');
   const patientJob = document.getElementById('patientJob');
@@ -889,7 +961,6 @@ function registerExam() {
   
   saveRegistration(state.patient);
   
-  // Cập nhật thanh thông tin với kiểm tra an toàn
   const pBarName = document.getElementById('pBarName');
   const pBarDob = document.getElementById('pBarDob');
   const pBarGender = document.getElementById('pBarGender');

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bác sĩ - Hệ thống khám sức khỏe TKG</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --primary:#1D9E75;--primary-dark:#0F6E56;--primary-light:#E1F5EE;
+    --bg:#f5f7f5;--card:#fff;--border:#e0e0e0;
+    --radius:12px;
+  }
+  body{font-family:'Segoe UI',sans-serif;background:var(--bg);min-height:100vh}
+  
+  .header{
+    background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);
+    color:white;padding:20px;
+  }
+  .header-content{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
+  .doctor-info{display:flex;align-items:center;gap:12px}
+  .doctor-info .icon{font-size:40px}
+  .logout-btn{background:rgba(255,255,255,0.2);padding:8px 16px;border-radius:30px;border:none;color:white;cursor:pointer}
+  
+  .main{max-width:1200px;margin:0 auto;padding:20px}
+  
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:30px}
+  .stat-card{background:white;border-radius:var(--radius);padding:20px;text-align:center;border:1px solid var(--border)}
+  .stat-number{font-size:32px;font-weight:700;color:var(--primary)}
+  
+  .search-card{background:white;border-radius:var(--radius);padding:20px;margin-bottom:20px;border:1px solid var(--border)}
+  .search-bar{display:flex;gap:12px;flex-wrap:wrap}
+  .search-bar input{flex:2;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;min-width:150px}
+  .search-bar button{padding:12px 24px;background:var(--primary);color:white;border:none;border-radius:10px;cursor:pointer}
+  .search-by-id{background:#F59E0B}
+  .search-by-id:hover{background:#D97706}
+  .reset-btn{background:#6B7280}
+  
+  .patient-list{background:white;border-radius:var(--radius);border:1px solid var(--border);overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:600px}
+  th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border)}
+  th{background:#f8f9fa;color:var(--primary-dark)}
+  .exam-btn{background:var(--primary);color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer}
+  .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px}
+  .badge-done{background:var(--primary-light);color:var(--primary-dark)}
+  .badge-pending{background:#f0f0f0;color:#999}
+  
+  /* Sidebar Navigation */
+  .sidebar-nav{
+    position:fixed;
+    left:20px;
+    top:50%;
+    transform:translateY(-50%);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    z-index:1000;
+  }
+  .nav-circle{
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    color:var(--primary);
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+    transition:all 0.3s;
+    font-size:22px;
+  }
+  .nav-circle:hover{
+    transform:scale(1.1);
+    background:var(--primary);
+    color:white;
+  }
+  .nav-tooltip{
+    position:absolute;
+    left:60px;
+    background:#333;
+    color:white;
+    padding:5px 10px;
+    border-radius:8px;
+    font-size:12px;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.3s;
+  }
+  .nav-circle:hover .nav-tooltip{
+    opacity:1;
+  }
+  
+  @media(max-width:768px){
+    .stats-grid{grid-template-columns:1fr}
+    .sidebar-nav{left:10px}
+    .nav-circle{width:40px;height:40px;font-size:18px}
+    .nav-tooltip{left:50px;font-size:10px}
+    .header-content{flex-direction:column;text-align:center}
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-nav">
+  <a href="index.html" class="nav-circle">
+    <i class="fas fa-home"></i>
+    <span class="nav-tooltip">Trang chủ</span>
+  </a>
+  <a href="exam-summary.html" class="nav-circle">
+    <i class="fas fa-chart-line"></i>
+    <span class="nav-tooltip">Tổng hợp</span>
+  </a>
+  <a href="employee-manager.html" class="nav-circle">
+    <i class="fas fa-users"></i>
+    <span class="nav-tooltip">Quản lý NV</span>
+  </a>
+  <a href="doctor-dashboard.html" class="nav-circle" style="background:var(--primary);color:white">
+    <i class="fas fa-stethoscope"></i>
+    <span class="nav-tooltip">Dashboard BS</span>
+  </a>
+  <a href="login.html" class="nav-circle" onclick="logout(); return false;">
+    <i class="fas fa-sign-out-alt"></i>
+    <span class="nav-tooltip">Đăng xuất</span>
+  </a>
+</div>
+
+<div class="header">
+  <div class="header-content">
+    <div class="doctor-info">
+      <div class="icon" id="doctorIcon">🫀</div>
+      <div>
+        <h2 id="doctorName">Bác sĩ</h2>
+        <p id="doctorSpecialty">Chuyên khoa</p>
+      </div>
+    </div>
+    <div>
+      <span><i class="fas fa-calendar-day"></i> <span id="currentDate"></span></span>
+      <button class="logout-btn" onclick="logout()" style="margin-left:15px"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-number" id="totalPatients">0</div><div>Tổng bệnh nhân</div></div>
+    <div class="stat-card"><div class="stat-number" id="examinedCount">0</div><div>Đã khám</div></div>
+    <div class="stat-card"><div class="stat-number" id="pendingCount">0</div><div>Chưa khám</div></div>
+  </div>
+  
+  <div class="search-card">
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="🔍 Tìm theo tên, phòng ban...">
+      <input type="text" id="searchByIdInput" placeholder="🔢 Tìm theo mã nhân viên">
+      <button onclick="searchByEmployeeId()" class="search-by-id"><i class="fas fa-id-card"></i> Tìm theo mã</button>
+      <button onclick="searchPatients()"><i class="fas fa-search"></i> Tìm kiếm</button>
+      <button onclick="resetSearch()" class="reset-btn"><i class="fas fa-undo"></i> Reset</button>
+    </div>
+  </div>
+  
+  <div class="patient-list">
+    <table id="patientTable">
+      <thead>
+        <tr><th>STT</th><th>Mã NV</th><th>Họ tên</th><th>Phòng ban</th><th>Trạng thái</th><th>Thao tác</th></tr>
+      </thead>
+      <tbody id="patientTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let currentDoctor = null;
+let allPatients = [];
+let filteredPatients = [];
+
+function loadDoctorInfo() {
+  const stored = sessionStorage.getItem('currentDoctor');
+  if(!stored) {
+    window.location.href = 'login.html';
+    return;
+  }
+  currentDoctor = JSON.parse(stored);
+  document.getElementById('doctorName').textContent = currentDoctor.name;
+  document.getElementById('doctorSpecialty').textContent = currentDoctor.specialty;
+  document.getElementById('doctorIcon').innerHTML = currentDoctor.icon;
+  document.getElementById('currentDate').textContent = new Date().toLocaleDateString('vi-VN');
+}
+
+function loadPatients() {
+  const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+  const completedExams = JSON.parse(localStorage.getItem('completedExams') || '[]');
+  
+  allPatients = employees.map(emp => {
+    let isExamined = false;
+    for(let exam of completedExams) {
+      if(exam.patient?.empId === emp.id) {
+        if(exam.examData && exam.examData[currentDoctor.id] && exam.examData[currentDoctor.id].class) {
+          isExamined = true;
+          break;
+        }
+      }
+    }
+    return { ...emp, isExamined: isExamined };
+  });
+  
+  filteredPatients = [...allPatients];
+  updateStats();
+  renderPatientTable();
+}
+
+function updateStats() {
+  const total = allPatients.length;
+  const examined = allPatients.filter(p => p.isExamined).length;
+  document.getElementById('totalPatients').textContent = total;
+  document.getElementById('examinedCount').textContent = examined;
+  document.getElementById('pendingCount').textContent = total - examined;
+}
+
+function renderPatientTable() {
+  const tbody = document.getElementById('patientTableBody');
+  tbody.innerHTML = '';
+  
+  filteredPatients.forEach((p, idx) => {
+    const row = tbody.insertRow();
+    row.insertCell(0).textContent = idx + 1;
+    row.insertCell(1).innerHTML = `<strong style="color:var(--primary)">${p.id}</strong>`;
+    row.insertCell(2).innerHTML = `<strong>${p.name}</strong>`;
+    row.insertCell(3).textContent = p.dept || '—';
+    row.insertCell(4).innerHTML = p.isExamined ? 
+      '<span class="badge badge-done"><i class="fas fa-check-circle"></i> Đã khám</span>' : 
+      '<span class="badge badge-pending"><i class="fas fa-clock"></i> Chưa khám</span>';
+    row.insertCell(5).innerHTML = p.isExamined ? 
+      '<button class="exam-btn" disabled style="opacity:0.5"><i class="fas fa-check"></i> Đã khám</button>' : 
+      `<button class="exam-btn" onclick="startExam('${p.id}')"><i class="fas fa-stethoscope"></i> Khám</button>`;
+  });
+}
+
+function searchPatients() {
+  const term = document.getElementById('searchInput').value.toLowerCase().trim();
+  if(!term) {
+    filteredPatients = [...allPatients];
+  } else {
+    filteredPatients = allPatients.filter(p => 
+      p.name.toLowerCase().includes(term) || (p.dept && p.dept.toLowerCase().includes(term))
+    );
+  }
+  renderPatientTable();
+  showToast(`Tìm thấy ${filteredPatients.length} bệnh nhân`);
+}
+
+function searchByEmployeeId() {
+  const empId = document.getElementById('searchByIdInput').value.trim();
+  if(!empId) {
+    showToast('Vui lòng nhập mã nhân viên');
+    return;
+  }
+  const patient = allPatients.find(p => p.id === empId);
+  if(patient) {
+    filteredPatients = [patient];
+    renderPatientTable();
+    showToast(`Đã tìm thấy: ${patient.name}`);
+  } else {
+    filteredPatients = [];
+    renderPatientTable();
+    showToast(`Không tìm thấy nhân viên có mã: ${empId}`);
+  }
+}
+
+function resetSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchByIdInput').value = '';
+  filteredPatients = [...allPatients];
+  renderPatientTable();
+  showToast('Đã hiển thị lại toàn bộ danh sách');
+}
+
+function startExam(empId) {
+  const patient = allPatients.find(p => p.id === empId);
+  if(!patient) return;
+  
+  // Lưu thông tin bệnh nhân vào sessionStorage để trang khám đọc được
+  sessionStorage.setItem('examPatient', JSON.stringify({
+    id: patient.id,
+    name: patient.name,
+    dept: patient.dept,
+    dob: patient.dob || '',
+    gender: patient.gender || ''
+  }));
+  
+  // Chuyển sang trang khám theo đúng chuyên khoa
+  window.location.href = `doctor-exam.html`;
+}
+
+function logout() {
+  sessionStorage.clear();
+  window.location.href = 'login.html';
+}
+
+function showToast(msg) {
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1F2937;color:white;padding:10px 20px;border-radius:30px;font-size:14px;z-index:2000';
+  toast.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadDoctorInfo();
+  loadPatients();
+});
+</script>
+</body>
+</html>

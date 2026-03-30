@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khám bệnh - Hệ thống khám sức khỏe TKG</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --primary:#1D9E75;--primary-dark:#0F6E56;--primary-light:#E1F5EE;
+    --bg:#f5f7f5;--card:#fff;--border:#e0e0e0;
+    --radius:12px;
+  }
+  body{font-family:'Segoe UI',sans-serif;background:var(--bg);min-height:100vh}
+  
+  .header{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:white;padding:20px}
+  .header-content{max-width:800px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
+  .back-btn{background:rgba(255,255,255,0.2);border:none;color:white;padding:8px 16px;border-radius:30px;cursor:pointer}
+  
+  .main{max-width:800px;margin:0 auto;padding:20px}
+  
+  /* Sidebar Navigation */
+  .sidebar-nav{
+    position:fixed;
+    left:20px;
+    top:50%;
+    transform:translateY(-50%);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    z-index:1000;
+  }
+  .nav-circle{
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    color:var(--primary);
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+    transition:all 0.3s;
+    font-size:22px;
+  }
+  .nav-circle:hover{
+    transform:scale(1.1);
+    background:var(--primary);
+    color:white;
+  }
+  .nav-tooltip{
+    position:absolute;
+    left:60px;
+    background:#333;
+    color:white;
+    padding:5px 10px;
+    border-radius:8px;
+    font-size:12px;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.3s;
+  }
+  .nav-circle:hover .nav-tooltip{
+    opacity:1;
+  }
+  
+  .patient-card{background:white;border-radius:var(--radius);padding:20px;margin-bottom:20px;border:1px solid var(--border)}
+  .patient-info{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  
+  .exam-card{background:white;border-radius:var(--radius);padding:20px;margin-bottom:20px;border:1px solid var(--border)}
+  .exam-card h3{color:var(--primary-dark);margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--primary-light)}
+  
+  .form-group{margin-bottom:16px}
+  .form-group label{display:block;margin-bottom:6px;font-weight:500;color:#666}
+  .form-group textarea{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;min-height:100px}
+  .form-group input{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px}
+  
+  .radio-group{display:flex;gap:12px;flex-wrap:wrap}
+  .radio-label{display:flex;align-items:center;gap:6px;padding:8px 16px;border:1.5px solid var(--border);border-radius:30px;cursor:pointer}
+  .radio-label.selected{background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark)}
+  
+  .action-buttons{display:flex;gap:12px;margin-top:20px}
+  .btn-primary{flex:1;background:var(--primary);color:white;border:none;padding:14px;border-radius:10px;font-weight:600;cursor:pointer}
+  .btn-secondary{flex:1;background:#fff;color:var(--primary-dark);border:1.5px solid var(--primary);padding:14px;border-radius:10px;cursor:pointer}
+  
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:10px 20px;border-radius:30px;opacity:0;transition:opacity 0.3s;z-index:1001}
+  .toast.show{opacity:1}
+  
+  @media(max-width:768px){
+    .sidebar-nav{left:10px}
+    .nav-circle{width:40px;height:40px;font-size:18px}
+    .nav-tooltip{left:50px;font-size:10px}
+    .patient-info{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-nav">
+  <a href="index.html" class="nav-circle">
+    <i class="fas fa-home"></i>
+    <span class="nav-tooltip">Trang chủ</span>
+  </a>
+  <a href="exam-summary.html" class="nav-circle">
+    <i class="fas fa-chart-line"></i>
+    <span class="nav-tooltip">Tổng hợp</span>
+  </a>
+  <a href="employee-manager.html" class="nav-circle">
+    <i class="fas fa-users"></i>
+    <span class="nav-tooltip">Quản lý NV</span>
+  </a>
+  <a href="doctor-dashboard.html" class="nav-circle">
+    <i class="fas fa-stethoscope"></i>
+    <span class="nav-tooltip">Dashboard BS</span>
+  </a>
+  <a href="login.html" class="nav-circle" onclick="logout(); return false;">
+    <i class="fas fa-sign-out-alt"></i>
+    <span class="nav-tooltip">Đăng xuất</span>
+  </a>
+</div>
+
+<div class="header">
+  <div class="header-content">
+    <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Quay lại</button>
+    <div><i class="fas fa-stethoscope"></i> <span id="doctorSpecialty"></span></div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="patient-card">
+    <h3><i class="fas fa-user-circle"></i> Thông tin bệnh nhân</h3>
+    <div class="patient-info">
+      <div><strong>Mã NV:</strong> <span id="patientId"></span></div>
+      <div><strong>Họ tên:</strong> <span id="patientName"></span></div>
+      <div><strong>Phòng ban:</strong> <span id="patientDept"></span></div>
+      <div><strong>Ngày sinh:</strong> <span id="patientDob"></span></div>
+      <div><strong>Giới tính:</strong> <span id="patientGender"></span></div>
+    </div>
+  </div>
+  
+  <div class="exam-card" id="examContent"></div>
+  
+  <div class="action-buttons">
+    <button class="btn-secondary" onclick="saveDraft()"><i class="fas fa-save"></i> Lưu tạm</button>
+    <button class="btn-primary" onclick="completeExam()"><i class="fas fa-check-circle"></i> Hoàn thành khám</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="fas fa-info-circle"></i> <span id="toastMsg"></span></div>
+
+<script>
+let currentDoctor = null;
+let currentPatient = null;
+
+const specialtyForms = {
+  nk: {
+    title: "🫀 KHÁM NỘI KHOA",
+    fields: [
+      { id: "nkTH", label: "a) Tuần hoàn", placeholder: "Nhịp tim đều/không đều, tiếng thổi, phù chi..." },
+      { id: "nkHH", label: "b) Hô hấp", placeholder: "Ran phổi, khó thở, co kéo cơ hô hấp phụ..." },
+      { id: "nkTHoa", label: "c) Tiêu hóa", placeholder: "Bụng mềm/cứng, gan lách, đau điểm..." },
+      { id: "nkTTN", label: "d) Thận – Tiết niệu", placeholder: "Chạm thận, vỗ hông lưng, tiểu khó..." },
+      { id: "nkNT", label: "đ) Nội tiết", placeholder: "Tuyến giáp, glucose máu, dấu hiệu ĐTĐ..." },
+      { id: "nkCXK", label: "e) Cơ – Xương – Khớp", placeholder: "Biến dạng khớp, hạn chế vận động..." },
+      { id: "nkTK", label: "g) Thần kinh", placeholder: "Dấu hiệu thần kinh khu trú, phản xạ..." },
+      { id: "nkTThan", label: "h) Tâm thần", placeholder: "Hành vi, giao tiếp, định hướng..." }
+    ],
+    classifications: ["Bình thường", "Bệnh lý"]
+  },
+  ng: {
+    title: "🩺 KHÁM NGOẠI KHOA & DA LIỄU",
+    fields: [
+      { id: "ngNgoai", label: "Ngoại khoa", placeholder: "Dị tật, thoát vị, khối u ngoài, sẹo phẫu thuật..." },
+      { id: "ngDa", label: "Da liễu", placeholder: "Nấm da, viêm da, vảy nến, loét, dị ứng..." }
+    ],
+    classifications: ["Bình thường", "Bệnh lý"]
+  },
+  mt: {
+    title: "👁 KHÁM MẮT",
+    fields: [
+      { id: "mtNoGlassR", label: "Thị lực không kính - Mắt phải", placeholder: "VD: 7/10", isInput: true },
+      { id: "mtNoGlassL", label: "Thị lực không kính - Mắt trái", placeholder: "VD: 7/10", isInput: true },
+      { id: "mtGlassR", label: "Thị lực có kính - Mắt phải", placeholder: "VD: 10/10", isInput: true },
+      { id: "mtGlassL", label: "Thị lực có kính - Mắt trái", placeholder: "VD: 10/10", isInput: true },
+      { id: "mtDiag", label: "Chẩn đoán bệnh về mắt", placeholder: "Cận thị, viễn thị, loạn thị, đục thủy tinh thể...", isTextarea: true }
+    ],
+    classifications: ["Bình thường", "Có kính đạt", "Bệnh lý"]
+  },
+  tmh: {
+    title: "👂 KHÁM TAI MŨI HỌNG",
+    fields: [
+      { id: "tmhRN", label: "Thính lực - Tai phải (nói thường m)", placeholder: "≥6", isInput: true },
+      { id: "tmhRW", label: "Thính lực - Tai phải (nói thầm m)", placeholder: "≥1", isInput: true },
+      { id: "tmhLN", label: "Thính lực - Tai trái (nói thường m)", placeholder: "≥6", isInput: true },
+      { id: "tmhLW", label: "Thính lực - Tai trái (nói thầm m)", placeholder: "≥1", isInput: true },
+      { id: "tmhNH", label: "Mũi – Họng – Thanh quản", placeholder: "Viêm mũi dị ứng, polyp, viêm họng mạn, amidan...", isTextarea: true },
+      { id: "tmhDiag", label: "Chẩn đoán bệnh TMH", placeholder: "Điếc nghề nghiệp, viêm tai mạn, thủng nhĩ...", isTextarea: true }
+    ],
+    classifications: ["Bình thường", "Cần theo dõi", "Bệnh lý"]
+  },
+  rhm: {
+    title: "🦷 KHÁM RĂNG HÀM MẶT",
+    fields: [
+      { id: "rhmNotes", label: "Ghi chú lâm sàng", placeholder: "Sâu răng, viêm lợi, khớp cắn sai, thiếu răng...", isTextarea: true }
+    ],
+    classifications: ["Bình thường", "Cần điều trị", "Bệnh lý nặng"]
+  },
+  sp: {
+    title: "👶 KHÁM SẢN PHỤ KHOA",
+    fields: [
+      { id: "spContent", label: "Chi tiết nội dung khám", placeholder: "Tử cung, phần phụ, kinh nguyệt, thai (nếu có)...", isTextarea: true }
+    ],
+    classifications: ["Bình thường", "Cần theo dõi", "Bệnh lý"]
+  }
+};
+
+function loadDoctor() {
+  const stored = sessionStorage.getItem('currentDoctor');
+  if(!stored) {
+    window.location.href = 'login.html';
+    return;
+  }
+  currentDoctor = JSON.parse(stored);
+  document.getElementById('doctorSpecialty').innerHTML = `${currentDoctor.icon} ${currentDoctor.specialty}`;
+  renderExamForm();
+}
+
+function loadPatient() {
+  const stored = sessionStorage.getItem('examPatient');
+  if(!stored) {
+    showToast('Không tìm thấy thông tin bệnh nhân!', true);
+    setTimeout(() => window.location.href = 'doctor-dashboard.html', 1500);
+    return;
+  }
+  currentPatient = JSON.parse(stored);
+  document.getElementById('patientId').textContent = currentPatient.id;
+  document.getElementById('patientName').textContent = currentPatient.name;
+  document.getElementById('patientDept').textContent = currentPatient.dept || '—';
+  document.getElementById('patientDob').textContent = currentPatient.dob || '—';
+  document.getElementById('patientGender').textContent = currentPatient.gender || '—';
+}
+
+function renderExamForm() {
+  const config = specialtyForms[currentDoctor.id];
+  if(!config) {
+    document.getElementById('examContent').innerHTML = '<p>Không có cấu hình cho chuyên khoa này</p>';
+    return;
+  }
+  
+  let html = `<h3>${config.title}</h3>`;
+  
+  for(let field of config.fields) {
+    html += `<div class="form-group">`;
+    html += `<label>${field.label}</label>`;
+    if(field.isTextarea) {
+      html += `<textarea id="${field.id}" placeholder="${field.placeholder}"></textarea>`;
+    } else if(field.isInput) {
+      html += `<input type="text" id="${field.id}" placeholder="${field.placeholder}">`;
+    } else {
+      html += `<textarea id="${field.id}" placeholder="${field.placeholder}"></textarea>`;
+    }
+    html += `</div>`;
+  }
+  
+  html += `<div class="form-group">`;
+  html += `<label>📊 Phân loại kết quả khám</label>`;
+  html += `<div class="radio-group" id="classGroup">`;
+  for(let cls of config.classifications) {
+    let badgeStyle = '';
+    if(cls === 'Bình thường') badgeStyle = 'style="background:var(--primary-light)"';
+    html += `<label class="radio-label" onclick="selectClass(this, '${cls}')" data-value="${cls}" ${badgeStyle}>
+      ${cls}
+    </label>`;
+  }
+  html += `</div></div>`;
+  
+  document.getElementById('examContent').innerHTML = html;
+  loadSavedData();
+}
+
+function selectClass(element, value) {
+  document.querySelectorAll('.radio-label').forEach(el => el.classList.remove('selected'));
+  element.classList.add('selected');
+}
+
+function getSelectedClass() {
+  const selected = document.querySelector('.radio-label.selected');
+  return selected ? selected.getAttribute('data-value') : null;
+}
+
+function saveDraft() {
+  const config = specialtyForms[currentDoctor.id];
+  const examData = {};
+  for(let field of config.fields) {
+    const el = document.getElementById(field.id);
+    if(el) examData[field.id] = el.value;
+  }
+  examData.class = getSelectedClass();
+  
+  let allExamData = JSON.parse(localStorage.getItem('examData') || '{}');
+  if(!allExamData[currentDoctor.id]) allExamData[currentDoctor.id] = {};
+  allExamData[currentDoctor.id][currentPatient.id] = examData;
+  localStorage.setItem('examData', JSON.stringify(allExamData));
+  
+  showToast('Đã lưu tạm kết quả khám!');
+}
+
+function loadSavedData() {
+  const config = specialtyForms[currentDoctor.id];
+  const allExamData = JSON.parse(localStorage.getItem('examData') || '{}');
+  const saved = allExamData[currentDoctor.id]?.[currentPatient.id];
+  if(saved) {
+    for(let field of config.fields) {
+      const el = document.getElementById(field.id);
+      if(el && saved[field.id]) el.value = saved[field.id];
+    }
+    if(saved.class) {
+      document.querySelectorAll('.radio-label').forEach(el => {
+        if(el.getAttribute('data-value') === saved.class) {
+          el.classList.add('selected');
+        }
+      });
+    }
+  }
+}
+
+function completeExam() {
+  const config = specialtyForms[currentDoctor.id];
+  const examData = {};
+  for(let field of config.fields) {
+    const el = document.getElementById(field.id);
+    if(el) examData[field.id] = el.value;
+  }
+  examData.class = getSelectedClass();
+  
+  if(!examData.class) {
+    showToast('Vui lòng chọn phân loại kết quả khám!');
+    return;
+  }
+  
+  let completedExams = JSON.parse(localStorage.getItem('completedExams') || '[]');
+  let existingExam = completedExams.find(e => e.patient?.empId === currentPatient.id);
+  
+  if(existingExam) {
+    if(!existingExam.examData) existingExam.examData = {};
+    existingExam.examData[currentDoctor.id] = examData;
+    if(!existingExam.completedSections.includes(currentDoctor.id)) {
+      existingExam.completedSections.push(currentDoctor.id);
+    }
+  } else {
+    completedExams.push({
+      patient: currentPatient,
+      examData: { [currentDoctor.id]: examData },
+      completedSections: [currentDoctor.id],
+      completeDate: new Date().toISOString()
+    });
+  }
+  
+  localStorage.setItem('completedExams', JSON.stringify(completedExams));
+  
+  let allExamData = JSON.parse(localStorage.getItem('examData') || '{}');
+  if(allExamData[currentDoctor.id]) {
+    delete allExamData[currentDoctor.id][currentPatient.id];
+    localStorage.setItem('examData', JSON.stringify(allExamData));
+  }
+  
+  showToast('✅ Hoàn thành khám!');
+  setTimeout(() => {
+    window.location.href = 'doctor-dashboard.html';
+  }, 1500);
+}
+
+function goBack() {
+  window.location.href = 'doctor-dashboard.html';
+}
+
+function logout() {
+  sessionStorage.clear();
+  window.location.href = 'login.html';
+}
+
+function showToast(msg, isError = false) {
+  const toast = document.getElementById('toast');
+  const toastMsg = document.getElementById('toastMsg');
+  toastMsg.textContent = msg;
+  toast.style.background = isError ? '#EF4444' : '#1F2937';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadDoctor();
+  loadPatient();
+});
+</script>
+</body>
+</html>
