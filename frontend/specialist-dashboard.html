@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bác sĩ chuyên khoa</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  /* (Giống nurse-dashboard, thay màu sắc) */
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--primary:#1D9E75;--primary-dark:#0F6E56;--primary-light:#E1F5EE;--bg:#f5f7f5;--card:#fff;--border:#e0e0e0;--radius:12px}
+  body{font-family:'Segoe UI',sans-serif;background:var(--bg);min-height:100vh}
+  .header{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:white;padding:20px}
+  .header-content{max-width:800px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+  .logout-btn{background:rgba(255,255,255,0.2);padding:8px 16px;border-radius:30px;border:none;color:white;cursor:pointer}
+  .main{max-width:800px;margin:0 auto;padding:20px}
+  .search-card{background:white;border-radius:var(--radius);padding:20px;margin-bottom:20px;border:1px solid var(--border)}
+  .search-bar{display:flex;gap:12px;flex-wrap:wrap}
+  .search-bar input{flex:2;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px}
+  .search-bar button{padding:12px 24px;background:var(--primary);color:white;border:none;border-radius:10px;cursor:pointer}
+  .patient-list{background:white;border-radius:var(--radius);border:1px solid var(--border);overflow-x:auto}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border)}
+  th{background:#f8f9fa;color:var(--primary-dark)}
+  .exam-btn{background:var(--primary);color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer}
+  .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px}
+  .badge-done{background:var(--primary-light);color:var(--primary-dark)}
+  .badge-pending{background:#f0f0f0;color:#999}
+  @media(max-width:640px){.search-bar{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-content">
+    <div><span id="doctorIcon"></span> <span id="doctorName"></span> - <span id="doctorSpecialty"></span></div>
+    <button class="logout-btn" onclick="logout()">Đăng xuất</button>
+  </div>
+</div>
+<div class="main">
+  <div class="search-card">
+    <div class="search-bar">
+      <input type="text" id="searchById" placeholder="🔢 Nhập mã nhân viên cần tìm...">
+      <button onclick="searchPatient()">Tìm kiếm</button>
+      <button onclick="resetSearch()" style="background:#6B7280">Reset</button>
+    </div>
+  </div>
+  <div class="patient-list">
+    <table id="patientTable">
+      <thead><tr><th>Mã NV</th><th>Họ tên</th><th>Phòng ban</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+      <tbody id="patientTableBody"></tbody>
+    </table>
+  </div>
+</div>
+<script>
+let currentDoctor = null;
+let patients = [];
+
+function loadUser() {
+  const stored = sessionStorage.getItem('currentUser');
+  if(!stored || JSON.parse(stored).role !== 'specialist') {
+    window.location.href = 'login.html';
+    return;
+  }
+  currentDoctor = JSON.parse(stored);
+  document.getElementById('doctorIcon').innerHTML = currentDoctor.icon;
+  document.getElementById('doctorName').innerHTML = currentDoctor.name;
+  document.getElementById('doctorSpecialty').innerHTML = currentDoctor.specialty;
+  loadPatients();
+}
+
+function loadPatients() {
+  const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+  const completedExams = JSON.parse(localStorage.getItem('completedExams') || '[]');
+  patients = employees.map(emp => {
+    const hasGeneral = completedExams.some(e => e.patient?.empId === emp.id && e.examData?.tq);
+    const hasSpecialist = completedExams.some(e => e.patient?.empId === emp.id && e.examData?.[currentDoctor.id]);
+    return { ...emp, hasGeneral, hasSpecialist };
+  }).filter(p => p.hasGeneral && !p.hasSpecialist); // chỉ hiển thị đã có tổng quát và chưa khám chuyên khoa này
+  renderTable(patients);
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('patientTableBody');
+  tbody.innerHTML = '';
+  data.forEach(p => {
+    const row = tbody.insertRow();
+    row.insertCell(0).innerHTML = `<strong>${p.id}</strong>`;
+    row.insertCell(1).innerHTML = `<strong>${p.name}</strong>`;
+    row.insertCell(2).textContent = p.dept || '—';
+    row.insertCell(3).innerHTML = '<span class="badge badge-pending">Chưa khám chuyên khoa</span>';
+    row.insertCell(4).innerHTML = `<button class="exam-btn" onclick="startExam('${p.id}')">Khám chuyên khoa</button>`;
+  });
+}
+
+function searchPatient() {
+  const id = document.getElementById('searchById').value.trim();
+  if(!id) {
+    renderTable(patients);
+    return;
+  }
+  const filtered = patients.filter(p => p.id === id);
+  renderTable(filtered);
+  if(filtered.length === 0) alert('Không tìm thấy nhân viên hoặc nhân viên chưa đủ điều kiện khám');
+}
+
+function resetSearch() {
+  document.getElementById('searchById').value = '';
+  renderTable(patients);
+}
+
+function startExam(empId) {
+  const patient = patients.find(p => p.id === empId);
+  if(!patient) return;
+  sessionStorage.setItem('examPatient', JSON.stringify(patient));
+  window.location.href = 'doctor-exam.html';
+}
+
+function logout() {
+  sessionStorage.clear();
+  window.location.href = 'login.html';
+}
+
+loadUser();
+</script>
+</body>
+</html>

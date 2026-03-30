@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khám tổng quát - Điều dưỡng</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--primary:#1D9E75;--primary-dark:#0F6E56;--primary-light:#E1F5EE;--bg:#f5f7f5;--card:#fff;--border:#e0e0e0;--radius:12px}
+  body{font-family:'Segoe UI',sans-serif;background:var(--bg);min-height:100vh}
+  .header{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:white;padding:20px}
+  .header-content{max-width:800px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+  .back-btn{background:rgba(255,255,255,0.2);border:none;color:white;padding:8px 16px;border-radius:30px;cursor:pointer}
+  .main{max-width:800px;margin:0 auto;padding:20px}
+  .sidebar-nav{position:fixed;left:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;z-index:1000}
+  .nav-circle{width:50px;height:50px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--primary);box-shadow:0 2px 10px rgba(0,0,0,0.1);transition:all 0.3s;font-size:22px}
+  .nav-circle:hover{transform:scale(1.1);background:var(--primary);color:white}
+  .nav-tooltip{position:absolute;left:60px;background:#333;color:white;padding:5px 10px;border-radius:8px;font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.3s}
+  .nav-circle:hover .nav-tooltip{opacity:1}
+  .patient-card{background:white;border-radius:var(--radius);padding:20px;margin-bottom:20px;border:1px solid var(--border)}
+  .patient-info{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .form-group{margin-bottom:16px}
+  .form-group label{display:block;margin-bottom:6px;font-weight:500;color:#666}
+  .form-group input{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px}
+  .radio-group{display:flex;gap:12px;flex-wrap:wrap}
+  .radio-label{padding:8px 16px;border:1.5px solid var(--border);border-radius:30px;cursor:pointer}
+  .radio-label.selected{background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark)}
+  .action-buttons{display:flex;gap:12px;margin-top:20px}
+  .btn-primary{flex:1;background:var(--primary);color:white;border:none;padding:14px;border-radius:10px;font-weight:600;cursor:pointer}
+  .btn-secondary{flex:1;background:#fff;color:var(--primary-dark);border:1.5px solid var(--primary);padding:14px;border-radius:10px;cursor:pointer}
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:10px 20px;border-radius:30px;opacity:0;transition:opacity 0.3s;z-index:1001}
+  .toast.show{opacity:1}
+  @media(max-width:768px){.sidebar-nav{left:10px}.nav-circle{width:40px;height:40px;font-size:18px}}
+</style>
+</head>
+<body>
+
+<div class="sidebar-nav">
+  <a href="index.html" class="nav-circle"><i class="fas fa-home"></i><span class="nav-tooltip">Trang chủ</span></a>
+  <a href="exam-summary.html" class="nav-circle"><i class="fas fa-chart-line"></i><span class="nav-tooltip">Tổng hợp</span></a>
+  <a href="employee-manager.html" class="nav-circle"><i class="fas fa-users"></i><span class="nav-tooltip">Quản lý NV</span></a>
+  <a href="doctor-dashboard.html" class="nav-circle"><i class="fas fa-stethoscope"></i><span class="nav-tooltip">Dashboard</span></a>
+  <a href="login.html" class="nav-circle" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i><span class="nav-tooltip">Đăng xuất</span></a>
+</div>
+
+<div class="header">
+  <div class="header-content">
+    <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Quay lại</button>
+    <div><i class="fas fa-stethoscope"></i> Khám tổng quát</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="patient-card">
+    <h3><i class="fas fa-user-circle"></i> Thông tin bệnh nhân</h3>
+    <div class="patient-info">
+      <div><strong>Mã NV:</strong> <span id="patientId"></span></div>
+      <div><strong>Họ tên:</strong> <span id="patientName"></span></div>
+      <div><strong>Phòng ban:</strong> <span id="patientDept"></span></div>
+      <div><strong>Ngày sinh:</strong> <span id="patientDob"></span></div>
+      <div><strong>Giới tính:</strong> <span id="patientGender"></span></div>
+    </div>
+  </div>
+
+  <div class="exam-card" style="background:white;border-radius:var(--radius);padding:20px;margin-bottom:20px;border:1px solid var(--border)">
+    <h3>📏 KHÁM TỔNG QUÁT</h3>
+    <div class="form-row cols-2" style="display:grid;gap:16px;margin-bottom:16px;grid-template-columns:1fr 1fr">
+      <div class="form-group"><label>Chiều cao (cm)</label><input type="number" id="height" placeholder="170" oninput="calcBMI()"></div>
+      <div class="form-group"><label>Cân nặng (kg)</label><input type="number" id="weight" placeholder="65" oninput="calcBMI()"></div>
+    </div>
+    <div id="bmiCard" style="background:var(--primary-light);padding:10px;border-radius:8px;text-align:center;display:none;margin-bottom:16px">
+      <div><strong>BMI:</strong> <span id="bmiValue">—</span></div>
+      <div><span id="bmiStatus">—</span></div>
+    </div>
+    <div class="form-row cols-2" style="display:grid;gap:16px;margin-bottom:16px;grid-template-columns:1fr 1fr">
+      <div class="form-group"><label>Mạch (lần/phút)</label><input type="number" id="pulse" placeholder="72"></div>
+      <div class="form-group"><label>Huyết áp</label><input type="text" id="bpDisplay" placeholder="120/80" oninput="checkBP()"></div>
+    </div>
+    <div class="form-group"><label>Phân loại thể lực</label>
+      <div class="radio-group" id="physicalClass">
+        <label class="radio-label" onclick="selectPhysicalClass(this, 'Loại I')">Loại I – Rất tốt</label>
+        <label class="radio-label" onclick="selectPhysicalClass(this, 'Loại II')">Loại II – Tốt</label>
+        <label class="radio-label" onclick="selectPhysicalClass(this, 'Loại III')">Loại III – Trung bình</label>
+        <label class="radio-label" onclick="selectPhysicalClass(this, 'Loại IV')">Loại IV – Kém</label>
+        <label class="radio-label" onclick="selectPhysicalClass(this, 'Loại V')">Loại V – Rất kém</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <button class="btn-secondary" onclick="saveDraft()"><i class="fas fa-save"></i> Lưu tạm</button>
+    <button class="btn-primary" onclick="completeExam()"><i class="fas fa-check-circle"></i> Hoàn thành khám</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="fas fa-info-circle"></i> <span id="toastMsg"></span></div>
+
+<script>
+let currentPatient = null;
+let draftData = {};
+
+function loadPatient() {
+  const stored = sessionStorage.getItem('examPatient');
+  if(!stored) {
+    showToast('Không tìm thấy thông tin bệnh nhân!', true);
+    setTimeout(() => window.location.href = 'doctor-dashboard.html', 1500);
+    return;
+  }
+  currentPatient = JSON.parse(stored);
+  document.getElementById('patientId').textContent = currentPatient.id;
+  document.getElementById('patientName').textContent = currentPatient.name;
+  document.getElementById('patientDept').textContent = currentPatient.dept || '—';
+  document.getElementById('patientDob').textContent = currentPatient.dob || '—';
+  document.getElementById('patientGender').textContent = currentPatient.gender || '—';
+}
+
+function calcBMI() {
+  const h = parseFloat(document.getElementById('height').value);
+  const w = parseFloat(document.getElementById('weight').value);
+  const card = document.getElementById('bmiCard');
+  if(h>0 && w>0) {
+    const bmi = w/(h/100)**2;
+    document.getElementById('bmiValue').textContent = bmi.toFixed(1);
+    let status = bmi<18.5?'Thiếu cân':bmi<23?'Bình thường':bmi<25?'Thừa cân':'Béo phì';
+    document.getElementById('bmiStatus').textContent = status;
+    card.style.display = 'block';
+  } else card.style.display = 'none';
+}
+
+function checkBP() {
+  // Giữ nguyên giá trị nhập
+}
+
+function selectPhysicalClass(element, value) {
+  document.querySelectorAll('#physicalClass .radio-label').forEach(l => l.classList.remove('selected'));
+  element.classList.add('selected');
+  draftData.physicalClass = value;
+}
+
+function getPhysicalClass() {
+  const selected = document.querySelector('#physicalClass .radio-label.selected');
+  return selected ? selected.textContent.trim() : null;
+}
+
+function saveDraft() {
+  const examData = {
+    height: document.getElementById('height').value,
+    weight: document.getElementById('weight').value,
+    bmi: document.getElementById('bmiValue').textContent,
+    pulse: document.getElementById('pulse').value,
+    bpDisplay: document.getElementById('bpDisplay').value,
+    physicalClass: getPhysicalClass()
+  };
+  // Lưu vào localStorage để phục hồi sau
+  localStorage.setItem('nurseDraft_' + currentPatient.id, JSON.stringify(examData));
+  showToast('Đã lưu tạm kết quả khám tổng quát');
+}
+
+function loadDraft() {
+  const saved = localStorage.getItem('nurseDraft_' + currentPatient.id);
+  if(saved) {
+    const data = JSON.parse(saved);
+    if(data.height) document.getElementById('height').value = data.height;
+    if(data.weight) document.getElementById('weight').value = data.weight;
+    if(data.pulse) document.getElementById('pulse').value = data.pulse;
+    if(data.bpDisplay) document.getElementById('bpDisplay').value = data.bpDisplay;
+    if(data.height && data.weight) calcBMI();
+    if(data.physicalClass) {
+      document.querySelectorAll('#physicalClass .radio-label').forEach(el => {
+        if(el.textContent.trim() === data.physicalClass) {
+          el.classList.add('selected');
+        }
+      });
+    }
+  }
+}
+
+function completeExam() {
+  const examData = {
+    height: document.getElementById('height').value,
+    weight: document.getElementById('weight').value,
+    bmi: document.getElementById('bmiValue').textContent,
+    pulse: document.getElementById('pulse').value,
+    bpDisplay: document.getElementById('bpDisplay').value,
+    physicalClass: getPhysicalClass()
+  };
+  if(!examData.height || !examData.weight) {
+    showToast('Vui lòng nhập chiều cao và cân nặng');
+    return;
+  }
+  if(!examData.physicalClass) {
+    showToast('Vui lòng chọn phân loại thể lực');
+    return;
+  }
+
+  // Lấy dữ liệu đã có
+  let completedExams = JSON.parse(localStorage.getItem('completedExams') || '[]');
+  let existingExam = completedExams.find(e => e.patient?.empId === currentPatient.id);
+  if(existingExam) {
+    if(!existingExam.examData) existingExam.examData = {};
+    existingExam.examData.tq = examData;
+    if(!existingExam.completedSections) existingExam.completedSections = [];
+    if(!existingExam.completedSections.includes('tq')) existingExam.completedSections.push('tq');
+  } else {
+    completedExams.push({
+      patient: currentPatient,
+      examData: { tq: examData },
+      completedSections: ['tq'],
+      completeDate: new Date().toISOString()
+    });
+  }
+  localStorage.setItem('completedExams', JSON.stringify(completedExams));
+  // Xóa draft
+  localStorage.removeItem('nurseDraft_' + currentPatient.id);
+  showToast('✅ Hoàn thành khám tổng quát!');
+  setTimeout(() => window.location.href = 'doctor-dashboard.html', 1500);
+}
+
+function goBack() {
+  window.location.href = 'doctor-dashboard.html';
+}
+
+function logout() {
+  sessionStorage.clear();
+  window.location.href = 'login.html';
+}
+
+function showToast(msg, isError = false) {
+  const toast = document.getElementById('toast');
+  const toastMsg = document.getElementById('toastMsg');
+  toastMsg.textContent = msg;
+  toast.style.background = isError ? '#EF4444' : '#1F2937';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadPatient();
+  loadDraft();
+});
+</script>
+</body>
+</html>

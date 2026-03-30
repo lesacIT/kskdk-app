@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Khám Sức Khỏe Lưu Động</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --primary:#1D9E75;--primary-dark:#0F6E56;--primary-light:#E1F5EE;
+    --accent:#185FA5;--accent-light:#E6F1FB;
+    --warn:#BA7517;--warn-light:#FAEEDA;
+    --danger:#A32D2D;--danger-light:#FCEBEB;
+    --text:#1a1a1a;--text-muted:#666;--text-hint:#999;
+    --bg:#f5f7f5;--card:#fff;--border:#e0e0e0;
+    --radius:12px;--radius-sm:8px;
+  }
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px}
+
+  /* Header */
+  .app-header{background:var(--primary);color:#fff;padding:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,100,60,.25)}
+  .header-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+  .header-top h1{font-size:17px;font-weight:600;letter-spacing:.2px}
+  .back-btn{background:rgba(255,255,255,.2);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+  .back-btn:active{background:rgba(255,255,255,.35)}
+  .patient-bar{background:rgba(0,0,0,.15);padding:8px 16px;font-size:13px;display:flex;gap:16px;overflow-x:auto;white-space:nowrap}
+  .patient-bar span{opacity:.85}
+  .patient-bar strong{color:#fff;opacity:1}
+
+  /* Progress bar */
+  .progress-bar{height:3px;background:rgba(255,255,255,.25)}
+  .progress-fill{height:100%;background:#fff;transition:width .3s ease}
+
+  /* Navigation tabs */
+  .nav-tabs{display:flex;overflow-x:auto;background:#fff;border-bottom:1.5px solid var(--border);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .nav-tabs::-webkit-scrollbar{display:none}
+  .nav-tab{flex:0 0 auto;padding:10px 14px;border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2.5px solid transparent;transition:all .15s;position:relative}
+  .nav-tab.active{color:var(--primary-dark);border-bottom-color:var(--primary)}
+  .nav-tab .badge{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--warn);border-radius:50%;display:none}
+  .nav-tab.done .badge{display:block;background:var(--primary)}
+  .nav-tab .icon{font-size:15px;margin-right:4px}
+
+  /* Main content */
+  .main{padding:16px;max-width:600px;margin:0 auto}
+
+  /* Screen management */
+  .screen{display:none}
+  .screen.active{display:block}
+
+  /* Cards */
+  .card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:14px;overflow:hidden}
+  .card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+  .card-header h2{font-size:15px;font-weight:600;color:var(--primary-dark)}
+  .card-header .icon{font-size:20px}
+  .card-body{padding:14px 16px}
+
+  /* Section labels */
+  .section-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--text-hint);margin-bottom:8px;margin-top:16px}
+  .section-label:first-child{margin-top:0}
+
+  /* Form elements */
+  .form-row{display:grid;gap:10px;margin-bottom:10px}
+  .form-row.cols-2{grid-template-columns:1fr 1fr}
+  .form-row.cols-3{grid-template-columns:1fr 1fr 1fr}
+  .form-group{display:flex;flex-direction:column;gap:4px}
+  .form-group label{font-size:13px;color:var(--text-muted);font-weight:500}
+  .form-group input,.form-group select,.form-group textarea{
+    border:1.5px solid var(--border);border-radius:var(--radius-sm);
+    padding:10px 12px;font-size:15px;color:var(--text);background:#fff;
+    transition:border .15s;outline:none;width:100%;
+    font-family:inherit;
+  }
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary)}
+  .form-group textarea{min-height:72px;resize:vertical}
+  input[readonly]{background:#f8f8f8;color:var(--text-muted)}
+
+  /* Radio/checkbox groups */
+  .radio-group{display:flex;gap:8px;flex-wrap:wrap}
+  .radio-btn{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);
+    cursor:pointer;font-size:14px;transition:all .15s;
+    background:#fff;color:var(--text-muted);user-select:none;
+  }
+  .radio-btn input{display:none}
+  .radio-btn.selected{background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark);font-weight:500}
+  .radio-btn.danger.selected{background:var(--danger-light);border-color:var(--danger);color:var(--danger)}
+  .radio-btn.warn.selected{background:var(--warn-light);border-color:var(--warn);color:var(--warn)}
+
+  /* Classification row */
+  .classify-row{background:#f8fdf9;border-radius:var(--radius-sm);padding:12px;border:1px solid #d0ead8}
+  .classify-row label{font-size:13px;font-weight:600;color:var(--primary-dark);display:block;margin-bottom:8px}
+
+  /* Vital signs */
+  .vital-display{
+    background:var(--primary-light);border-radius:var(--radius-sm);
+    padding:10px 14px;text-align:center;border:1.5px solid #9FE1CB;
+  }
+  .vital-value{font-size:24px;font-weight:700;color:var(--primary-dark);line-height:1}
+  .vital-unit{font-size:12px;color:var(--primary);margin-top:2px}
+  .bmi-normal{background:var(--primary-light);border-color:#9FE1CB}
+  .bmi-warn{background:var(--warn-light);border-color:#FAC775}
+  .bmi-danger{background:var(--danger-light);border-color:#F7C1C1}
+
+  /* Patient info screen */
+  .big-field input{font-size:18px;padding:12px 14px;font-weight:500}
+  .gender-select{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  .gender-card{border:2px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;transition:all .15s;background:#fff}
+  .gender-card.selected{border-color:var(--primary);background:var(--primary-light)}
+  .gender-card .gender-icon{font-size:32px;margin-bottom:4px}
+  .gender-card span{font-size:14px;font-weight:500;color:var(--text-muted)}
+  .gender-card.selected span{color:var(--primary-dark)}
+
+  /* Summary / conclusion */
+  .summary-section{margin-bottom:14px}
+  .summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)}
+  .summary-row:last-child{border-bottom:none}
+  .summary-label{font-size:14px;color:var(--text-muted)}
+  .summary-value{font-size:14px;font-weight:500}
+  .badge-ok{background:var(--primary-light);color:var(--primary-dark);padding:3px 10px;border-radius:10px;font-size:12px;font-weight:600}
+  .badge-warn{background:var(--warn-light);color:var(--warn);padding:3px 10px;border-radius:10px;font-size:12px;font-weight:600}
+  .badge-danger{background:var(--danger-light);color:var(--danger);padding:3px 10px;border-radius:10px;font-size:12px;font-weight:600}
+  .badge-pending{background:#f0f0f0;color:var(--text-hint);padding:3px 10px;border-radius:10px;font-size:12px;font-weight:600}
+
+  /* Health classification selector */
+  .health-class-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+  .hc-btn{border:2px solid var(--border);border-radius:var(--radius-sm);padding:10px 4px;text-align:center;cursor:pointer;background:#fff;transition:all .15s}
+  .hc-btn .hc-num{font-size:22px;font-weight:700;color:var(--text-hint)}
+  .hc-btn .hc-lbl{font-size:10px;color:var(--text-hint);margin-top:2px;line-height:1.2}
+  .hc-btn.sel-1,.hc-btn.sel-2{border-color:var(--primary);background:var(--primary-light)}
+  .hc-btn.sel-1 .hc-num,.hc-btn.sel-2 .hc-num{color:var(--primary-dark)}
+  .hc-btn.sel-3{border-color:var(--warn);background:var(--warn-light)}
+  .hc-btn.sel-3 .hc-num{color:var(--warn)}
+  .hc-btn.sel-4,.hc-btn.sel-5{border-color:var(--danger);background:var(--danger-light)}
+  .hc-btn.sel-4 .hc-num,.hc-btn.sel-5 .hc-num{color:var(--danger)}
+
+  /* Bottom action */
+  .bottom-action{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:10px;z-index:50}
+  .btn-primary{flex:1;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:13px;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s}
+  .btn-primary:active{background:var(--primary-dark)}
+  .btn-secondary{background:#fff;color:var(--primary-dark);border:1.5px solid var(--primary);border-radius:var(--radius-sm);padding:13px 18px;font-size:15px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+  .btn-secondary:active{background:var(--primary-light)}
+  .btn-danger{background:var(--danger);color:#fff;border:none;border-radius:var(--radius-sm);padding:13px;font-size:15px;font-weight:600;cursor:pointer;flex:1}
+
+  /* Home screen */
+  .hero{text-align:center;padding:24px 16px 16px}
+  .hero-icon{font-size:56px;margin-bottom:12px}
+  .hero h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:6px}
+  .hero p{font-size:14px;color:var(--text-muted);line-height:1.5}
+  .specialty-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 0 8px}
+  .spec-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
+  .spec-card:active{transform:scale(.97)}
+  .spec-card .spec-icon{font-size:28px;margin-bottom:6px}
+  .spec-card .spec-name{font-size:12px;font-weight:600;color:var(--text);line-height:1.3}
+  .spec-card.done{border-color:var(--primary);background:var(--primary-light)}
+  .spec-card.done .spec-name{color:var(--primary-dark)}
+  .spec-card .done-tick{position:absolute;top:6px;right:6px;width:18px;height:18px;background:var(--primary);border-radius:50%;color:#fff;font-size:11px;display:none;align-items:center;justify-content:center;font-weight:700}
+  .spec-card.done .done-tick{display:flex}
+  .info-strip{background:var(--accent-light);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--accent);border:1px solid #B5D4F4}
+
+  /* Hearing test special */
+  .hear-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .hear-ear{text-align:center;padding:10px}
+  .hear-ear .ear-label{font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:8px}
+
+  /* Tooth chart simplified */
+  .tooth-row{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-bottom:6px}
+  .tooth-box{width:28px;height:28px;border:1.5px solid var(--border);border-radius:4px;cursor:pointer;background:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;color:var(--text-hint);transition:all .15s;font-weight:500}
+  .tooth-box:active{transform:scale(.9)}
+  .tooth-box.tooth-ok{background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark)}
+  .tooth-box.tooth-issue{background:var(--danger-light);border-color:var(--danger);color:var(--danger)}
+
+  /* Vision input pair */
+  .vision-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .vision-label{text-align:center;font-size:12px;color:var(--text-muted);font-weight:600;margin-bottom:4px}
+
+  /* Floating save indicator */
+  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:999;white-space:nowrap}
+  .toast.show{opacity:1}
+
+  /* Responsive */
+  @media(max-width:360px){
+    .specialty-grid{grid-template-columns:repeat(2,1fr)}
+    .health-class-grid{grid-template-columns:repeat(3,1fr)}
+  }
+</style>
+</head>
+<body>
+
+<!-- App Header -->
+<div class="app-header" id="appHeader">
+  <div class="header-top">
+    <button class="back-btn" id="backBtn" onclick="goBack()" style="visibility:hidden">&#8592;</button>
+    <h1 id="headerTitle">Khám Sức Khỏe Lưu Động</h1>
+    <div style="width:36px"></div>
+  </div>
+  <div class="patient-bar" id="patientBar" style="display:none">
+    <span>👤 <strong id="pBarName">—</strong></span>
+    <span>📅 <strong id="pBarDob">—</strong></span>
+    <span>🏷 <strong id="pBarGender">—</strong></span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<!-- NAV TABS (hidden on home) -->
+<div class="nav-tabs" id="navTabs" style="display:none">
+  <button class="nav-tab" data-screen="screen-tq" onclick="goToTab('tq')"><span class="icon">📋</span>Tổng quát<span class="badge"></span></button>
+  <button class="nav-tab" data-screen="screen-nk" onclick="goToTab('nk')"><span class="icon">🫀</span>Nội khoa<span class="badge"></span></button>
+  <button class="nav-tab" data-screen="screen-ng" onclick="goToTab('ng')"><span class="icon">🩺</span>Ngoại/Da<span class="badge"></span></button>
+  <button class="nav-tab" data-screen="screen-sp" onclick="goToTab('sp')"><span class="icon">👶</span>Sản phụ<span class="badge"></span></button>
+  <button class="nav-tab" data-screen="screen-mt" onclick="goToTab('mt')"><span class="icon">👁</span>Mắt<span class="badge"></span></button>
+  <button class="nav-tab" data-screen="screen-tmh" onclick="goToTab('tmh')"><span class="icon">👂</span>TMH<span class="badge"></span></button>
+  <button class="nav-tab" data-screen="screen-rhm" onclick="goToTab('rhm')"><span class="icon">🦷</span>RHM<span class="badge"></span></button>
+  <button class="nav-tab" data-screen="screen-kl" onclick="goToTab('kl')"><span class="icon">📝</span>Kết luận<span class="badge"></span></button>
+</div>
+
+<!-- ============== HOME SCREEN ============== -->
+<div class="screen active main" id="screen-home">
+  <div class="hero">
+    <div class="hero-icon">🏥</div>
+    <h2>Phiếu khám lưu động</h2>
+    <p>Theo TT 56/2025/TT-BYT – Nhập thông tin bệnh nhân để bắt đầu</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">👤</span><h2>Thông tin bệnh nhân</h2></div>
+    <div class="card-body">
+      <div class="form-row big-field">
+        <div class="form-group">
+          <label>Họ và tên (CHỮ IN HOA)</label>
+          <input type="text" id="patientName" placeholder="VD: NGUYỄN VĂN AN" oninput="this.value=this.value.toUpperCase()" autocomplete="off">
+        </div>
+      </div>
+      <div class="section-label">Giới tính</div>
+      <div class="gender-select">
+        <div class="gender-card" id="genderNam" onclick="selectGender('Nam')">
+          <div class="gender-icon">👨</div>
+          <span>Nam</span>
+        </div>
+        <div class="gender-card" id="genderNu" onclick="selectGender('Nữ')">
+          <div class="gender-icon">👩</div>
+          <span>Nữ</span>
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label>Ngày sinh</label>
+          <input type="date" id="patientDob">
+        </div>
+        <div class="form-group">
+          <label>Tuổi</label>
+          <input type="text" id="patientAge" readonly placeholder="Tự tính">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>Vị trí nghề/công việc dự kiến</label>
+        <input type="text" id="patientJob" placeholder="VD: Thợ hàn, Kế toán, ...">
+      </div>
+      <div class="form-group">
+        <label>Tiền sử bệnh (nếu có)</label>
+        <textarea id="patientHistory" placeholder="Ghi tên bệnh/hội chứng đã mắc hoặc đang mắc..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">⚠️</span><h2>Yếu tố có hại tại vị trí làm việc</h2></div>
+    <div class="card-body">
+      <textarea id="hazardFactors" placeholder="Mô tả các yếu tố nguy hại tại vị trí làm việc dự kiến..." style="border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:15px;width:100%;min-height:80px;outline:none;font-family:inherit"></textarea>
+    </div>
+  </div>
+
+  <div class="bottom-action">
+    <button class="btn-primary" onclick="startExam()">Bắt đầu khám →</button>
+  </div>
+</div>
+
+<!-- ============== 3.1 TỔNG QUÁT ============== -->
+<div class="screen" id="screen-tq">
+  <div class="main">
+    <div class="info-strip">⚡ Nhập nhanh – hệ thống tự tính BMI và phân loại</div>
+    <div class="card">
+      <div class="card-header"><span class="icon">📏</span><h2>Nhân trắc học</h2></div>
+      <div class="card-body">
+        <div class="form-row cols-2">
+          <div class="form-group">
+            <label>Chiều cao (cm)</label>
+            <input type="number" id="height" placeholder="170" oninput="calcBMI()">
+          </div>
+          <div class="form-group">
+            <label>Cân nặng (kg)</label>
+            <input type="number" id="weight" placeholder="65" oninput="calcBMI()">
+          </div>
+        </div>
+        <div id="bmiCard" class="vital-display bmi-normal" style="display:none;margin-bottom:10px">
+          <div class="vital-value" id="bmiValue">—</div>
+          <div class="vital-unit">BMI • <span id="bmiStatus">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">💓</span><h2>Sinh hiệu</h2></div>
+      <div class="card-body">
+        <div class="form-row cols-2">
+          <div class="form-group">
+            <label>Mạch (lần/phút)</label>
+            <input type="number" id="pulse" placeholder="72">
+          </div>
+          <div class="form-group">
+            <label>Huyết áp tâm thu</label>
+            <input type="number" id="bpSys" placeholder="120" oninput="checkBP()">
+          </div>
+        </div>
+        <div class="form-row cols-2">
+          <div class="form-group">
+            <label>Huyết áp tâm trương</label>
+            <input type="number" id="bpDia" placeholder="80" oninput="checkBP()">
+          </div>
+          <div class="form-group">
+            <label>HA hiển thị</label>
+            <input type="text" id="bpDisplay" readonly placeholder="mmHg">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">🏃</span><h2>Phân loại thể lực</h2></div>
+      <div class="card-body">
+        <div class="section-label">Xếp loại</div>
+        <div class="radio-group" id="physicalClass">
+          <label class="radio-btn" onclick="selectRadio(this,'physicalClass')"><input type="radio" name="physical" value="Loại I">Loại I – Rất tốt</label>
+          <label class="radio-btn" onclick="selectRadio(this,'physicalClass')"><input type="radio" name="physical" value="Loại II">Loại II – Tốt</label>
+          <label class="radio-btn" onclick="selectRadio(this,'physicalClass')"><input type="radio" name="physical" value="Loại III">Loại III – Trung bình</label>
+          <label class="radio-btn warn" onclick="selectRadio(this,'physicalClass')"><input type="radio" name="physical" value="Loại IV">Loại IV – Kém</label>
+          <label class="radio-btn danger" onclick="selectRadio(this,'physicalClass')"><input type="radio" name="physical" value="Loại V">Loại V – Rất kém</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-action">
+    <button class="btn-secondary" onclick="goToTab('home')">← Quay lại</button>
+    <button class="btn-primary" onclick="saveSectionAndNext('tq','nk')">Lưu & Tiếp →</button>
+  </div>
+</div>
+
+<!-- ============== NỘI KHOA ============== -->
+<div class="screen" id="screen-nk">
+  <div class="main">
+    <div class="card">
+      <div class="card-header"><span class="icon">🫀</span><h2>a) Tuần hoàn</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Ghi nhận lâm sàng</label>
+          <textarea id="nkTH" placeholder="Nhịp tim đều/không đều, tiếng thổi, phù chi..."></textarea>
+        </div>
+        <div class="classify-row">
+          <label>Phân loại</label>
+          <div class="radio-group" id="nkTH_class">
+            <label class="radio-btn" onclick="selectRadio(this,'nkTH_class')"><input type="radio" value="Bình thường">Bình thường</label>
+            <label class="radio-btn warn" onclick="selectRadio(this,'nkTH_class')"><input type="radio" value="Bệnh lý">Bệnh lý</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">🫁</span><h2>b) Hô hấp</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Ghi nhận lâm sàng</label>
+          <textarea id="nkHH" placeholder="Ran phổi, khó thở, co kéo cơ hô hấp phụ..."></textarea>
+        </div>
+        <div class="classify-row">
+          <label>Phân loại</label>
+          <div class="radio-group" id="nkHH_class">
+            <label class="radio-btn" onclick="selectRadio(this,'nkHH_class')"><input type="radio" value="Bình thường">Bình thường</label>
+            <label class="radio-btn warn" onclick="selectRadio(this,'nkHH_class')"><input type="radio" value="Bệnh lý">Bệnh lý</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">🩺</span><h2>c) Tiêu hóa</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Ghi nhận lâm sàng</label>
+          <textarea id="nkTHoa" placeholder="Bụng mềm/cứng, gan lách, đau điểm..."></textarea>
+        </div>
+        <div class="classify-row">
+          <label>Phân loại</label>
+          <div class="radio-group" id="nkTHoa_class">
+            <label class="radio-btn" onclick="selectRadio(this,'nkTHoa_class')"><input type="radio" value="Bình thường">Bình thường</label>
+            <label class="radio-btn warn" onclick="selectRadio(this,'nkTHoa_class')"><input type="radio" value="Bệnh lý">Bệnh lý</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">🫘</span><h2>d) Thận – Tiết niệu</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Ghi nhận lâm sàng</label>
+          <textarea id="nkTTN" placeholder="Chạm thận, vỗ hông lưng, tiểu khó..."></textarea>
+        </div>
+        <div class="classify-row">
+          <label>Phân loại</label>
+          <div class="radio-group" id="nkTTN_class">
+            <label class="radio-btn" onclick="selectRadio(this,'nkTTN_class')"><input type="radio" value="Bình thường">Bình thường</label>
+            <label class="radio-btn warn" onclick="selectRadio(this,'nkTTN_class')"><input type="radio" value="Bệnh lý">Bệnh lý</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">⚗️</span><h2>đ) Nội tiết</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Ghi nhận lâm sàng</label>
+          <textarea id="nkNT" placeholder="Tuyến giáp, glucose máu, dấu hiệu ĐTĐ..."></textarea>
+        </div>
+        <div class="classify-row">
+          <label>Phân loại</label>
+          <div class="radio-group" id="nkNT_class">
+            <label class="radio-btn" onclick="selectRadio(this,'nkNT_class')"><input type="radio" value="Bình thường">Bình thường</label>
+            <label class="radio-btn warn" onclick="selectRadio(this,'nkNT_class')"><input type="radio" value="Bệnh lý">Bệnh lý</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">🦴</span><h2>e) Cơ – Xương – Khớp</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Ghi nhận lâm sàng</label>
+          <textarea id="nkCXK" placeholder="Biến dạng khớp, hạn chế vận động, cột sống..."></textarea>
+        </div>
+        <div class="classify-row">
+          <label>Phân loại</label>
+          <div class="radio-group" id="nkCXK_class">
+            <label class="radio-btn" onclick="selectRadio(this,'nkCXK_class')"><input type="radio" value="Bình thường">Bình thường</label>
+            <label class="radio-btn warn" onclick="selectRadio(this,'nkCXK_class')"><input type="radio" value="Bệnh lý">Bệnh lý</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">🧠</span><h2>g) Thần kinh</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Ghi nhận lâm sàng</label>
+          <textarea id="nkTK" placeholder="Dấu hiệu thần kinh khu trú, phản xạ, cảm giác..."></textarea>
+        </div>
+        <div class="classify-row">
+          <label>Phân loại</label>
+          <div class="radio-group" id="nkTK_class">
+            <label class="radio-btn" onclick="selectRadio(this,'nkTK_class')"><input type="radio" value="Bình thường">Bình thường</label>
+            <label class="radio-btn warn" onclick="selectRadio(this,'nkTK_class')"><input type="radio" value="Bệnh lý">Bệnh lý</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">🧬</span><h2>h) Tâm thần</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Ghi nhận lâm sàng</label>
+          <textarea id="nkTThan" placeholder="Hành vi, giao tiếp, định hướng không gian/thời gian..."></textarea>
+        </div>
+        <div class="classify-row">
+          <label>Phân loại</label>
+          <div class="radio-group" id="nkTThan_class">
+            <label class="radio-btn" onclick="selectRadio(this,'nkTThan_class')"><input type="radio" value="Bình thường">Bình thường</label>
+            <label class="radio-btn warn" onclick="selectRadio(this,'nkTThan_class')"><input type="radio" value="Bệnh lý">Bệnh lý</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-action">
+    <button class="btn-secondary" onclick="goToTab('tq')">← Trước</button>
+    <button class="btn-primary" onclick="saveSectionAndNext('nk','ng')">Lưu & Tiếp →</button>
+  </div>
+</div>
+
+<!-- ============== NGOẠI KHOA / DA LIỄU ============== -->
+<div class="screen" id="screen-ng">
+  <div class="main">
+    <div class="card">
+      <div class="card-header"><span class="icon">🩻</span><h2>Ngoại khoa</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Ghi nhận lâm sàng</label>
+          <textarea id="ngNgoai" placeholder="Dị tật, thoát vị, khối u ngoài, sẹo phẫu thuật..."></textarea>
+        </div>
+        <div class="classify-row">
+          <label>Phân loại</label>
+          <div class="radio-group" id="ngNgoai_class">
+            <label class="radio-btn" onclick="selectRadio(this,'ngNgoai_class')"><input type="radio" value="Bình thường">Bình thường</label>
+            <label class="radio-btn warn" onclick="selectRadio(this,'ngNgoai_class')"><input type="radio" value="Bệnh lý">Bệnh lý</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">🔬</span><h2>Da liễu</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Ghi nhận lâm sàng</label>
+          <textarea id="ngDa" placeholder="Nấm da, viêm da, vảy nến, loét, dị ứng..."></textarea>
+        </div>
+        <div class="classify-row">
+          <label>Phân loại</label>
+          <div class="radio-group" id="ngDa_class">
+            <label class="radio-btn" onclick="selectRadio(this,'ngDa_class')"><input type="radio" value="Bình thường">Bình thường</label>
+            <label class="radio-btn warn" onclick="selectRadio(this,'ngDa_class')"><input type="radio" value="Bệnh lý">Bệnh lý</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-action">
+    <button class="btn-secondary" onclick="goToTab('nk')">← Trước</button>
+    <button class="btn-primary" onclick="saveSectionAndNext('ng','sp')">Lưu & Tiếp →</button>
+  </div>
+</div>
+
+<!-- ============== SẢN PHỤ KHOA ============== -->
+<div class="screen" id="screen-sp">
+  <div class="main">
+    <div id="spSkipNote" class="info-strip" style="display:none">⚠️ Bệnh nhân nam – mục này không áp dụng</div>
+    <div class="card" id="spCard">
+      <div class="card-header"><span class="icon">👶</span><h2>Sản phụ khoa</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Chi tiết nội dung khám (theo danh mục Phụ lục 13 – TT 56/2025)</label>
+          <textarea id="spContent" placeholder="Tử cung, phần phụ, kinh nguyệt, thai (nếu có)..." style="min-height:100px"></textarea>
+        </div>
+        <div class="classify-row">
+          <label>Phân loại</label>
+          <div class="radio-group" id="sp_class">
+            <label class="radio-btn" onclick="selectRadio(this,'sp_class')"><input type="radio" value="Bình thường">Bình thường</label>
+            <label class="radio-btn warn" onclick="selectRadio(this,'sp_class')"><input type="radio" value="Cần theo dõi">Cần theo dõi</label>
+            <label class="radio-btn danger" onclick="selectRadio(this,'sp_class')"><input type="radio" value="Bệnh lý">Bệnh lý</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-action">
+    <button class="btn-secondary" onclick="goToTab('ng')">← Trước</button>
+    <button class="btn-primary" onclick="saveSectionAndNext('sp','mt')">Lưu & Tiếp →</button>
+  </div>
+</div>
+
+<!-- ============== MẮT ============== -->
+<div class="screen" id="screen-mt">
+  <div class="main">
+    <div class="card">
+      <div class="card-header"><span class="icon">👁</span><h2>Thị lực – Không kính</h2></div>
+      <div class="card-body">
+        <div class="vision-pair">
+          <div>
+            <div class="vision-label">👁 Mắt phải</div>
+            <input type="text" id="mtNoGlassR" placeholder="VD: 7/10" style="text-align:center;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:15px;width:100%;outline:none">
+          </div>
+          <div>
+            <div class="vision-label">👁 Mắt trái</div>
+            <input type="text" id="mtNoGlassL" placeholder="VD: 7/10" style="text-align:center;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:15px;width:100%;outline:none">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">🔍</span><h2>Thị lực – Có kính</h2></div>
+      <div class="card-body">
+        <div class="vision-pair">
+          <div>
+            <div class="vision-label">👁 Mắt phải</div>
+            <input type="text" id="mtGlassR" placeholder="VD: 10/10" style="text-align:center;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:15px;width:100%;outline:none">
+          </div>
+          <div>
+            <div class="vision-label">👁 Mắt trái</div>
+            <input type="text" id="mtGlassL" placeholder="VD: 10/10" style="text-align:center;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:15px;width:100%;outline:none">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">📋</span><h2>Các bệnh về mắt</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Chẩn đoán (nếu có)</label>
+          <textarea id="mtDiag" placeholder="Cận thị, viễn thị, loạn thị, đục thủy tinh thể..."></textarea>
+        </div>
+        <div class="classify-row">
+          <label>Phân loại</label>
+          <div class="radio-group" id="mt_class">
+            <label class="radio-btn" onclick="selectRadio(this,'mt_class')"><input type="radio" value="Bình thường">Bình thường</label>
+            <label class="radio-btn warn" onclick="selectRadio(this,'mt_class')"><input type="radio" value="Có kính đạt">Có kính đạt</label>
+            <label class="radio-btn danger" onclick="selectRadio(this,'mt_class')"><input type="radio" value="Bệnh lý">Bệnh lý</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-action">
+    <button class="btn-secondary" onclick="goToTab('sp')">← Trước</button>
+    <button class="btn-primary" onclick="saveSectionAndNext('mt','tmh')">Lưu & Tiếp →</button>
+  </div>
+</div>
+
+<!-- ============== TAI MŨI HỌNG ============== -->
+<div class="screen" id="screen-tmh">
+  <div class="main">
+    <div class="card">
+      <div class="card-header"><span class="icon">👂</span><h2>Thính lực</h2></div>
+      <div class="card-body">
+        <div class="hear-grid">
+          <div class="hear-ear">
+            <div class="ear-label">Tai phải</div>
+            <div class="form-group" style="margin-bottom:6px">
+              <label style="font-size:12px">Nói thường (m)</label>
+              <input type="number" id="tmhRN" placeholder="≥6" style="border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:15px;width:100%;outline:none">
+            </div>
+            <div class="form-group">
+              <label style="font-size:12px">Nói thầm (m)</label>
+              <input type="number" id="tmhRW" placeholder="≥1" style="border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:15px;width:100%;outline:none">
+            </div>
+          </div>
+          <div class="hear-ear">
+            <div class="ear-label">Tai trái</div>
+            <div class="form-group" style="margin-bottom:6px">
+              <label style="font-size:12px">Nói thường (m)</label>
+              <input type="number" id="tmhLN" placeholder="≥6" style="border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:15px;width:100%;outline:none">
+            </div>
+            <div class="form-group">
+              <label style="font-size:12px">Nói thầm (m)</label>
+              <input type="number" id="tmhLW" placeholder="≥1" style="border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:15px;width:100%;outline:none">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">👃</span><h2>Mũi – Họng – Thanh quản</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Ghi nhận lâm sàng</label>
+          <textarea id="tmhNH" placeholder="Viêm mũi dị ứng, polyp, viêm họng mạn, amidan..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">📋</span><h2>Các bệnh về TMH</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Chẩn đoán (nếu có)</label>
+          <textarea id="tmhDiag" placeholder="Điếc nghề nghiệp, viêm tai mạn, thủng nhĩ..."></textarea>
+        </div>
+        <div class="classify-row">
+          <label>Phân loại</label>
+          <div class="radio-group" id="tmh_class">
+            <label class="radio-btn" onclick="selectRadio(this,'tmh_class')"><input type="radio" value="Bình thường">Bình thường</label>
+            <label class="radio-btn warn" onclick="selectRadio(this,'tmh_class')"><input type="radio" value="Cần theo dõi">Cần theo dõi</label>
+            <label class="radio-btn danger" onclick="selectRadio(this,'tmh_class')"><input type="radio" value="Bệnh lý">Bệnh lý</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-action">
+    <button class="btn-secondary" onclick="goToTab('mt')">← Trước</button>
+    <button class="btn-primary" onclick="saveSectionAndNext('tmh','rhm')">Lưu & Tiếp →</button>
+  </div>
+</div>
+
+<!-- ============== RĂNG HÀM MẶT ============== -->
+<div class="screen" id="screen-rhm">
+  <div class="main">
+    <div class="card">
+      <div class="card-header"><span class="icon">🦷</span><h2>Kết quả khám răng</h2></div>
+      <div class="card-body">
+        <div class="section-label">Hàm trên – chạm để đánh dấu tình trạng</div>
+        <div class="tooth-row" id="upperTeeth"></div>
+        <div class="section-label">Hàm dưới</div>
+        <div class="tooth-row" id="lowerTeeth"></div>
+        <div style="display:flex;gap:10px;margin-top:10px;font-size:12px;align-items:center">
+          <div style="width:14px;height:14px;background:var(--primary-light);border:1.5px solid var(--primary);border-radius:3px"></div><span style="color:var(--text-muted)">Bình thường</span>
+          <div style="width:14px;height:14px;background:var(--danger-light);border:1.5px solid var(--danger);border-radius:3px;margin-left:8px"></div><span style="color:var(--text-muted)">Sâu/Vấn đề</span>
+          <div style="width:14px;height:14px;background:#f0f0f0;border:1.5px solid var(--border);border-radius:3px;margin-left:8px"></div><span style="color:var(--text-muted)">Chưa khám</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">📋</span><h2>Ghi chú lâm sàng</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Các bệnh về răng hàm mặt (nếu có)</label>
+          <textarea id="rhmNotes" placeholder="Sâu răng, viêm lợi, khớp cắn sai, thiếu răng..."></textarea>
+        </div>
+        <div class="classify-row">
+          <label>Phân loại</label>
+          <div class="radio-group" id="rhm_class">
+            <label class="radio-btn" onclick="selectRadio(this,'rhm_class')"><input type="radio" value="Bình thường">Bình thường</label>
+            <label class="radio-btn warn" onclick="selectRadio(this,'rhm_class')"><input type="radio" value="Cần điều trị">Cần điều trị</label>
+            <label class="radio-btn danger" onclick="selectRadio(this,'rhm_class')"><input type="radio" value="Bệnh lý nặng">Bệnh lý nặng</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-action">
+    <button class="btn-secondary" onclick="goToTab('tmh')">← Trước</button>
+    <button class="btn-primary" onclick="saveSectionAndNext('rhm','kl')">Lưu & Tiếp →</button>
+  </div>
+</div>
+
+<!-- ============== KẾT LUẬN ============== -->
+<div class="screen" id="screen-kl">
+  <div class="main">
+    <div class="card">
+      <div class="card-header"><span class="icon">🏆</span><h2>Phân loại sức khỏe tổng thể</h2></div>
+      <div class="card-body">
+        <div class="health-class-grid" id="healthClassGrid">
+          <div class="hc-btn" onclick="selectHealthClass(1)" data-class="1"><div class="hc-num">I</div><div class="hc-lbl">Rất tốt</div></div>
+          <div class="hc-btn" onclick="selectHealthClass(2)" data-class="2"><div class="hc-num">II</div><div class="hc-lbl">Tốt</div></div>
+          <div class="hc-btn" onclick="selectHealthClass(3)" data-class="3"><div class="hc-num">III</div><div class="hc-lbl">Trung bình</div></div>
+          <div class="hc-btn" onclick="selectHealthClass(4)" data-class="4"><div class="hc-num">IV</div><div class="hc-lbl">Kém</div></div>
+          <div class="hc-btn" onclick="selectHealthClass(5)" data-class="5"><div class="hc-num">V</div><div class="hc-lbl">Rất kém</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">📋</span><h2>Tổng hợp kết quả khám</h2></div>
+      <div class="card-body summary-section" id="summaryBody">
+        <!-- Auto-generated -->
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">✅</span><h2>Kết luận</h2></div>
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Các bệnh tật (nếu có)</label>
+          <textarea id="klDiseases" placeholder="Liệt kê các bệnh phát hiện..."></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Kết luận đủ/không đủ sức khỏe làm việc</label>
+          <div class="radio-group" id="klFit" style="margin-bottom:10px">
+            <label class="radio-btn" onclick="selectRadio(this,'klFit')"><input type="radio" value="Đủ sức khỏe">✅ Đủ sức khỏe</label>
+            <label class="radio-btn danger" onclick="selectRadio(this,'klFit')"><input type="radio" value="Không đủ sức khỏe">❌ Không đủ</label>
+            <label class="radio-btn warn" onclick="selectRadio(this,'klFit')"><input type="radio" value="Tạm thời không đủ">⏸ Tạm hoãn</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Hướng giải quyết / ghi chú thêm</label>
+          <textarea id="klResolution" placeholder="Chuyển khám chuyên sâu, theo dõi định kỳ, đề nghị điều trị..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="icon">👨‍⚕️</span><h2>Bác sĩ kết luận</h2></div>
+      <div class="card-body">
+        <div class="form-row cols-2">
+          <div class="form-group">
+            <label>Họ tên bác sĩ</label>
+            <input type="text" id="doctorName" placeholder="BS. Nguyễn Văn A">
+          </div>
+          <div class="form-group">
+            <label>Ngày ký</label>
+            <input type="date" id="signDate">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Cơ sở khám bệnh</label>
+          <input type="text" id="clinicName" placeholder="Trung tâm y tế / BV...">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-action">
+    <button class="btn-secondary" onclick="goToTab('rhm')">← Trước</button>
+    <button class="btn-primary" onclick="finishExam()">🖨 Hoàn tất & In phiếu</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const state = {
+  patient:{name:'',gender:'',dob:'',job:'',history:'',hazard:''},
+  currentScreen:'home',
+  doneSections:new Set(),
+  selectedHealthClass:null,
+  toothState:{} // toothId -> 0=unset,1=ok,2=issue
+};
+
+const screenOrder = ['home','tq','nk','ng','sp','mt','tmh','rhm','kl'];
+const sectionNames = {tq:'Tổng quát',nk:'Nội khoa',ng:'Ngoại/Da liễu',sp:'Sản phụ khoa',mt:'Mắt',tmh:'Tai Mũi Họng',rhm:'Răng Hàm Mặt',kl:'Kết luận'};
+
+// ===== NAVIGATION =====
+function goToTab(section){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const target = section==='home' ? 'screen-home' : 'screen-'+section;
+  const el = document.getElementById(target);
+  if(el) el.classList.add('active');
+  state.currentScreen = section;
+  updateHeader(section);
+  if(section==='kl') buildSummary();
+  window.scrollTo(0,0);
+}
+
+function goBack(){
+  const idx = screenOrder.indexOf(state.currentScreen);
+  if(idx>0) goToTab(screenOrder[idx-1]);
+}
+
+function updateHeader(section){
+  const backBtn = document.getElementById('backBtn');
+  const navTabs = document.getElementById('navTabs');
+  const patientBar = document.getElementById('patientBar');
+  const titles = {home:'Khám Sức Khỏe Lưu Động',tq:'Khám Tổng Quát',nk:'Nội Khoa',ng:'Ngoại Khoa & Da Liễu',sp:'Sản Phụ Khoa',mt:'Khám Mắt',tmh:'Tai – Mũi – Họng',rhm:'Răng Hàm Mặt',kl:'Kết Luận'};
+  document.getElementById('headerTitle').textContent = titles[section]||'Khám Sức Khỏe';
+  if(section==='home'){
+    backBtn.style.visibility='hidden';
+    navTabs.style.display='none';
+    patientBar.style.display='none';
+  } else {
+    backBtn.style.visibility='visible';
+    navTabs.style.display='flex';
+    patientBar.style.display='flex';
+    document.querySelectorAll('.nav-tab').forEach(t=>{
+      t.classList.remove('active');
+      if(t.getAttribute('data-screen')==='screen-'+section) t.classList.add('active');
+    });
+  }
+  updateProgress();
+}
+
+function updateProgress(){
+  const total = screenOrder.length - 1; // exclude home
+  const done = state.doneSections.size;
+  document.getElementById('progressFill').style.width = Math.round((done/total)*100)+'%';
+  document.querySelectorAll('.nav-tab').forEach(t=>{
+    const s = t.getAttribute('data-screen').replace('screen-','');
+    if(state.doneSections.has(s)) t.classList.add('done'); else t.classList.remove('done');
+  });
+}
+
+// ===== START EXAM =====
+function startExam(){
+  const name = document.getElementById('patientName').value.trim();
+  if(!name){showToast('⚠️ Vui lòng nhập họ tên bệnh nhân');return;}
+  state.patient.name = name;
+  state.patient.gender = document.querySelector('.gender-card.selected span')?.textContent||'';
+  const dob = document.getElementById('patientDob').value;
+  state.patient.dob = dob;
+  state.patient.job = document.getElementById('patientJob').value;
+  state.patient.history = document.getElementById('patientHistory').value;
+  state.patient.hazard = document.getElementById('hazardFactors').value;
+  // Update patient bar
+  document.getElementById('pBarName').textContent = name;
+  document.getElementById('pBarDob').textContent = dob || '—';
+  document.getElementById('pBarGender').textContent = state.patient.gender||'—';
+  // Hide san phu khoa for male
+  const isMale = state.patient.gender === 'Nam';
+  document.getElementById('spSkipNote').style.display = isMale ? 'block':'none';
+  document.getElementById('spCard').style.display = isMale ? 'none':'block';
+  // Set today's date for sign date
+  document.getElementById('signDate').value = new Date().toISOString().slice(0,10);
+  goToTab('tq');
+}
+
+function saveSectionAndNext(current, next){
+  state.doneSections.add(current);
+  updateProgress();
+  showToast('✓ Đã lưu phần '+sectionNames[current]);
+  goToTab(next);
+}
+
+function finishExam(){
+  state.doneSections.add('kl');
+  updateProgress();
+  showToast('✅ Phiếu khám đã hoàn tất!');
+  setTimeout(()=>window.print(),800);
+}
+
+// ===== FORM HELPERS =====
+function selectGender(g){
+  document.getElementById('genderNam').classList.toggle('selected', g==='Nam');
+  document.getElementById('genderNu').classList.toggle('selected', g==='Nữ');
+}
+
+function selectRadio(label, groupId){
+  document.querySelectorAll('#'+groupId+' .radio-btn').forEach(l=>l.classList.remove('selected'));
+  label.classList.add('selected');
+}
+
+function calcBMI(){
+  const h = parseFloat(document.getElementById('height').value);
+  const w = parseFloat(document.getElementById('weight').value);
+  const card = document.getElementById('bmiCard');
+  if(h>0 && w>0){
+    const bmi = w/(h/100)**2;
+    const v = bmi.toFixed(1);
+    document.getElementById('bmiValue').textContent = v;
+    let status='', cls='bmi-normal';
+    if(bmi<18.5){status='Thiếu cân';cls='bmi-warn';}
+    else if(bmi<23){status='Bình thường';}
+    else if(bmi<25){status='Thừa cân';cls='bmi-warn';}
+    else{status='Béo phì';cls='bmi-danger';}
+    document.getElementById('bmiStatus').textContent = status;
+    card.className = 'vital-display '+cls;
+    card.style.display='block';
+  } else { card.style.display='none'; }
+}
+
+function checkBP(){
+  const s = document.getElementById('bpSys').value;
+  const d = document.getElementById('bpDia').value;
+  if(s&&d) document.getElementById('bpDisplay').value = s+'/'+d+' mmHg';
+}
+
+// DOB -> Age
+document.getElementById('patientDob').addEventListener('change',function(){
+  const dob = new Date(this.value);
+  const now = new Date();
+  let age = now.getFullYear()-dob.getFullYear();
+  const m = now.getMonth()-dob.getMonth();
+  if(m<0||(m===0&&now.getDate()<dob.getDate())) age--;
+  document.getElementById('patientAge').value = age>0?age+' tuổi':'';
+});
+
+function selectHealthClass(n){
+  state.selectedHealthClass = n;
+  document.querySelectorAll('.hc-btn').forEach(b=>{
+    b.className = 'hc-btn';
+    if(parseInt(b.getAttribute('data-class'))===n) b.classList.add('sel-'+n);
+  });
+}
+
+// ===== TOOTH CHART =====
+function initTeeth(){
+  const upper = [18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
+  const lower = [48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
+  buildTeethRow('upperTeeth', upper);
+  buildTeethRow('lowerTeeth', lower);
+}
+
+function buildTeethRow(containerId, ids){
+  const row = document.getElementById(containerId);
+  ids.forEach(id=>{
+    const el = document.createElement('div');
+    el.className = 'tooth-box';
+    el.textContent = id;
+    el.setAttribute('data-tooth', id);
+    el.onclick = ()=>cycleTooth(id, el);
+    row.appendChild(el);
+    state.toothState[id]=0;
+  });
+}
+
+function cycleTooth(id, el){
+  const s = (state.toothState[id]+1)%3;
+  state.toothState[id]=s;
+  el.className = 'tooth-box' + (s===1?' tooth-ok':s===2?' tooth-issue':'');
+}
+
+// ===== SUMMARY =====
+function buildSummary(){
+  const sections=[
+    {label:'Tổng quát',fields:[
+      {l:'Chiều cao',v:()=>{const h=document.getElementById('height').value;return h?h+' cm':'—'}},
+      {l:'Cân nặng',v:()=>{const w=document.getElementById('weight').value;return w?w+' kg':'—'}},
+      {l:'BMI',v:()=>document.getElementById('bmiValue').textContent||'—'},
+      {l:'Huyết áp',v:()=>document.getElementById('bpDisplay').value||'—'},
+      {l:'Thể lực',v:()=>{const el=document.querySelector('#physicalClass .selected');return el?el.querySelector('input').value:'—'}},
+    ]},
+    {label:'Nội khoa',fields:[
+      {l:'Tuần hoàn',v:()=>getClass('nkTH_class')},
+      {l:'Hô hấp',v:()=>getClass('nkHH_class')},
+      {l:'Tiêu hóa',v:()=>getClass('nkTHoa_class')},
+      {l:'Thận-TN',v:()=>getClass('nkTTN_class')},
+      {l:'Nội tiết',v:()=>getClass('nkNT_class')},
+      {l:'CXK',v:()=>getClass('nkCXK_class')},
+      {l:'Thần kinh',v:()=>getClass('nkTK_class')},
+      {l:'Tâm thần',v:()=>getClass('nkTThan_class')},
+    ]},
+    {label:'Ngoại/Da',fields:[
+      {l:'Ngoại khoa',v:()=>getClass('ngNgoai_class')},
+      {l:'Da liễu',v:()=>getClass('ngDa_class')},
+    ]},
+    {label:'Mắt',fields:[{l:'Kết quả',v:()=>getClass('mt_class')}]},
+    {label:'TMH',fields:[{l:'Kết quả',v:()=>getClass('tmh_class')}]},
+    {label:'RHM',fields:[{l:'Kết quả',v:()=>getClass('rhm_class')}]},
+  ];
+  if(state.patient.gender==='Nữ'){
+    sections.push({label:'Sản phụ',fields:[{l:'Kết quả',v:()=>getClass('sp_class')}]});
+  }
+  let html='';
+  sections.forEach(sec=>{
+    html+=`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div style="font-size:12px;font-weight:700;color:var(--text-hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${sec.label}</div>`;
+    sec.fields.forEach(f=>{
+      const v=f.v();
+      const badge = v==='Bình thường'||v==='Đủ sức khỏe'?'badge-ok':v==='—'||!v?'badge-pending':v.includes('lý')||v.includes('nặng')?'badge-danger':'badge-warn';
+      html+=`<div class="summary-row" style="padding:6px 0;border:none"><span class="summary-label">${f.l}</span><span class="${badge}">${v||'—'}</span></div>`;
+    });
+    html+='</div>';
+  });
+  document.getElementById('summaryBody').innerHTML = html;
+}
+
+function getClass(groupId){
+  const el = document.querySelector('#'+groupId+' .selected');
+  return el ? el.querySelector('input').value : '—';
+}
+
+// ===== TOAST =====
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+// ===== INIT =====
+initTeeth();
+// Set today
+document.getElementById('signDate').value = new Date().toISOString().slice(0,10);
+</script>
+</body>
+</html>

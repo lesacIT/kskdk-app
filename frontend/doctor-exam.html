@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Khám bệnh - Hệ thống khám sức khỏe TKG</title>
+<title>Khám chuyên khoa - Hệ thống khám sức khỏe TKG</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
@@ -15,10 +15,10 @@
   body{font-family:'Segoe UI',sans-serif;background:var(--bg);min-height:100vh}
   
   .header{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:white;padding:20px}
-  .header-content{max-width:800px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
+  .header-content{max-width:900px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
   .back-btn{background:rgba(255,255,255,0.2);border:none;color:white;padding:8px 16px;border-radius:30px;cursor:pointer}
   
-  .main{max-width:800px;margin:0 auto;padding:20px}
+  .main{max-width:900px;margin:0 auto;padding:20px}
   
   /* Sidebar Navigation */
   .sidebar-nav{
@@ -67,11 +67,64 @@
     opacity:1;
   }
   
-  .patient-card{background:white;border-radius:var(--radius);padding:20px;margin-bottom:20px;border:1px solid var(--border)}
-  .patient-info{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .search-card{
+    background:white;
+    border-radius:var(--radius);
+    padding:20px;
+    margin-bottom:20px;
+    border:1px solid var(--border);
+  }
+  .search-bar{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .search-bar input{
+    flex:2;
+    padding:12px 16px;
+    border:1.5px solid var(--border);
+    border-radius:10px;
+    font-size:15px;
+  }
+  .search-bar button{
+    padding:12px 24px;
+    background:var(--primary);
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+  }
+  .search-by-id{background:#F59E0B;}
   
-  .exam-card{background:white;border-radius:var(--radius);padding:20px;margin-bottom:20px;border:1px solid var(--border)}
-  .exam-card h3{color:var(--primary-dark);margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--primary-light)}
+  .patient-card{
+    background:white;
+    border-radius:var(--radius);
+    padding:20px;
+    margin-bottom:20px;
+    border:1px solid var(--border);
+    display:none;
+  }
+  .patient-info{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+  }
+  
+  .exam-card{
+    background:white;
+    border-radius:var(--radius);
+    padding:20px;
+    margin-bottom:20px;
+    border:1px solid var(--border);
+    display:none;
+  }
+  .exam-card h3{
+    color:var(--primary-dark);
+    margin-bottom:16px;
+    padding-bottom:8px;
+    border-bottom:2px solid var(--primary-light);
+  }
   
   .form-group{margin-bottom:16px}
   .form-group label{display:block;margin-bottom:6px;font-weight:500;color:#666}
@@ -79,15 +132,69 @@
   .form-group input{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px}
   
   .radio-group{display:flex;gap:12px;flex-wrap:wrap}
-  .radio-label{display:flex;align-items:center;gap:6px;padding:8px 16px;border:1.5px solid var(--border);border-radius:30px;cursor:pointer}
-  .radio-label.selected{background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark)}
+  .radio-label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 16px;
+    border:1.5px solid var(--border);
+    border-radius:30px;
+    cursor:pointer;
+  }
+  .radio-label.selected{
+    background:var(--primary-light);
+    border-color:var(--primary);
+    color:var(--primary-dark);
+  }
   
-  .action-buttons{display:flex;gap:12px;margin-top:20px}
-  .btn-primary{flex:1;background:var(--primary);color:white;border:none;padding:14px;border-radius:10px;font-weight:600;cursor:pointer}
-  .btn-secondary{flex:1;background:#fff;color:var(--primary-dark);border:1.5px solid var(--primary);padding:14px;border-radius:10px;cursor:pointer}
+  .action-buttons{
+    display:flex;
+    gap:12px;
+    margin-top:20px;
+  }
+  .btn-primary{
+    flex:1;
+    background:var(--primary);
+    color:white;
+    border:none;
+    padding:14px;
+    border-radius:10px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .btn-secondary{
+    flex:1;
+    background:#fff;
+    color:var(--primary-dark);
+    border:1.5px solid var(--primary);
+    padding:14px;
+    border-radius:10px;
+    cursor:pointer;
+  }
   
-  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:10px 20px;border-radius:30px;opacity:0;transition:opacity 0.3s;z-index:1001}
+  .toast{
+    position:fixed;
+    bottom:30px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#333;
+    color:white;
+    padding:10px 20px;
+    border-radius:30px;
+    opacity:0;
+    transition:opacity 0.3s;
+    z-index:1001;
+  }
   .toast.show{opacity:1}
+  
+  .warning{
+    background:#FAEEDA;
+    color:#BA7517;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:16px;
+    display:none;
+  }
   
   @media(max-width:768px){
     .sidebar-nav{left:10px}
@@ -100,26 +207,11 @@
 <body>
 
 <div class="sidebar-nav">
-  <a href="index.html" class="nav-circle">
-    <i class="fas fa-home"></i>
-    <span class="nav-tooltip">Trang chủ</span>
-  </a>
-  <a href="exam-summary.html" class="nav-circle">
-    <i class="fas fa-chart-line"></i>
-    <span class="nav-tooltip">Tổng hợp</span>
-  </a>
-  <a href="employee-manager.html" class="nav-circle">
-    <i class="fas fa-users"></i>
-    <span class="nav-tooltip">Quản lý NV</span>
-  </a>
-  <a href="doctor-dashboard.html" class="nav-circle">
-    <i class="fas fa-stethoscope"></i>
-    <span class="nav-tooltip">Dashboard BS</span>
-  </a>
-  <a href="login.html" class="nav-circle" onclick="logout(); return false;">
-    <i class="fas fa-sign-out-alt"></i>
-    <span class="nav-tooltip">Đăng xuất</span>
-  </a>
+  <a href="index.html" class="nav-circle"><i class="fas fa-home"></i><span class="nav-tooltip">Trang chủ</span></a>
+  <a href="exam-summary.html" class="nav-circle"><i class="fas fa-chart-line"></i><span class="nav-tooltip">Tổng hợp</span></a>
+  <a href="employee-manager.html" class="nav-circle"><i class="fas fa-users"></i><span class="nav-tooltip">Quản lý NV</span></a>
+  <a href="doctor-dashboard.html" class="nav-circle"><i class="fas fa-stethoscope"></i><span class="nav-tooltip">Dashboard</span></a>
+  <a href="login.html" class="nav-circle" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i><span class="nav-tooltip">Đăng xuất</span></a>
 </div>
 
 <div class="header">
@@ -130,7 +222,19 @@
 </div>
 
 <div class="main">
-  <div class="patient-card">
+  <!-- Ô tìm kiếm bệnh nhân -->
+  <div class="search-card">
+    <div class="search-bar">
+      <input type="text" id="searchByIdInput" placeholder="🔢 Nhập mã nhân viên cần khám">
+      <button onclick="searchPatientById()" class="search-by-id"><i class="fas fa-id-card"></i> Tìm bệnh nhân</button>
+    </div>
+  </div>
+
+  <!-- Thông báo -->
+  <div id="warningMsg" class="warning"></div>
+
+  <!-- Thông tin bệnh nhân -->
+  <div id="patientCard" class="patient-card">
     <h3><i class="fas fa-user-circle"></i> Thông tin bệnh nhân</h3>
     <div class="patient-info">
       <div><strong>Mã NV:</strong> <span id="patientId"></span></div>
@@ -140,10 +244,12 @@
       <div><strong>Giới tính:</strong> <span id="patientGender"></span></div>
     </div>
   </div>
-  
-  <div class="exam-card" id="examContent"></div>
-  
-  <div class="action-buttons">
+
+  <!-- Form khám chuyên khoa -->
+  <div id="examCard" class="exam-card"></div>
+
+  <!-- Nút hành động -->
+  <div class="action-buttons" id="actionButtons" style="display:none">
     <button class="btn-secondary" onclick="saveDraft()"><i class="fas fa-save"></i> Lưu tạm</button>
     <button class="btn-primary" onclick="completeExam()"><i class="fas fa-check-circle"></i> Hoàn thành khám</button>
   </div>
@@ -218,40 +324,92 @@ const specialtyForms = {
 };
 
 function loadDoctor() {
-  const stored = sessionStorage.getItem('currentDoctor');
-  if(!stored) {
-    window.location.href = 'login.html';
-    return;
+  const urlParams = new URLSearchParams(window.location.search);
+  const specialtyParam = urlParams.get('specialty');
+  const stored = sessionStorage.getItem('currentUser');
+  if(!stored) { window.location.href = 'login.html'; return; }
+  const user = JSON.parse(stored);
+  if(user.role === 'specialist') {
+    currentDoctor = { id: user.specialtyId, name: user.name, specialty: user.specialty, icon: user.icon };
+  } else if(specialtyParam) {
+    const specMap = {
+      nk: { name: "Bác sĩ Nội khoa", specialty: "Nội khoa", icon: "🫀" },
+      ng: { name: "Bác sĩ Ngoại khoa", specialty: "Ngoại khoa", icon: "🩺" },
+      mt: { name: "Bác sĩ Mắt", specialty: "Mắt", icon: "👁" },
+      tmh: { name: "Bác sĩ Tai Mũi Họng", specialty: "Tai Mũi Họng", icon: "👂" },
+      rhm: { name: "Bác sĩ Răng Hàm Mặt", specialty: "Răng Hàm Mặt", icon: "🦷" },
+      sp: { name: "Bác sĩ Sản phụ khoa", specialty: "Sản phụ khoa", icon: "👶" }
+    };
+    const spec = specMap[specialtyParam];
+    if(spec) currentDoctor = { id: specialtyParam, name: spec.name, specialty: spec.specialty, icon: spec.icon };
   }
-  currentDoctor = JSON.parse(stored);
-  document.getElementById('doctorSpecialty').innerHTML = `${currentDoctor.icon} ${currentDoctor.specialty}`;
-  renderExamForm();
-}
-
-function loadPatient() {
-  const stored = sessionStorage.getItem('examPatient');
-  if(!stored) {
-    showToast('Không tìm thấy thông tin bệnh nhân!', true);
+  if(!currentDoctor) {
+    showToast('Không xác định được chuyên khoa', true);
     setTimeout(() => window.location.href = 'doctor-dashboard.html', 1500);
     return;
   }
-  currentPatient = JSON.parse(stored);
-  document.getElementById('patientId').textContent = currentPatient.id;
-  document.getElementById('patientName').textContent = currentPatient.name;
-  document.getElementById('patientDept').textContent = currentPatient.dept || '—';
-  document.getElementById('patientDob').textContent = currentPatient.dob || '—';
-  document.getElementById('patientGender').textContent = currentPatient.gender || '—';
+  document.getElementById('doctorSpecialty').innerHTML = `${currentDoctor.icon} ${currentDoctor.specialty}`;
+}
+
+function searchPatientById() {
+  const empId = document.getElementById('searchByIdInput').value.trim();
+  const warningDiv = document.getElementById('warningMsg');
+  if(!empId) {
+    showToast('Vui lòng nhập mã nhân viên', true);
+    return;
+  }
+  const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+  const patient = employees.find(e => e.id === empId);
+  if(!patient) {
+    warningDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Không tìm thấy nhân viên với mã này.';
+    warningDiv.style.display = 'block';
+    document.getElementById('patientCard').style.display = 'none';
+    document.getElementById('examCard').style.display = 'none';
+    document.getElementById('actionButtons').style.display = 'none';
+    return;
+  }
+  warningDiv.style.display = 'none';
+  currentPatient = {
+    id: patient.id,
+    name: patient.name,
+    dept: patient.dept,
+    dob: patient.dob,
+    gender: patient.gender
+  };
+  document.getElementById('patientId').textContent = patient.id;
+  document.getElementById('patientName').textContent = patient.name;
+  document.getElementById('patientDept').textContent = patient.dept || '—';
+  document.getElementById('patientDob').textContent = patient.dob || '—';
+  document.getElementById('patientGender').textContent = patient.gender || '—';
+  document.getElementById('patientCard').style.display = 'block';
+  
+  // Kiểm tra xem đã khám khoa này chưa (chỉ thông báo, không chặn)
+  const completedExams = JSON.parse(localStorage.getItem('completedExams') || '[]');
+  const examRecord = completedExams.find(e => e.patient?.empId === patient.id);
+  if(examRecord?.examData?.[currentDoctor.id]?.class) {
+    warningDiv.innerHTML = '<i class="fas fa-info-circle"></i> Bệnh nhân đã được khám khoa này trước đó. Bạn có thể cập nhật lại kết quả.';
+    warningDiv.style.display = 'block';
+    warningDiv.style.background = 'var(--primary-light)';
+    warningDiv.style.color = 'var(--primary-dark)';
+  } else {
+    warningDiv.innerHTML = '';
+    warningDiv.style.display = 'none';
+  }
+  
+  renderExamForm();
+  document.getElementById('examCard').style.display = 'block';
+  document.getElementById('actionButtons').style.display = 'flex';
+  loadSavedData();
 }
 
 function renderExamForm() {
   const config = specialtyForms[currentDoctor.id];
   if(!config) {
-    document.getElementById('examContent').innerHTML = '<p>Không có cấu hình cho chuyên khoa này</p>';
+    document.getElementById('examCard').innerHTML = '<p>Không có cấu hình cho chuyên khoa này</p>';
     return;
   }
   
   let html = `<h3>${config.title}</h3>`;
-  
   for(let field of config.fields) {
     html += `<div class="form-group">`;
     html += `<label>${field.label}</label>`;
@@ -269,16 +427,11 @@ function renderExamForm() {
   html += `<label>📊 Phân loại kết quả khám</label>`;
   html += `<div class="radio-group" id="classGroup">`;
   for(let cls of config.classifications) {
-    let badgeStyle = '';
-    if(cls === 'Bình thường') badgeStyle = 'style="background:var(--primary-light)"';
-    html += `<label class="radio-label" onclick="selectClass(this, '${cls}')" data-value="${cls}" ${badgeStyle}>
-      ${cls}
-    </label>`;
+    html += `<label class="radio-label" onclick="selectClass(this, '${cls}')" data-value="${cls}">${cls}</label>`;
   }
   html += `</div></div>`;
   
-  document.getElementById('examContent').innerHTML = html;
-  loadSavedData();
+  document.getElementById('examCard').innerHTML = html;
 }
 
 function selectClass(element, value) {
@@ -292,6 +445,10 @@ function getSelectedClass() {
 }
 
 function saveDraft() {
+  if(!currentPatient) {
+    showToast('Chưa có bệnh nhân được chọn', true);
+    return;
+  }
   const config = specialtyForms[currentDoctor.id];
   const examData = {};
   for(let field of config.fields) {
@@ -304,11 +461,11 @@ function saveDraft() {
   if(!allExamData[currentDoctor.id]) allExamData[currentDoctor.id] = {};
   allExamData[currentDoctor.id][currentPatient.id] = examData;
   localStorage.setItem('examData', JSON.stringify(allExamData));
-  
   showToast('Đã lưu tạm kết quả khám!');
 }
 
 function loadSavedData() {
+  if(!currentPatient) return;
   const config = specialtyForms[currentDoctor.id];
   const allExamData = JSON.parse(localStorage.getItem('examData') || '{}');
   const saved = allExamData[currentDoctor.id]?.[currentPatient.id];
@@ -328,6 +485,10 @@ function loadSavedData() {
 }
 
 function completeExam() {
+  if(!currentPatient) {
+    showToast('Chưa có bệnh nhân được chọn', true);
+    return;
+  }
   const config = specialtyForms[currentDoctor.id];
   const examData = {};
   for(let field of config.fields) {
@@ -343,10 +504,10 @@ function completeExam() {
   
   let completedExams = JSON.parse(localStorage.getItem('completedExams') || '[]');
   let existingExam = completedExams.find(e => e.patient?.empId === currentPatient.id);
-  
   if(existingExam) {
     if(!existingExam.examData) existingExam.examData = {};
     existingExam.examData[currentDoctor.id] = examData;
+    if(!existingExam.completedSections) existingExam.completedSections = [];
     if(!existingExam.completedSections.includes(currentDoctor.id)) {
       existingExam.completedSections.push(currentDoctor.id);
     }
@@ -358,9 +519,9 @@ function completeExam() {
       completeDate: new Date().toISOString()
     });
   }
-  
   localStorage.setItem('completedExams', JSON.stringify(completedExams));
   
+  // Xóa dữ liệu tạm
   let allExamData = JSON.parse(localStorage.getItem('examData') || '{}');
   if(allExamData[currentDoctor.id]) {
     delete allExamData[currentDoctor.id][currentPatient.id];
@@ -369,7 +530,13 @@ function completeExam() {
   
   showToast('✅ Hoàn thành khám!');
   setTimeout(() => {
-    window.location.href = 'doctor-dashboard.html';
+    // Reset form
+    document.getElementById('searchByIdInput').value = '';
+    document.getElementById('patientCard').style.display = 'none';
+    document.getElementById('examCard').style.display = 'none';
+    document.getElementById('actionButtons').style.display = 'none';
+    document.getElementById('warningMsg').style.display = 'none';
+    currentPatient = null;
   }, 1500);
 }
 
@@ -393,7 +560,6 @@ function showToast(msg, isError = false) {
 
 document.addEventListener('DOMContentLoaded', () => {
   loadDoctor();
-  loadPatient();
 });
 </script>
 </body>
