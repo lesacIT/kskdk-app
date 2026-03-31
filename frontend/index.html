@@ -26,8 +26,6 @@
   .back-btn{background:rgba(255,255,255,.2);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
   .patient-bar{background:rgba(0,0,0,.15);padding:8px 16px;font-size:13px;display:flex;gap:16px;overflow-x:auto}
   .patient-bar strong{color:#fff}
-  .progress-bar{height:3px;background:rgba(255,255,255,.25)}
-  .progress-fill{height:100%;background:#fff;transition:width .3s ease}
 
   .main{padding:16px;max-width:600px;margin:0 auto}
 
@@ -144,7 +142,6 @@
     <span>🏷 <strong id="pBarGender">—</strong></span>
     <span>🆔 <strong id="pBarEmpId">—</strong></span>
   </div>
-  <div class="progress-bar" style="display:none"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 </div>
 
 <div class="main">
@@ -206,6 +203,7 @@
   <a href="index.html" class="nav-circle"><i class="fas fa-home"></i><span class="nav-tooltip">Trang chủ</span></a>
   <a href="exam-summary.html" class="nav-circle"><i class="fas fa-chart-line"></i><span class="nav-tooltip">Tổng hợp</span></a>
   <a href="employee-manager.html" class="nav-circle"><i class="fas fa-users"></i><span class="nav-tooltip">Quản lý NV</span></a>
+  <a href="exam-history.html" class="nav-circle"><i class="fas fa-file-excel"></i><span class="nav-tooltip">Lịch sử khám</span></a>
   <a href="login.html" class="nav-circle"><i class="fas fa-stethoscope"></i><span class="nav-tooltip">Đăng nhập BS</span></a>
 </div>
 
@@ -221,9 +219,11 @@ function loadEmployees() {
   if(stored) employees = JSON.parse(stored);
   else employees = [
     { id:"20000001", name:"NGUYỄN VĂN HÙNG", gender:"Nam", dob:"1995-03-10", dept:"Chuyền May 1" },
-    { id:"20000002", name:"TRẦN THỊ LAN", gender:"Nữ", dob:"1992-07-15", dept:"Chuyền May 1" }
+    { id:"20000002", name:"TRẦN THỊ LAN", gender:"Nữ", dob:"1992-07-15", dept:"Chuyền May 1" },
+    { id:"20000003", name:"LÊ VĂN THÀNH", gender:"Nam", dob:"1988-11-22", dept:"Chuyền May 2" }
   ];
-  document.getElementById('totalEmployees').textContent = employees.length;
+  const totalEl = document.getElementById('totalEmployees');
+  if(totalEl) totalEl.textContent = employees.length;
 }
 
 function refreshData() { loadEmployees(); loadStats(); showToast('Đã làm mới dữ liệu!', 'success'); }
@@ -234,8 +234,10 @@ function loadStats() {
   registeredCount = registrations.filter(r => r.date === today).length;
   const completed = JSON.parse(localStorage.getItem('completedExams') || '[]');
   completedCount = completed.length;
-  document.getElementById('totalRegistered').textContent = registeredCount;
-  document.getElementById('totalCompleted').textContent = completedCount;
+  const regEl = document.getElementById('totalRegistered');
+  const comEl = document.getElementById('totalCompleted');
+  if(regEl) regEl.textContent = registeredCount;
+  if(comEl) comEl.textContent = completedCount;
 }
 
 function saveRegistration(patientData) {
@@ -260,19 +262,22 @@ function showCompletedExams() {
 }
 
 function searchEmployee() {
-  const empId = document.getElementById('empId').value.trim();
+  const empId = document.getElementById('empId')?.value.trim();
   if(!empId) { showToast('Nhập mã nhân viên', 'warning'); return; }
   loadEmployees();
   const emp = employees.find(e => e.id === empId);
   const infoDiv = document.getElementById('empInfo');
   if(!emp) {
-    infoDiv.innerHTML = `<div class="emp-card" style="border-color:var(--warn);background:var(--warn-light);"><h3>❌ Không tìm thấy</h3><p>Mã ${empId} chưa có. Vui lòng đăng ký!</p><div class="form-row"><div class="form-group"><label>Họ tên *</label><input type="text" id="newEmpName" placeholder="Họ và tên"></div></div><button class="btn-primary" onclick="quickRegister('${empId}')" style="margin-top:12px">➕ Đăng ký nhân viên mới</button></div>`;
+    if(infoDiv) infoDiv.innerHTML = `<div class="emp-card" style="border-color:var(--warn);background:var(--warn-light);"><h3>❌ Không tìm thấy</h3><p>Mã ${empId} chưa có. Vui lòng đăng ký!</p><div class="form-row"><div class="form-group"><label>Họ tên *</label><input type="text" id="newEmpName" placeholder="Họ và tên"></div></div><button class="btn-primary" onclick="quickRegister('${empId}')" style="margin-top:12px">➕ Đăng ký nhân viên mới</button></div>`;
     return;
   }
-  infoDiv.innerHTML = `<div class="emp-card"><h3>✅ Thông tin</h3><div class="emp-row"><span>Họ tên</span><span><strong>${emp.name}</strong></span></div><div class="emp-row"><span>Mã NV</span><span>${emp.id}</span></div><div class="emp-row"><span>Phòng ban</span><span>${emp.dept || '—'}</span></div></div>`;
-  document.getElementById('patientName').value = emp.name;
-  document.getElementById('patientDept').value = emp.dept || '';
-  if(emp.dob) document.getElementById('patientDob').value = emp.dob;
+  if(infoDiv) infoDiv.innerHTML = `<div class="emp-card"><h3>✅ Thông tin</h3><div class="emp-row"><span>Họ tên</span><span><strong>${emp.name}</strong></span></div><div class="emp-row"><span>Mã NV</span><span>${emp.id}</span></div><div class="emp-row"><span>Phòng ban</span><span>${emp.dept || '—'}</span></div></div>`;
+  const nameEl = document.getElementById('patientName');
+  const deptEl = document.getElementById('patientDept');
+  const dobEl = document.getElementById('patientDob');
+  if(nameEl) nameEl.value = emp.name;
+  if(deptEl) deptEl.value = emp.dept || '';
+  if(dobEl && emp.dob) dobEl.value = emp.dob;
   if(emp.gender) selectGender(emp.gender);
   calculateAge();
   showToast(`Đã tìm thấy: ${emp.name}`, 'success');
@@ -283,61 +288,70 @@ function quickRegister(empId) {
   if(!name) { showToast('Nhập họ tên', 'error'); return; }
   employees.push({id:empId, name:name.toUpperCase(), gender:'Nam', dob:'', dept:'', position:'', phone:'', email:''});
   localStorage.setItem('employees', JSON.stringify(employees));
-  document.getElementById('patientName').value = name.toUpperCase();
-  document.getElementById('empInfo').innerHTML = `<div class="emp-card"><h3>✅ Đã thêm</h3><div class="emp-row"><span>${name.toUpperCase()}</span><span>${empId}</span></div></div>`;
+  const nameEl = document.getElementById('patientName');
+  if(nameEl) nameEl.value = name.toUpperCase();
+  const infoDiv = document.getElementById('empInfo');
+  if(infoDiv) infoDiv.innerHTML = `<div class="emp-card"><h3>✅ Đã thêm</h3><div class="emp-row"><span>${name.toUpperCase()}</span><span>${empId}</span></div></div>`;
   showToast(`Đã thêm: ${name}`, 'success');
 }
 
 function resetForm() {
-  document.getElementById('empId').value = '';
-  document.getElementById('patientName').value = '';
-  document.getElementById('patientDept').value = '';
-  document.getElementById('patientDob').value = '';
-  document.getElementById('patientAge').value = '';
-  document.getElementById('patientJob').value = '';
-  document.getElementById('patientHistory').value = '';
-  document.getElementById('hazardFactors').value = '';
-  document.getElementById('empInfo').innerHTML = '';
-  document.getElementById('genderNam').classList.remove('selected');
-  document.getElementById('genderNu').classList.remove('selected');
+  const ids = ['empId', 'patientName', 'patientDept', 'patientDob', 'patientAge', 'patientJob', 'patientHistory', 'hazardFactors'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  const infoDiv = document.getElementById('empInfo');
+  if(infoDiv) infoDiv.innerHTML = '';
+  const genderNam = document.getElementById('genderNam');
+  const genderNu = document.getElementById('genderNu');
+  if(genderNam) genderNam.classList.remove('selected');
+  if(genderNu) genderNu.classList.remove('selected');
   showToast('Đã làm mới form', 'info');
 }
 
 function calculateAge() {
-  const dob = document.getElementById('patientDob').value;
-  if(dob) document.getElementById('patientAge').value = new Date().getFullYear() - new Date(dob).getFullYear() + ' tuổi';
+  const dob = document.getElementById('patientDob')?.value;
+  const ageEl = document.getElementById('patientAge');
+  if(dob && ageEl) {
+    ageEl.value = new Date().getFullYear() - new Date(dob).getFullYear() + ' tuổi';
+  }
 }
 
 function selectGender(g) {
-  document.getElementById('genderNam').classList.toggle('selected', g==='Nam');
-  document.getElementById('genderNu').classList.toggle('selected', g==='Nữ');
+  const namCard = document.getElementById('genderNam');
+  const nuCard = document.getElementById('genderNu');
+  if(g === 'Nam') {
+    if(namCard) namCard.classList.add('selected');
+    if(nuCard) nuCard.classList.remove('selected');
+  } else {
+    if(nuCard) nuCard.classList.add('selected');
+    if(namCard) namCard.classList.remove('selected');
+  }
 }
 
 function registerExam() {
-  const empId = document.getElementById('empId').value.trim();
-  const name = document.getElementById('patientName').value.trim();
+  const empId = document.getElementById('empId')?.value.trim();
+  const name = document.getElementById('patientName')?.value.trim();
   if(!empId || !name) { showToast('Vui lòng tra cứu nhân viên trước', 'warning'); return; }
 
   const patientData = {
     empId: empId,
     name: name,
     gender: document.querySelector('.gender-card.selected span')?.textContent || '',
-    dob: document.getElementById('patientDob').value,
-    age: document.getElementById('patientAge').value,
-    job: document.getElementById('patientJob').value,
-    history: document.getElementById('patientHistory').value,
-    hazard: document.getElementById('hazardFactors').value,
-    dept: document.getElementById('patientDept').value
+    dob: document.getElementById('patientDob')?.value || '',
+    age: document.getElementById('patientAge')?.value || '',
+    job: document.getElementById('patientJob')?.value || '',
+    history: document.getElementById('patientHistory')?.value || '',
+    hazard: document.getElementById('hazardFactors')?.value || '',
+    dept: document.getElementById('patientDept')?.value || ''
   };
 
   saveRegistration(patientData);
   showToast('Đăng ký khám thành công!', 'success');
-
-  // Tạo PDF phiếu đăng ký
   generateRegistrationPDF(patientData);
 }
 
-// ========== TẠO PDF PHIẾU ĐĂNG KÝ ==========
 function generateRegistrationPDF(patientData) {
   const pdfContent = document.createElement('div');
   pdfContent.style.padding = '20px';
@@ -359,7 +373,7 @@ function generateRegistrationPDF(patientData) {
       <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Tiền sử bệnh:</strong></td><td style="padding:8px; border:1px solid #ddd;">${patientData.history || ''}</td></tr>
       <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Yếu tố có hại:</strong></td><td style="padding:8px; border:1px solid #ddd;">${patientData.hazard || ''}</td></tr>
       <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Ngày đăng ký:</strong></td><td style="padding:8px; border:1px solid #ddd;">${new Date().toLocaleString('vi-VN')}</td></tr>
-    </table>
+     </table>
     <hr>
     <p style="text-align:center; font-size:12px; margin-top:30px;">Đây là phiếu đăng ký khám sức khỏe định kỳ. Vui lòng mang theo khi đi khám.</p>
   `;
@@ -397,6 +411,7 @@ function generateRegistrationPDF(patientData) {
 function showToast(msg, type='info') {
   const toast = document.getElementById('toast');
   const toastMsg = document.getElementById('toastMessage');
+  if(!toast || !toastMsg) return;
   const icon = toast.querySelector('i');
   toastMsg.textContent = msg;
   if(type==='success') { icon.className = 'fas fa-check-circle'; toast.style.background = '#10B981'; }
@@ -410,7 +425,8 @@ function showToast(msg, type='info') {
 document.addEventListener('DOMContentLoaded', () => {
   loadEmployees();
   loadStats();
-  document.getElementById('patientDob').addEventListener('change', calculateAge);
+  const dobInput = document.getElementById('patientDob');
+  if(dobInput) dobInput.addEventListener('change', calculateAge);
 });
 </script>
 </body>

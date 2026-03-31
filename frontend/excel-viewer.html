@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lịch sử khám - TKG TAEKWANG</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f5f7f5;
+      padding: 20px;
+    }
+    .header {
+      background: #1D9E75;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .header h1 {
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .back-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 30px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .back-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    .search-box {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: rgba(255,255,255,0.2);
+      padding: 5px 10px;
+      border-radius: 30px;
+    }
+    .search-box input {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 20px;
+      outline: none;
+      font-size: 14px;
+      width: 180px;
+    }
+    .search-box button {
+      background: white;
+      border: none;
+      border-radius: 20px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .search-box button:hover {
+      background: #f0f0f0;
+    }
+    .reset-btn {
+      background: #f0f0f0;
+      color: #333;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      overflow-x: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    th {
+      background: #f0f0f0;
+      font-weight: 600;
+      color: #1D9E75;
+      position: sticky;
+      top: 0;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    .error {
+      color: #d32f2f;
+      background: #ffebee;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .info {
+      margin: 10px 0;
+      font-size: 13px;
+      color: #666;
+    }
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      .header h1 { font-size: 16px; }
+      .search-box input { width: 140px; }
+      th, td { font-size: 11px; padding: 5px; }
+    }
+  </style>
+</head>
+<body>
+<div class="header">
+  <h1><i class="fas fa-file-excel"></i> Lịch sử khám sức khỏe</h1>
+  <div class="search-box">
+    <input type="text" id="searchId" placeholder="Nhập mã nhân viên" autocomplete="off">
+    <button onclick="searchById()"><i class="fas fa-search"></i> Tìm</button>
+    <button onclick="resetSearch()" class="reset-btn"><i class="fas fa-undo"></i> Reset</button>
+  </div>
+  <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Quay lại</a>
+</div>
+<div class="container" id="excelContainer">
+  <div class="loading"><i class="fas fa-spinner fa-pulse"></i> Đang tải dữ liệu...</div>
+</div>
+
+<script>
+  const fileName = 'KET_QUA_CU_TKG.xlsx';
+  let rawData = [];      // Mảng 2D chứa toàn bộ dữ liệu (header + rows)
+  let headers = [];      // Mảng header (hàng đầu tiên)
+  let idColumnIndex = -1; // Vị trí cột chứa mã nhân viên (tự động phát hiện)
+
+  const container = document.getElementById('excelContainer');
+
+  // Hàm hiển thị bảng từ dữ liệu (có thể là toàn bộ hoặc lọc)
+  function renderTable(data) {
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="error"><i class="fas fa-info-circle"></i> Không tìm thấy dữ liệu phù hợp.</div>';
+      return;
+    }
+    let html = '<table><thead><tr>';
+    // Hàng đầu tiên là tiêu đề
+    data[0].forEach(cell => {
+      html += `<th>${cell !== undefined && cell !== null ? cell : ''}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      html += '<tr>';
+      row.forEach(cell => {
+        html += `<td>${cell !== undefined && cell !== null ? cell : ''}</td>`;
+      });
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  // Tìm cột chứa mã nhân viên (dựa vào từ khóa)
+  function detectIdColumn() {
+    if (!headers.length) return -1;
+    const keywords = ['mã nv', 'mã nhân viên', 'ma nv', 'ma nhan vien', 'id', 'code', 'employee id'];
+    for (let i = 0; i < headers.length; i++) {
+      const colName = String(headers[i]).toLowerCase();
+      if (keywords.some(kw => colName.includes(kw))) {
+        return i;
+      }
+    }
+    // Nếu không tìm thấy, giả định cột đầu tiên là mã
+    return 0;
+  }
+
+  // Hàm tìm kiếm theo ID
+  function searchById() {
+    const searchValue = document.getElementById('searchId').value.trim();
+    if (searchValue === "") {
+      renderTable(rawData);
+      return;
+    }
+    if (idColumnIndex === -1) {
+      container.innerHTML = '<div class="error"><i class="fas fa-exclamation-triangle"></i> Không xác định được cột mã nhân viên.</div>';
+      return;
+    }
+    const filtered = [rawData[0]]; // giữ header
+    for (let i = 1; i < rawData.length; i++) {
+      const row = rawData[i];
+      const cellValue = row[idColumnIndex] !== undefined ? String(row[idColumnIndex]) : '';
+      if (cellValue.includes(searchValue)) {
+        filtered.push(row);
+      }
+    }
+    if (filtered.length === 1) {
+      container.innerHTML = '<div class="error"><i class="fas fa-info-circle"></i> Không tìm thấy nhân viên có mã "' + searchValue + '".</div>';
+    } else {
+      renderTable(filtered);
+    }
+  }
+
+  // Reset về toàn bộ dữ liệu
+  function resetSearch() {
+    document.getElementById('searchId').value = '';
+    renderTable(rawData);
+  }
+
+  // Tải file Excel
+  fetch(fileName)
+    .then(response => {
+      if (!response.ok) throw new Error('Không tìm thấy file Excel "' + fileName + '"');
+      return response.arrayBuffer();
+    })
+    .then(data => {
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+      if (!jsonData || jsonData.length === 0) throw new Error('File không có dữ liệu');
+      
+      rawData = jsonData;
+      headers = jsonData[0];
+      idColumnIndex = detectIdColumn();
+      
+      renderTable(rawData);
+    })
+    .catch(error => {
+      console.error(error);
+      container.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i> ${error.message}. Vui lòng kiểm tra file "${fileName}" có tồn tại trong thư mục không.</div>`;
+    });
+</script>
+</body>
+</html>
