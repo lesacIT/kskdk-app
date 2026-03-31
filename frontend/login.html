@@ -28,12 +28,11 @@
   .login-header h1{font-size:24px;color:#1D9E75;margin-top:10px}
   .form-group{margin-bottom:20px}
   .form-group label{display:block;margin-bottom:8px;font-weight:500;color:#666}
-  .form-group input,.form-group select{width:100%;padding:12px 16px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:15px}
-  .form-group input:focus,.form-group select:focus{outline:none;border-color:#1D9E75}
+  .form-group input{width:100%;padding:12px 16px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:15px}
   .btn-login{width:100%;padding:14px;background:#1D9E75;color:white;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer}
-  .btn-login:hover{background:#0F6E56}
   .back-link{text-align:center;margin-top:20px}
   .back-link a{color:#1D9E75;text-decoration:none}
+  .checkbox{display:flex;align-items:center;gap:8px;margin-bottom:20px}
 </style>
 </head>
 <body>
@@ -41,64 +40,54 @@
   <div class="login-header">
     <div class="icon"><i class="fas fa-stethoscope"></i></div>
     <h1>ĐĂNG NHẬP HỆ THỐNG</h1>
-    <p style="color:#999;margin-top:5px">Chọn vai trò để đăng nhập</p>
+    <p style="color:#999">Sử dụng tài khoản được cấp</p>
   </div>
 
   <div class="form-group">
-    <label><i class="fas fa-user-md"></i> Vai trò</label>
-    <select id="userRole">
-      <option value="">-- Chọn vai trò --</option>
-      <option value="nurse">👩‍⚕️ Điều dưỡng (Khám tổng quát)</option>
-      <option value="nk">🫀 Bác sĩ Nội khoa</option>
-      <option value="ng">🩺 Bác sĩ Ngoại khoa</option>
-      <option value="mt">👁 Bác sĩ Mắt</option>
-      <option value="tmh">👂 Bác sĩ Tai Mũi Họng</option>
-      <option value="rhm">🦷 Bác sĩ Răng Hàm Mặt</option>
-      <option value="sp">👶 Bác sĩ Sản phụ khoa</option>
-      <option value="conclusion">📝 Bác sĩ Kết luận</option>
-    </select>
+    <label><i class="fas fa-user"></i> Tên đăng nhập</label>
+    <input type="text" id="username" placeholder="Ví dụ: nk, ng, mt, nurse, conclusion">
   </div>
-
   <div class="form-group">
     <label><i class="fas fa-lock"></i> Mật khẩu</label>
-    <input type="password" id="password" placeholder="Nhập mật khẩu" value="123456">
+    <input type="password" id="password" placeholder="Mật khẩu (mặc định: 123456)">
+  </div>
+  <div class="checkbox">
+    <input type="checkbox" id="rememberMe">
+    <label>Ghi nhớ đăng nhập (7 ngày)</label>
   </div>
 
   <button class="btn-login" onclick="login()"><i class="fas fa-sign-in-alt"></i> Đăng nhập</button>
-
+  <div class="register-link" style="text-align: center; margin-top: 15px;">
+  Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a>
+</div>
   <div class="back-link">
     <a href="index.html"><i class="fas fa-arrow-left"></i> Quay lại trang chủ</a>
   </div>
+  <div id="errorMsg" style="color:red;text-align:center;margin-top:10px;display:none"></div>
 </div>
 
-<script>
-// Danh sách tài khoản
-const accounts = {
-  nurse:    { name: "Điều dưỡng", role: "nurse", icon: "👩‍⚕️", password: "123456" },
-  nk:       { name: "BS. Nguyễn Văn A", role: "specialist", specialty: "Nội khoa", specialtyId: "nk", icon: "🫀", password: "123456" },
-  ng:       { name: "BS. Trần Văn B", role: "specialist", specialty: "Ngoại khoa", specialtyId: "ng", icon: "🩺", password: "123456" },
-  mt:       { name: "BS. Lê Thị C", role: "specialist", specialty: "Mắt", specialtyId: "mt", icon: "👁", password: "123456" },
-  tmh:      { name: "BS. Phạm Văn D", role: "specialist", specialty: "Tai Mũi Họng", specialtyId: "tmh", icon: "👂", password: "123456" },
-  rhm:      { name: "BS. Hoàng Văn E", role: "specialist", specialty: "Răng Hàm Mặt", specialtyId: "rhm", icon: "🦷", password: "123456" },
-  sp:       { name: "BS. Nguyễn Thị F", role: "specialist", specialty: "Sản phụ khoa", specialtyId: "sp", icon: "👶", password: "123456" },
-  conclusion:{ name: "BS. Kết luận", role: "conclusion", icon: "📝", password: "123456" }
-};
+<script type="module">
+  import api from './js/api.js';
 
-function login() {
-  const role = document.getElementById('userRole').value;
-  const password = document.getElementById('password').value;
-  if(!role) {
-    alert('Vui lòng chọn vai trò');
-    return;
-  }
-  const user = accounts[role];
-  if(!user || user.password !== password) {
-    alert('Sai mật khẩu! Mật khẩu mặc định: 123456');
-    return;
-  }
-  sessionStorage.setItem('currentUser', JSON.stringify(user));
-  window.location.href = 'doctor-dashboard.html';
-}
+  window.login = async function() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
+    if (!username || !password) {
+      alert('Vui lòng nhập tên đăng nhập và mật khẩu');
+      return;
+    }
+    try {
+      const result = await api.login(username, password, rememberMe);
+      // Lấy thông tin chi tiết người dùng (bao gồm specialty)
+      const me = await api.getCurrentUser();
+      sessionStorage.setItem('currentUser', JSON.stringify(me.user));
+      window.location.href = 'doctor-dashboard.html';
+    } catch (err) {
+      document.getElementById('errorMsg').textContent = err.message;
+      document.getElementById('errorMsg').style.display = 'block';
+    }
+  };
 </script>
 </body>
 </html>

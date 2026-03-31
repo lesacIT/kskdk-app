@@ -1,253 +1,260 @@
-// backend/server.js
-// Load environment variables first
 require('dotenv').config();
-
 const express = require('express');
+const session = require('express-session');
+const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 const { initDatabase, getDb } = require('./database');
-const patientRoutes = require('./routes/patients');
-const examRoutes = require('./routes/exams');
 
-// Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
-const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// ==================== MIDDLEWARE ====================
-// CORS configuration
+// Cấu hình session – phải đặt trước các route
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'my_super_secret_key_change_me',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: false,          // true nếu dùng HTTPS
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 ngày
+  }
+}));
+
+// CORS: cho phép gửi cookie từ frontend
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: 'http://localhost:3000', // frontend URL
   credentials: true
 }));
 
-// Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.static(path.join(__dirname, '../frontend')));
 
-// Request logging middleware
-app.use((req, res, next) => {
-  const start = Date.now();
-  res.on('finish', () => {
-    const duration = Date.now() - start;
-    console.log(`${req.method} ${req.url} ${res.statusCode} - ${duration}ms`);
-  });
-  next();
-});
-
-// Static files serving
-const frontendPath = path.join(__dirname, '../frontend');
-if (fs.existsSync(frontendPath)) {
-  app.use(express.static(frontendPath));
-  console.log(`✅ Serving static files from: ${frontendPath}`);
-} else {
-  console.warn(`⚠️ Frontend directory not found: ${frontendPath}`);
+// Middleware kiểm tra đăng nhập
+function requireAuth(req, res, next) {
+  if (req.session && req.session.userId) {
+    next();
+  } else {
+    res.status(401).json({ error: 'Chưa đăng nhập' });
+  }
 }
 
-// ==================== API ROUTES ====================
-// Health check endpoint
-app.get('/api/health', (req, res) => {
+// ========== AUTH ==========
+app.post('/api/auth/login', async (req, res) => {
+  const { username, password, rememberMe } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ success: false, error: 'Thiếu tên đăng nhập hoặc mật khẩu' });
+  }
   try {
     const db = getDb();
+    const [rows] = await db.execute('SELECT * FROM users WHERE username = ?', [username]);
+    if (rows.length === 0) {
+      return res.status(401).json({ success: false, error: 'Sai tên đăng nhập hoặc mật khẩu' });
+    }
+    const user = rows[0];
+    const valid = await bcrypt.compare(password, user.password_hash);
+    if (!valid) {
+      return res.status(401).json({ success: false, error: 'Sai tên đăng nhập hoặc mật khẩu' });
+    }
+    // Lưu session
+    req.session.userId = user.id;
+    req.session.user = {
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      role: user.role,
+      specialty: user.specialty
+    };
+    if (rememberMe) {
+      req.session.cookie.maxAge = 7 * 24 * 60 * 60 * 1000; // 7 ngày
+    } else {
+      req.session.cookie.expires = false; // session cookie
+    }
     res.json({
       success: true,
-      status: 'OK',
-      timestamp: new Date().toISOString(),
-      environment: NODE_ENV,
-      uptime: process.uptime(),
-      database: db ? 'connected' : 'disconnected'
+      user: {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        role: user.role
+      }
     });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      status: 'ERROR',
-      error: error.message
-    });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Lỗi server' });
   }
 });
 
-// API info endpoint
-app.get('/api/info', (req, res) => {
-  res.json({
-    name: 'KSKDK Health Examination System',
-    version: '1.0.0',
-    description: 'Medical examination management system',
-    endpoints: {
-      patients: '/api/patients',
-      examinations: '/api/exams',
-      health: '/api/health'
-    }
+app.get('/api/auth/me', requireAuth, (req, res) => {
+  res.json({ success: true, user: req.session.user });
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) console.error('Logout error:', err);
+    res.clearCookie('connect.sid');
+    res.json({ success: true });
   });
 });
 
-// Patient routes
-app.use('/api/patients', patientRoutes);
-
-// Examination routes
-app.use('/api/exams', examRoutes);
-
-// ==================== FRONTEND ROUTES ====================
-// Serve main HTML file
-app.get('/', (req, res) => {
-  const indexPath = path.join(__dirname, '../frontend/index.html');
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    res.status(404).send(`
-      <!DOCTYPE html>
-      <html>
-      <head><title>KSKDK - Not Found</title></head>
-      <body>
-        <h1>⚠️ Frontend not found</h1>
-        <p>Please ensure the frontend files are in the correct directory.</p>
-        <p>Expected path: ${indexPath}</p>
-      </body>
-      </html>
-    `);
-  }
+// ========== EMPLOYEES ==========
+app.get('/api/employees', requireAuth, async (req, res) => {
+  const db = getDb();
+  const [rows] = await db.execute('SELECT * FROM employees ORDER BY created_at DESC');
+  res.json({ success: true, data: rows });
 });
 
-// Serve other frontend routes
-app.get('/index.html', (req, res) => {
-  res.redirect('/');
+app.get('/api/employees/:code', requireAuth, async (req, res) => {
+  const db = getDb();
+  const [rows] = await db.execute('SELECT * FROM employees WHERE patient_code = ?', [req.params.code]);
+  if (rows.length === 0) return res.status(404).json({ error: 'Không tìm thấy' });
+  res.json({ success: true, data: rows[0] });
 });
 
-// ==================== ERROR HANDLING ====================
-// 404 handler for undefined routes
-app.use((req, res) => {
-  // Check if it's an API request
-  if (req.path.startsWith('/api/')) {
-    res.status(404).json({
-      success: false,
-      error: `API endpoint not found: ${req.method} ${req.path}`
-    });
-  } else {
-    // Try to serve index.html for SPA routing
-    const indexPath = path.join(__dirname, '../frontend/index.html');
-    if (fs.existsSync(indexPath)) {
-      res.status(404).sendFile(indexPath);
-    } else {
-      res.status(404).send(`
-        <!DOCTYPE html>
-        <html>
-        <head><title>404 - Page Not Found</title></head>
-        <body>
-          <h1>404 - Page Not Found</h1>
-          <p>The requested page does not exist.</p>
-          <a href="/">Go to Homepage</a>
-        </body>
-        </html>
-      `);
-    }
-  }
-});
-
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error('❌ Error:', err.stack);
-  
-  // Don't expose internal errors in production
-  const errorMessage = NODE_ENV === 'production' 
-    ? 'Internal Server Error' 
-    : err.message;
-  
-  res.status(err.status || 500).json({
-    success: false,
-    error: errorMessage,
-    ...(NODE_ENV === 'development' && { stack: err.stack })
-  });
-});
-
-// ==================== SERVER STARTUP ====================
-async function startServer() {
+app.post('/api/employees', requireAuth, async (req, res) => {
+  const { patient_code, name, gender, dob, dept, position, phone, email, note } = req.body;
+  const db = getDb();
   try {
-    console.log('\n🚀 Starting KSKDK Health Examination System...\n');
-    
-    // Initialize database
-    console.log('📦 Initializing database...');
+    await db.execute(
+      `INSERT INTO employees (patient_code, name, gender, dob, dept, position, phone, email, note)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [patient_code, name, gender, dob, dept, position, phone, email, note]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') {
+      res.status(409).json({ error: 'Mã nhân viên đã tồn tại' });
+    } else {
+      console.error(err);
+      res.status(500).json({ error: err.message });
+    }
+  }
+});
+
+app.put('/api/employees/:code', requireAuth, async (req, res) => {
+  const { name, gender, dob, dept, position, phone, email, note } = req.body;
+  const db = getDb();
+  await db.execute(
+    `UPDATE employees SET name=?, gender=?, dob=?, dept=?, position=?, phone=?, email=?, note=?
+     WHERE patient_code=?`,
+    [name, gender, dob, dept, position, phone, email, note, req.params.code]
+  );
+  res.json({ success: true });
+});
+
+app.delete('/api/employees/:code', requireAuth, async (req, res) => {
+  const db = getDb();
+  await db.execute('DELETE FROM employees WHERE patient_code = ?', [req.params.code]);
+  res.json({ success: true });
+});
+
+// ========== REGISTRATIONS ==========
+app.post('/api/registrations', requireAuth, async (req, res) => {
+  const { empId, name, gender, dob, age, job, history, hazard, dept, registerDate } = req.body;
+  const db = getDb();
+  await db.execute(
+    `INSERT INTO registrations (emp_id, name, gender, dob, age, job, history, hazard, dept, register_date)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [empId, name, gender, dob, age, job, history, hazard, dept, registerDate || new Date().toISOString().slice(0,10)]
+  );
+  res.json({ success: true });
+});
+
+app.get('/api/registrations/today', requireAuth, async (req, res) => {
+  const db = getDb();
+  const today = new Date().toISOString().slice(0,10);
+  const [rows] = await db.execute(
+    'SELECT * FROM registrations WHERE register_date = ? ORDER BY register_time DESC',
+    [today]
+  );
+  res.json({ success: true, data: rows });
+});
+
+// ========== EXAMINATIONS ==========
+app.get('/api/examinations/:patientCode', requireAuth, async (req, res) => {
+  const db = getDb();
+  const [rows] = await db.execute(
+    `SELECT * FROM examinations WHERE emp_id = ? ORDER BY exam_date DESC LIMIT 1`,
+    [req.params.patientCode]
+  );
+  if (rows.length === 0) {
+    return res.json({ success: true, data: null });
+  }
+  const exam = rows[0];
+  exam.data = JSON.parse(exam.data);
+  exam.completed_sections = exam.completed_sections ? JSON.parse(exam.completed_sections) : [];
+  res.json({ success: true, data: exam });
+});
+
+app.post('/api/examinations', requireAuth, async (req, res) => {
+  const { patient_code, exam_data } = req.body;
+  const db = getDb();
+
+  // Kiểm tra bản ghi cũ
+  const [existing] = await db.execute(
+    `SELECT id FROM examinations WHERE emp_id = ? ORDER BY exam_date DESC LIMIT 1`,
+    [patient_code]
+  );
+
+  const dataJson = JSON.stringify(exam_data);
+  const sectionsJson = JSON.stringify(exam_data.completed_sections || []);
+
+  if (existing.length > 0) {
+    await db.execute(
+      `UPDATE examinations SET data = ?, completed_sections = ?, exam_date = NOW()
+       WHERE id = ?`,
+      [dataJson, sectionsJson, existing[0].id]
+    );
+  } else {
+    await db.execute(
+      `INSERT INTO examinations (emp_id, data, completed_sections, exam_date)
+       VALUES (?, ?, ?, NOW())`,
+      [patient_code, dataJson, sectionsJson]
+    );
+  }
+  res.json({ success: true });
+});
+// ========== REGISTER ==========
+app.post('/api/auth/register', async (req, res) => {
+  const { username, password, name, role, specialty } = req.body;
+  if (!username || !password || !name) {
+    return res.status(400).json({ success: false, error: 'Vui lòng điền đầy đủ thông tin' });
+  }
+  try {
+    const db = getDb();
+    const [existing] = await db.execute('SELECT id FROM users WHERE username = ?', [username]);
+    if (existing.length > 0) {
+      return res.status(409).json({ success: false, error: 'Tên đăng nhập đã tồn tại' });
+    }
+    const hashedPassword = bcrypt.hashSync(password, 8);
+    await db.execute(
+      `INSERT INTO users (username, password_hash, name, role, specialty)
+       VALUES (?, ?, ?, ?, ?)`,
+      [username, hashedPassword, name, role || 'user', specialty || null]
+    );
+    res.json({ success: true, message: 'Đăng ký thành công' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Lỗi server' });
+  }
+});
+// ========== SERVE FRONTEND ==========
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
+// ========== KHỞI ĐỘNG SERVER ==========
+async function start() {
+  try {
     await initDatabase();
-    console.log('✅ Database initialized successfully\n');
-    
-    // Start server
-    const server = app.listen(PORT, () => {
-      console.log('╔════════════════════════════════════════════════════════════╗');
-      console.log('║                                                            ║');
-      console.log('║   🏥 KSKDK HEALTH EXAMINATION SYSTEM                       ║');
-      console.log('║   📍 Server is running successfully!                       ║');
-      console.log('║                                                            ║');
-      console.log(`║   🌐 Local:       http://localhost:${PORT}                    ║`);
-      console.log(`║   🌍 Network:     http://${getLocalIP()}:${PORT}              ║`);
-      console.log('║   📡 API:        http://localhost:' + PORT + '/api/health     ║');
-      console.log('║                                                            ║');
-      console.log(`║   🗄️  Database:   SQLite (${process.env.DB_PATH || './kskdk.db'})  ║`);
-      console.log(`║   🌎 Environment: ${NODE_ENV}                               ║`);
-      console.log('║   ⏰ Started at: ' + new Date().toLocaleString() + '          ║');
-      console.log('║                                                            ║');
-      console.log('╚════════════════════════════════════════════════════════════╝');
-      console.log('\n✨ Ready to accept requests!\n');
+    app.listen(PORT, () => {
+      console.log(`🚀 Server chạy tại http://localhost:${PORT}`);
     });
-    
-    // Graceful shutdown
-    const shutdown = async (signal) => {
-      console.log(`\n⚠️ Received ${signal}, shutting down gracefully...`);
-      server.close(async () => {
-        console.log('✅ HTTP server closed');
-        // Close database connection
-        const db = getDb();
-        if (db && db.close) {
-          await db.close();
-          console.log('✅ Database connection closed');
-        }
-        console.log('👋 Shutdown complete');
-        process.exit(0);
-      });
-      
-      // Force shutdown after 10 seconds
-      setTimeout(() => {
-        console.error('❌ Force shutdown after timeout');
-        process.exit(1);
-      }, 10000);
-    };
-    
-    process.on('SIGTERM', () => shutdown('SIGTERM'));
-    process.on('SIGINT', () => shutdown('SIGINT'));
-    
-  } catch (error) {
-    console.error('❌ Failed to start server:', error);
+  } catch (err) {
+    console.error('❌ Không thể khởi động server:', err);
     process.exit(1);
   }
 }
 
-// Helper function to get local IP address
-function getLocalIP() {
-  const { networkInterfaces } = require('os');
-  const nets = networkInterfaces();
-  
-  for (const name of Object.keys(nets)) {
-    for (const net of nets[name]) {
-      // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
-      if (net.family === 'IPv4' && !net.internal) {
-        return net.address;
-      }
-    }
-  }
-  return 'localhost';
-}
-
-// Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
-  console.error('❌ Uncaught Exception:', error);
-  process.exit(1);
-});
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
-});
-
-// Start the server
-startServer();
+start();

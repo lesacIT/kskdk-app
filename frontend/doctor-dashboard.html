@@ -47,36 +47,15 @@
   .badge-warning{background:#FAEEDA;color:#BA7517}
   .badge-ready{background:#E1F5EE;color:#1D9E75}
   
-  /* Modal thông báo */
-  .modal{
-    display:none;
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.5);
-    z-index:2000;
-    align-items:center;
-    justify-content:center;
-  }
+  .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center}
   .modal.active{display:flex}
-  .modal-content{
-    background:white;
-    border-radius:var(--radius);
-    max-width:500px;
-    width:90%;
-    max-height:80vh;
-    overflow-y:auto;
-  }
+  .modal-content{background:white;border-radius:var(--radius);max-width:500px;width:90%;max-height:80vh;overflow-y:auto}
   .modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
   .modal-body{padding:20px}
   .modal-footer{padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:12px;justify-content:flex-end}
   .missing-list{list-style:none;margin-top:10px}
   .missing-list li{padding:10px 12px;margin:8px 0;background:var(--warn-light);border-left:4px solid #BA7517;border-radius:6px;display:flex;align-items:center;gap:10px}
-  .missing-list li i{color:#BA7517;font-size:16px}
   
-  /* Sidebar Navigation */
   .sidebar-nav{
     position:fixed;
     left:20px;
@@ -160,8 +139,8 @@
 <div class="main">
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-number" id="totalPatients">0</div><div>Tổng bệnh nhân</div></div>
-    <div class="stat-card"><div class="stat-number" id="examinedCount">0</div><div>Đã khám đủ</div></div>
-    <div class="stat-card"><div class="stat-number" id="pendingCount">0</div><div>Chưa đủ</div></div>
+    <div class="stat-card"><div class="stat-number" id="examinedCount">0</div><div>Đã khám</div></div>
+    <div class="stat-card"><div class="stat-number" id="pendingCount">0</div><div>Chưa khám</div></div>
   </div>
   
   <div class="search-card">
@@ -175,305 +154,243 @@
   <div class="patient-list">
     <table id="patientTable">
       <thead>
-        <tr><th>STT</th><th>Mã NV</th><th>Họ tên</th><th>Phòng ban</th><th>Trạng thái khám</th><th>Thao tác</th>
+        <tr><th>STT</th><th>Mã NV</th><th>Họ tên</th><th>Phòng ban</th><th>Trạng thái</th><th>Thao tác</th>
       </thead>
       <tbody id="patientTableBody"></tbody>
      </table
   </div>
 </div>
 
-<!-- Modal thông báo thiếu khoa -->
 <div id="missingModal" class="modal">
   <div class="modal-content">
-    <div class="modal-header">
-      <h3><i class="fas fa-exclamation-triangle" style="color:#BA7517"></i> KHÔNG THỂ KẾT LUẬN</h3>
-      <button onclick="closeModal()" style="background:none;border:none;font-size:24px;cursor:pointer">&times;</button>
-    </div>
-    <div class="modal-body">
-      <p style="margin-bottom:15px"><strong>Bệnh nhân chưa được khám đầy đủ các khoa bắt buộc!</strong></p>
-      <p>Vui lòng hoàn thành các khoa sau trước khi kết luận:</p>
-      <ul class="missing-list" id="missingList"></ul>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-exam" onclick="closeModal()" style="background:#6B7280">Đóng</button>
-    </div>
+    <div class="modal-header"><h3><i class="fas fa-exclamation-triangle"></i> THIẾU KHOA</h3><button onclick="closeModal()">&times;</button></div>
+    <div class="modal-body"><p><strong>Các khoa chưa được khám:</strong></p><ul class="missing-list" id="missingList"></ul></div>
+    <div class="modal-footer"><button class="btn-exam" onclick="closeModal()">Đóng</button></div>
   </div>
 </div>
 
-<script>
-let currentUser = null;
-let allPatients = [];
-let filteredPatients = [];
+<script type="module">
+  import api from './js/api.js';
 
-// Danh sách các khoa bắt buộc
-const requiredSpecialties = [
-  { id: 'tq', name: 'Tổng quát', icon: '📏' },
-  { id: 'nk', name: 'Nội khoa', icon: '🫀' },
-  { id: 'ng', name: 'Ngoại khoa/Da liễu', icon: '🩺' },
-  { id: 'mt', name: 'Mắt', icon: '👁' },
-  { id: 'tmh', name: 'Tai Mũi Họng', icon: '👂' },
-  { id: 'rhm', name: 'Răng Hàm Mặt', icon: '🦷' }
-];
+  let currentUser = null;
+  let allPatients = [];
+  let filteredPatients = [];
+  const requiredSpecialties = [
+    { id: 'tq', name: 'Tổng quát' },
+    { id: 'nk', name: 'Nội khoa' },
+    { id: 'ng', name: 'Ngoại khoa/Da liễu' },
+    { id: 'mt', name: 'Mắt' },
+    { id: 'tmh', name: 'Tai Mũi Họng' },
+    { id: 'rhm', name: 'Răng Hàm Mặt' }
+  ];
 
-// Tạo dữ liệu mẫu nếu chưa có
-function initSampleData() {
-  let completedExams = JSON.parse(localStorage.getItem('completedExams') || '[]');
-  if(completedExams.length === 0) {
-    const samplePatients = [
-      { id: "20000001", name: "NGUYỄN VĂN HÙNG", gender: "Nam", dob: "1995-03-10", dept: "Chuyền May 1" },
-      { id: "20000002", name: "TRẦN THỊ LAN", gender: "Nữ", dob: "1992-07-15", dept: "Chuyền May 1" },
-      { id: "20000003", name: "LÊ VĂN THÀNH", gender: "Nam", dob: "1988-11-22", dept: "Chuyền May 2" },
-      { id: "20000004", name: "PHẠM THỊ HOA", gender: "Nữ", dob: "1993-05-05", dept: "Chuyền May 2" },
-      { id: "20000005", name: "HOÀNG VĂN TÂM", gender: "Nam", dob: "1990-09-18", dept: "Chuyền Cắt" }
-    ];
-    
-    samplePatients.forEach(patient => {
-      const examData = {
-        tq: { height: "170", weight: "65", bmi: "22.5", pulse: "72", bpDisplay: "120/80", physicalClass: "Loại II" },
-        nk: { th_class: "Bình thường", hh_class: "Bình thường", thoa_class: "Bình thường", ttn_class: "Bình thường", nt_class: "Bình thường", cxk_class: "Bình thường", tk_class: "Bình thường", tthan_class: "Bình thường" },
-        ng: { ngoai_class: "Bình thường", da_class: "Bình thường" },
-        mt: { class: "Bình thường" },
-        tmh: { class: "Bình thường" },
-        rhm: { class: "Bình thường" }
-      };
-      if(patient.gender === 'Nữ') {
-        examData.sp = { content: "Bình thường", class: "Bình thường" };
-      }
-      completedExams.push({
-        patient: patient,
-        examData: examData,
-        completedSections: ['tq', 'nk', 'ng', 'mt', 'tmh', 'rhm'],
-        completeDate: new Date().toISOString()
+  async function loadUser() {
+    try {
+      const res = await api.getCurrentUser();
+      currentUser = res.user;
+      sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+      displayUserInfo();
+      loadPatients();
+    } catch (err) {
+      console.error('Not authenticated', err);
+      window.location.href = 'login.html';
+    }
+  }
+
+  function displayUserInfo() {
+    document.getElementById('userName').textContent = currentUser.name;
+    let roleText = '';
+    if (currentUser.role === 'nurse') roleText = 'Điều dưỡng';
+    else if (currentUser.role === 'specialist') roleText = `Bác sĩ ${currentUser.specialty}`;
+    else if (currentUser.role === 'conclusion') roleText = 'Bác sĩ kết luận';
+    document.getElementById('userRole').textContent = roleText;
+    let icon = '👤';
+    if (currentUser.specialty?.includes('Nội')) icon = '🫀';
+    else if (currentUser.specialty?.includes('Ngoại')) icon = '🩺';
+    else if (currentUser.specialty?.includes('Mắt')) icon = '👁';
+    else if (currentUser.specialty?.includes('Tai')) icon = '👂';
+    else if (currentUser.specialty?.includes('Răng')) icon = '🦷';
+    else if (currentUser.specialty?.includes('Sản')) icon = '👶';
+    else if (currentUser.role === 'nurse') icon = '👩‍⚕️';
+    else if (currentUser.role === 'conclusion') icon = '📝';
+    document.getElementById('userIcon').innerHTML = icon;
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('vi-VN');
+  }
+
+  async function loadPatients() {
+    const employeesRes = await api.getEmployees();
+    const employees = employeesRes.data;
+    // Lấy phiếu khám mới nhất cho từng nhân viên
+    const exams = await Promise.all(employees.map(async emp => {
+      try {
+        const examRes = await api.getLatestExamination(emp.patient_code);
+        return { emp, exam: examRes.data };
+      } catch { return { emp, exam: null }; }
+    }));
+
+    if (currentUser.role === 'nurse') {
+      // Điều dưỡng: hiển thị bệnh nhân chưa có tổng quát
+      allPatients = exams.map(({ emp, exam }) => {
+        const hasGeneral = exam?.data?.tq ? true : false;
+        return { ...emp, status: hasGeneral ? 'done' : 'pending' };
       });
-    });
-    localStorage.setItem('completedExams', JSON.stringify(completedExams));
-  }
-}
-
-function loadUserInfo() {
-  const stored = sessionStorage.getItem('currentUser');
-  if(!stored) { window.location.href = 'login.html'; return; }
-  currentUser = JSON.parse(stored);
-  let roleText = '';
-  if(currentUser.role === 'nurse') roleText = 'Điều dưỡng - Khám tổng quát';
-  else if(currentUser.role === 'specialist') roleText = `Bác sĩ ${currentUser.specialty}`;
-  else if(currentUser.role === 'conclusion') roleText = 'Bác sĩ kết luận';
-  document.getElementById('userName').textContent = currentUser.name;
-  document.getElementById('userRole').textContent = roleText;
-  document.getElementById('userIcon').innerHTML = currentUser.icon || '👤';
-  document.getElementById('currentDate').textContent = new Date().toLocaleDateString('vi-VN');
-}
-
-function loadPatients() {
-  const employees = JSON.parse(localStorage.getItem('employees') || '[]');
-  const completedExams = JSON.parse(localStorage.getItem('completedExams') || '[]');
-  
-  if(currentUser.role === 'nurse') {
-    // Điều dưỡng: hiển thị tất cả bệnh nhân, kiểm tra đã khám tổng quát chưa
-    allPatients = employees.map(emp => {
-      const exam = completedExams.find(e => e.patient?.empId === emp.id);
-      const hasGeneral = exam?.examData?.tq ? true : false;
-      return { ...emp, status: hasGeneral ? 'done' : 'pending', missingCount: hasGeneral ? 0 : 1 };
-    });
-  }
-  else if(currentUser.role === 'specialist') {
-    // Bác sĩ chuyên khoa: hiển thị tất cả bệnh nhân, kiểm tra đã khám khoa này chưa
-    const specialtyId = currentUser.specialtyId;
-    allPatients = employees.map(emp => {
-      const exam = completedExams.find(e => e.patient?.empId === emp.id);
-      const hasSpecialist = exam?.examData?.[specialtyId]?.class ? true : false;
-      return { ...emp, status: hasSpecialist ? 'done' : 'pending', missingCount: hasSpecialist ? 0 : 1 };
-    });
-  }
-  else if(currentUser.role === 'conclusion') {
-    // Bác sĩ kết luận: kiểm tra chi tiết từng khoa
-    allPatients = employees.map(emp => {
-      const exam = completedExams.find(e => e.patient?.empId === emp.id);
-      
-      // Nếu chưa có phiếu khám nào
-      if(!exam || !exam.examData) {
-        const allMissing = [...requiredSpecialties.map(s => s.name)];
-        if(emp.gender === 'Nữ') allMissing.push('Sản phụ khoa');
-        return { 
-          ...emp, 
-          status: 'pending',
-          missingCount: allMissing.length,
-          missingList: allMissing
-        };
-      }
-      
-      // Kiểm tra từng khoa
-      const missing = [];
-      requiredSpecialties.forEach(spec => {
-        if(!exam.examData[spec.id]) {
-          missing.push(spec.name);
+    } else if (currentUser.role === 'specialist') {
+      // Bác sĩ chuyên khoa: hiển thị bệnh nhân đã có tổng quát và chưa khám khoa này
+      const specialtyMap = {
+        'Nội khoa': 'nk', 'Ngoại khoa': 'ng', 'Mắt': 'mt',
+        'Tai Mũi Họng': 'tmh', 'Răng Hàm Mặt': 'rhm', 'Sản phụ khoa': 'sp'
+      };
+      const specId = specialtyMap[currentUser.specialty];
+      allPatients = exams.map(({ emp, exam }) => {
+        const hasGeneral = exam?.data?.tq ? true : false;
+        const hasSpecialist = exam?.data?.[specId]?.class ? true : false;
+        // Chỉ hiển thị nếu đã có tổng quát và chưa khám chuyên khoa này
+        return { ...emp, status: (hasGeneral && !hasSpecialist) ? 'pending' : 'done' };
+      });
+    } else if (currentUser.role === 'conclusion') {
+      // Bác sĩ kết luận: hiển thị bệnh nhân đã có đủ các khoa bắt buộc và chưa kết luận
+      allPatients = exams.map(({ emp, exam }) => {
+        if (!exam || !exam.data) {
+          const missingAll = [...requiredSpecialties.map(s=>s.name)];
+          if (emp.gender === 'Nữ') missingAll.push('Sản phụ khoa');
+          return { ...emp, status: 'pending', missingCount: missingAll.length, missingList: missingAll };
         }
-      });
-      if(emp.gender === 'Nữ' && !exam.examData.sp) {
-        missing.push('Sản phụ khoa');
+        const missing = [];
+        requiredSpecialties.forEach(spec => {
+          if (!exam.data[spec.id]) missing.push(spec.name);
+        });
+        if (emp.gender === 'Nữ' && !exam.data.sp) missing.push('Sản phụ khoa');
+        const hasAll = missing.length === 0;
+        const hasConclusion = exam.data.kl?.healthClass ? true : false;
+        let status = '';
+        if (hasConclusion) status = 'done';
+        else if (hasAll) status = 'ready';
+        else status = 'pending';
+        return { ...emp, status, missingCount: missing.length, missingList: missing };
+      }).filter(p => p.status !== 'done');
+    }
+    filteredPatients = [...allPatients];
+    updateStats();
+    renderPatientTable();
+  }
+
+  function updateStats() {
+    const total = allPatients.length;
+    let done = 0, pending = 0;
+    if (currentUser.role === 'conclusion') {
+      done = allPatients.filter(p => p.status === 'done').length;
+      pending = allPatients.filter(p => p.status !== 'done').length;
+    } else {
+      done = allPatients.filter(p => p.status === 'done').length;
+      pending = allPatients.filter(p => p.status === 'pending').length;
+    }
+    document.getElementById('totalPatients').textContent = total;
+    document.getElementById('examinedCount').textContent = done;
+    document.getElementById('pendingCount').textContent = pending;
+  }
+
+  function renderPatientTable() {
+    const tbody = document.getElementById('patientTableBody');
+    tbody.innerHTML = '';
+    filteredPatients.forEach((p, idx) => {
+      const row = tbody.insertRow();
+      row.insertCell(0).textContent = idx+1;
+      row.insertCell(1).innerHTML = `<strong style="color:var(--primary)">${p.patient_code}</strong>`;
+      row.insertCell(2).innerHTML = `<strong>${p.name}</strong>`;
+      row.insertCell(3).textContent = p.dept || '—';
+      let statusHtml = '';
+      if (currentUser.role === 'conclusion') {
+        if (p.status === 'ready') statusHtml = '<span class="badge badge-ready"><i class="fas fa-check-circle"></i> Đã khám đủ</span>';
+        else statusHtml = `<span class="badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Thiếu ${p.missingCount} khoa</span>`;
+      } else {
+        statusHtml = p.status === 'done' ? '<span class="badge badge-done">Đã khám</span>' : '<span class="badge badge-pending">Chưa khám</span>';
       }
-      
-      const hasAll = missing.length === 0;
-      const hasConclusion = exam.examData.kl?.healthClass ? true : false;
-      
-      let status = '';
-      if(hasConclusion) status = 'done';
-      else if(hasAll) status = 'ready';
-      else status = 'pending';
-      
-      return { 
-        ...emp, 
-        status: status,
-        missingCount: missing.length,
-        missingList: missing
-      };
+      row.insertCell(4).innerHTML = statusHtml;
+      let btnHtml = '';
+      if (currentUser.role === 'conclusion') {
+        if (p.status === 'ready') btnHtml = `<button class="btn-exam" onclick="startExam('${p.patient_code}')">Kết luận</button>`;
+        else btnHtml = `<button class="btn-exam" onclick="showMissingModal('${p.patient_code}')" style="background:#F59E0B">Xem thiếu (${p.missingCount})</button>`;
+      } else {
+        if (p.status === 'pending') btnHtml = `<button class="btn-exam" onclick="startExam('${p.patient_code}')">Khám</button>`;
+        else btnHtml = `<button class="btn-exam" disabled style="opacity:0.5">Đã khám</button>`;
+      }
+      row.insertCell(5).innerHTML = btnHtml;
     });
   }
-  
-  filteredPatients = [...allPatients];
-  updateStats();
-  renderPatientTable();
-}
 
-function updateStats() {
-  const total = allPatients.length;
-  let doneCount = 0;
-  let pendingCount = 0;
-  
-  if(currentUser.role === 'conclusion') {
-    doneCount = allPatients.filter(p => p.status === 'done').length;
-    pendingCount = allPatients.filter(p => p.status !== 'done').length;
-  } else {
-    doneCount = allPatients.filter(p => p.status === 'done').length;
-    pendingCount = allPatients.filter(p => p.status === 'pending').length;
+  function showMissingModal(empId) {
+    const patient = allPatients.find(p => p.patient_code === empId);
+    if (!patient) return;
+    const missingList = patient.missingList || [];
+    const html = missingList.map(m => `<li><i class="fas fa-times-circle"></i> ${m}</li>`).join('');
+    document.getElementById('missingList').innerHTML = html;
+    document.getElementById('missingModal').classList.add('active');
   }
-  
-  document.getElementById('totalPatients').textContent = total;
-  document.getElementById('examinedCount').textContent = doneCount;
-  document.getElementById('pendingCount').textContent = pendingCount;
-}
+  window.showMissingModal = showMissingModal;
 
-function renderPatientTable() {
-  const tbody = document.getElementById('patientTableBody');
-  tbody.innerHTML = '';
-  
-  filteredPatients.forEach((p, idx) => {
-    const row = tbody.insertRow();
-    row.insertCell(0).textContent = idx + 1;
-    row.insertCell(1).innerHTML = `<strong style="color:var(--primary)">${p.id}</strong>`;
-    row.insertCell(2).innerHTML = `<strong>${p.name}</strong>`;
-    row.insertCell(3).textContent = p.dept || '—';
-    
-    // Hiển thị trạng thái
-    let statusHtml = '';
-    if(currentUser.role === 'conclusion') {
-      if(p.status === 'done') {
-        statusHtml = '<span class="badge badge-done"><i class="fas fa-check-circle"></i> Đã kết luận</span>';
-      } else if(p.status === 'ready') {
-        statusHtml = '<span class="badge badge-ready"><i class="fas fa-check-circle"></i> Đã khám đủ</span>';
-      } else {
-        statusHtml = `<span class="badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Thiếu ${p.missingCount} khoa</span>`;
-      }
-    } else {
-      statusHtml = p.status === 'done' ? 
-        '<span class="badge badge-done"><i class="fas fa-check-circle"></i> Đã khám</span>' : 
-        '<span class="badge badge-pending"><i class="fas fa-clock"></i> Chưa khám</span>';
+  function closeModal() { document.getElementById('missingModal').classList.remove('active'); }
+  window.closeModal = closeModal;
+
+  function searchByEmployeeId() {
+    const id = document.getElementById('searchByIdInput').value.trim();
+    if (!id) { showToast('Nhập mã'); return; }
+    const patient = allPatients.find(p => p.patient_code === id);
+    if (patient) { filteredPatients = [patient]; renderPatientTable(); showToast(`Tìm thấy: ${patient.name}`); }
+    else { filteredPatients = []; renderPatientTable(); showToast(`Không tìm thấy mã ${id}`); }
+  }
+  window.searchByEmployeeId = searchByEmployeeId;
+
+  function resetSearch() {
+    document.getElementById('searchByIdInput').value = '';
+    filteredPatients = [...allPatients];
+    renderPatientTable();
+    showToast('Hiển thị tất cả');
+  }
+  window.resetSearch = resetSearch;
+
+  function startExam(empId) {
+    const patient = allPatients.find(p => p.patient_code === empId);
+    if (!patient) return;
+    sessionStorage.setItem('examPatient', JSON.stringify({
+      id: patient.patient_code,
+      name: patient.name,
+      dept: patient.dept,
+      dob: patient.dob,
+      gender: patient.gender
+    }));
+    if (currentUser.role === 'nurse') {
+      window.location.href = 'nurse-exam.html';
+    } else if (currentUser.role === 'specialist') {
+      const specialtyMap = { 'Nội khoa':'nk','Ngoại khoa':'ng','Mắt':'mt','Tai Mũi Họng':'tmh','Răng Hàm Mặt':'rhm','Sản phụ khoa':'sp' };
+      const spec = specialtyMap[currentUser.specialty];
+      window.location.href = `doctor-exam.html?specialty=${spec}`;
+    } else if (currentUser.role === 'conclusion') {
+      window.location.href = 'doctor-conclusion.html';
     }
-    row.insertCell(4).innerHTML = statusHtml;
-    
-    // Hiển thị nút thao tác
-    let buttonHtml = '';
-    if(currentUser.role === 'conclusion') {
-      if(p.status === 'done') {
-        buttonHtml = '<button class="btn-exam" disabled style="opacity:0.5"><i class="fas fa-check"></i> Đã kết luận</button>';
-      } else if(p.status === 'ready') {
-        buttonHtml = `<button class="btn-exam" onclick="startExam('${p.id}')"><i class="fas fa-clipboard-list"></i> Kết luận</button>`;
-      } else {
-        buttonHtml = `<button class="btn-exam" onclick="showMissingModal('${p.id}')" style="background:#F59E0B"><i class="fas fa-exclamation-triangle"></i> Xem thiếu (${p.missingCount})</button>`;
-      }
-    } else {
-      buttonHtml = `<button class="btn-exam" onclick="startExam('${p.id}')"><i class="fas fa-stethoscope"></i> Khám</button>`;
-    }
-    row.insertCell(5).innerHTML = buttonHtml;
+  }
+  window.startExam = startExam;
+
+  async function logout() {
+    try {
+      await api.logout();
+    } catch (e) {}
+    sessionStorage.clear();
+    window.location.href = 'login.html';
+  }
+  window.logout = logout;
+
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1F2937;color:white;padding:10px 20px;border-radius:30px;z-index:2000';
+    t.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2000);
+  }
+  window.showToast = showToast;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadUser();
   });
-}
-
-function showMissingModal(empId) {
-  const patient = allPatients.find(p => p.id === empId);
-  if(!patient) return;
-  
-  const missingList = patient.missingList || [];
-  const missingHtml = missingList.map(m => `<li><i class="fas fa-times-circle"></i> ${m}</li>`).join('');
-  
-  document.getElementById('missingList').innerHTML = missingHtml || '<li>Không xác định được khoa thiếu</li>';
-  document.getElementById('missingModal').classList.add('active');
-}
-
-function closeModal() {
-  document.getElementById('missingModal').classList.remove('active');
-}
-
-function searchByEmployeeId() {
-  const empId = document.getElementById('searchByIdInput').value.trim();
-  if(!empId) { showToast('Vui lòng nhập mã nhân viên'); return; }
-  const patient = allPatients.find(p => p.id === empId);
-  if(patient) {
-    filteredPatients = [patient];
-    renderPatientTable();
-    showToast(`Đã tìm thấy: ${patient.name}`);
-  } else {
-    filteredPatients = [];
-    renderPatientTable();
-    showToast(`Không tìm thấy nhân viên có mã: ${empId}`);
-  }
-}
-
-function resetSearch() {
-  document.getElementById('searchByIdInput').value = '';
-  filteredPatients = [...allPatients];
-  renderPatientTable();
-  showToast('Đã hiển thị lại toàn bộ danh sách');
-}
-
-function startExam(empId) {
-  const patient = allPatients.find(p => p.id === empId);
-  if(!patient) return;
-  
-  sessionStorage.setItem('examPatient', JSON.stringify({
-    id: patient.id,
-    name: patient.name,
-    dept: patient.dept,
-    dob: patient.dob,
-    gender: patient.gender
-  }));
-  
-  if(currentUser.role === 'nurse') {
-    window.location.href = 'nurse-exam.html';
-  } else if(currentUser.role === 'specialist') {
-    window.location.href = `doctor-exam.html?specialty=${currentUser.specialtyId}`;
-  } else if(currentUser.role === 'conclusion') {
-    window.location.href = 'doctor-conclusion.html';
-  }
-}
-
-function logout() { 
-  sessionStorage.clear(); 
-  window.location.href = 'login.html'; 
-}
-
-function showToast(msg) {
-  const toast = document.createElement('div');
-  toast.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1F2937;color:white;padding:10px 20px;border-radius:30px;font-size:14px;z-index:2000';
-  toast.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 2000);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  initSampleData();
-  loadUserInfo();
-  loadPatients();
-});
 </script>
 </body>
 </html>

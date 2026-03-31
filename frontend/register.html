@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng ký tài khoản - TKG TAEKWANG</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Segoe UI',sans-serif;
+    background:linear-gradient(135deg,#1D9E75 0%,#0F6E56 100%);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .register-container{
+    background:white;
+    border-radius:20px;
+    padding:40px;
+    width:450px;
+    max-width:90%;
+    box-shadow:0 20px 40px rgba(0,0,0,0.2);
+  }
+  .register-header{text-align:center;margin-bottom:30px}
+  .register-header .icon{font-size:60px;color:#1D9E75}
+  .register-header h1{font-size:24px;color:#1D9E75;margin-top:10px}
+  .form-group{margin-bottom:20px}
+  .form-group label{display:block;margin-bottom:8px;font-weight:500;color:#666}
+  .form-group input,.form-group select{width:100%;padding:12px 16px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:15px}
+  .form-group input:focus,.form-group select:focus{outline:none;border-color:#1D9E75}
+  .btn-register{width:100%;padding:14px;background:#1D9E75;color:white;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer}
+  .btn-register:hover{background:#0F6E56}
+  .back-link{text-align:center;margin-top:20px}
+  .back-link a{color:#1D9E75;text-decoration:none}
+  .error-message{color:#d32f2f;background:#ffebee;padding:10px;border-radius:8px;margin-top:10px;text-align:center;display:none}
+  .success-message{color:#388e3c;background:#e8f5e9;padding:10px;border-radius:8px;margin-top:10px;text-align:center;display:none}
+</style>
+</head>
+<body>
+<div class="register-container">
+  <div class="register-header">
+    <div class="icon"><i class="fas fa-user-plus"></i></div>
+    <h1>ĐĂNG KÝ TÀI KHOẢN</h1>
+    <p style="color:#999">Tạo tài khoản để sử dụng hệ thống</p>
+  </div>
+
+  <div class="form-group">
+    <label><i class="fas fa-user"></i> Tên đăng nhập *</label>
+    <input type="text" id="username" placeholder="Ví dụ: bacsixyz" autocomplete="username">
+  </div>
+  <div class="form-group">
+    <label><i class="fas fa-user-circle"></i> Họ tên *</label>
+    <input type="text" id="fullname" placeholder="Họ và tên">
+  </div>
+  <div class="form-group">
+    <label><i class="fas fa-stethoscope"></i> Vai trò</label>
+    <select id="role">
+      <option value="specialist">Bác sĩ chuyên khoa</option>
+      <option value="nurse">Điều dưỡng</option>
+      <option value="conclusion">Bác sĩ kết luận</option>
+    </select>
+  </div>
+  <div class="form-group" id="specialtyGroup">
+    <label><i class="fas fa-notes-medical"></i> Chuyên khoa (nếu là bác sĩ)</label>
+    <select id="specialty">
+      <option value="Nội khoa">Nội khoa</option>
+      <option value="Ngoại khoa">Ngoại khoa</option>
+      <option value="Mắt">Mắt</option>
+      <option value="Tai Mũi Họng">Tai Mũi Họng</option>
+      <option value="Răng Hàm Mặt">Răng Hàm Mặt</option>
+      <option value="Sản phụ khoa">Sản phụ khoa</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label><i class="fas fa-lock"></i> Mật khẩu *</label>
+    <input type="password" id="password" placeholder="Ít nhất 6 ký tự" autocomplete="new-password" required>
+  </div>
+  <div class="form-group">
+    <label><i class="fas fa-lock"></i> Xác nhận mật khẩu *</label>
+    <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu" autocomplete="new-password" required>
+  </div>
+
+  <button class="btn-register" onclick="register()"><i class="fas fa-user-plus"></i> Đăng ký</button>
+
+  <div class="back-link">
+    <a href="login.html"><i class="fas fa-arrow-left"></i> Quay lại đăng nhập</a>
+  </div>
+  <div id="errorMsg" class="error-message"></div>
+  <div id="successMsg" class="success-message"></div>
+</div>
+
+<script type="module">
+  import api from './js/api.js';
+
+  // Hiển thị/hide chuyên khoa dựa trên vai trò
+  const roleSelect = document.getElementById('role');
+  const specialtyGroup = document.getElementById('specialtyGroup');
+  roleSelect.addEventListener('change', () => {
+    if (roleSelect.value === 'specialist') {
+      specialtyGroup.style.display = 'block';
+    } else {
+      specialtyGroup.style.display = 'none';
+    }
+  });
+
+  window.register = async function() {
+    const username = document.getElementById('username').value.trim();
+    const fullname = document.getElementById('fullname').value.trim();
+    const role = document.getElementById('role').value;
+    const specialty = document.getElementById('specialty').value;
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirmPassword').value;
+
+    document.getElementById('errorMsg').style.display = 'none';
+    document.getElementById('successMsg').style.display = 'none';
+
+    if (!username || !fullname || !password) {
+      showError('Vui lòng điền đầy đủ thông tin');
+      return;
+    }
+    if (password !== confirm) {
+      showError('Mật khẩu xác nhận không khớp');
+      return;
+    }
+    if (password.length < 6) {
+      showError('Mật khẩu phải có ít nhất 6 ký tự');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username,
+          password,
+          name: fullname,
+          role,
+          specialty: role === 'specialist' ? specialty : null
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Đăng ký thất bại');
+      document.getElementById('successMsg').textContent = 'Đăng ký thành công! Vui lòng đăng nhập.';
+      document.getElementById('successMsg').style.display = 'block';
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 2000);
+    } catch (err) {
+      showError(err.message);
+    }
+  };
+
+  function showError(msg) {
+    const errorDiv = document.getElementById('errorMsg');
+    errorDiv.textContent = msg;
+    errorDiv.style.display = 'block';
+  }
+</script>
+</body>
+</html>

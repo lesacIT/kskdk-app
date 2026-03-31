@@ -3,101 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kết luận - Bác sĩ</title>
+<title>Kết luận - Hệ thống khám sức khỏe TKG</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  :root{
-    --primary:#1D9E75;--primary-dark:#0F6E56;--primary-light:#E1F5EE;
-    --bg:#f5f7f5;--card:#fff;--border:#e0e0e0;
-    --radius:12px;
-  }
+  :root{--primary:#1D9E75;--primary-dark:#0F6E56;--primary-light:#E1F5EE;--bg:#f5f7f5;--card:#fff;--border:#e0e0e0;--radius:12px}
   body{font-family:'Segoe UI',sans-serif;background:var(--bg);min-height:100vh}
   .header{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:white;padding:20px}
-  .header-content{max-width:1000px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
+  .header-content{max-width:800px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
   .back-btn{background:rgba(255,255,255,0.2);border:none;color:white;padding:8px 16px;border-radius:30px;cursor:pointer}
-  .main{max-width:1000px;margin:0 auto;padding:20px}
-  
-  /* Sidebar Navigation */
-  .sidebar-nav{
-    position:fixed;
-    left:20px;
-    top:50%;
-    transform:translateY(-50%);
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    z-index:1000;
-  }
-  .nav-circle{
-    width:50px;
-    height:50px;
-    border-radius:50%;
-    background:white;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-decoration:none;
-    color:var(--primary);
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-    transition:all 0.3s;
-    font-size:22px;
-  }
-  .nav-circle:hover{
-    transform:scale(1.1);
-    background:var(--primary);
-    color:white;
-  }
-  .nav-tooltip{
-    position:absolute;
-    left:60px;
-    background:#333;
-    color:white;
-    padding:5px 10px;
-    border-radius:8px;
-    font-size:12px;
-    white-space:nowrap;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity 0.3s;
-  }
-  .nav-circle:hover .nav-tooltip{
-    opacity:1;
-  }
-  
+  .main{max-width:800px;margin:0 auto;padding:20px}
+  .sidebar-nav{position:fixed;left:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;z-index:1000}
+  .nav-circle{width:50px;height:50px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--primary);box-shadow:0 2px 10px rgba(0,0,0,0.1);transition:all 0.3s;font-size:22px}
+  .nav-circle:hover{transform:scale(1.1);background:var(--primary);color:white}
+  .nav-tooltip{position:absolute;left:60px;background:#333;color:white;padding:5px 10px;border-radius:8px;font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.3s}
+  .nav-circle:hover .nav-tooltip{opacity:1}
   .patient-card{background:white;border-radius:var(--radius);padding:20px;margin-bottom:20px;border:1px solid var(--border)}
   .patient-info{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  
-  .exam-card{background:white;border-radius:var(--radius);padding:20px;margin-bottom:20px;border:1px solid var(--border)}
-  .exam-card h3{color:var(--primary-dark);margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--primary-light)}
-  
-  .form-group{margin-bottom:16px}
-  .form-group label{display:block;margin-bottom:6px;font-weight:500;color:#666}
-  .form-group textarea{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;min-height:100px}
-  .form-group input{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px}
-  
-  .health-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:15px 0}
-  .health-btn{border:2px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer;background:white}
-  .health-btn.selected{border-color:var(--primary);background:var(--primary-light);color:var(--primary-dark)}
+  .form-group{margin-bottom:20px}
+  .form-group label{display:block;margin-bottom:8px;font-weight:500;color:#666}
+  .form-group input,.form-group select,.form-group textarea{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px}
+  .health-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px}
+  .health-option{border:2px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;transition:all 0.2s}
+  .health-option.selected{border-color:var(--primary);background:var(--primary-light)}
   .health-num{font-size:24px;font-weight:700}
-  
+  .health-label{font-size:12px;color:var(--text-muted)}
   .radio-group{display:flex;gap:12px;flex-wrap:wrap}
-  .radio-label{display:flex;align-items:center;gap:6px;padding:8px 16px;border:1.5px solid var(--border);border-radius:30px;cursor:pointer}
+  .radio-label{padding:8px 16px;border:1.5px solid var(--border);border-radius:30px;cursor:pointer}
   .radio-label.selected{background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark)}
-  
   .action-buttons{display:flex;gap:12px;margin-top:20px}
   .btn-primary{flex:1;background:var(--primary);color:white;border:none;padding:14px;border-radius:10px;font-weight:600;cursor:pointer}
   .btn-secondary{flex:1;background:#fff;color:var(--primary-dark);border:1.5px solid var(--primary);padding:14px;border-radius:10px;cursor:pointer}
-  
   .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:10px 20px;border-radius:30px;opacity:0;transition:opacity 0.3s;z-index:1001}
   .toast.show{opacity:1}
-  
-  @media(max-width:768px){
-    .sidebar-nav{left:10px}
-    .nav-circle{width:40px;height:40px;font-size:18px}
-    .health-grid{grid-template-columns:repeat(3,1fr)}
-    .patient-info{grid-template-columns:1fr}
-  }
+  @media(max-width:768px){.sidebar-nav{left:10px}.nav-circle{width:40px;height:40px;font-size:18px}.patient-info{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -106,14 +45,14 @@
   <a href="index.html" class="nav-circle"><i class="fas fa-home"></i><span class="nav-tooltip">Trang chủ</span></a>
   <a href="exam-summary.html" class="nav-circle"><i class="fas fa-chart-line"></i><span class="nav-tooltip">Tổng hợp</span></a>
   <a href="employee-manager.html" class="nav-circle"><i class="fas fa-users"></i><span class="nav-tooltip">Quản lý NV</span></a>
-  <a href="doctor-conclusion.html" class="nav-circle" style="background:var(--primary);color:white"><i class="fas fa-stethoscope"></i><span class="nav-tooltip">Kết luận</span></a>
+  <a href="doctor-dashboard.html" class="nav-circle"><i class="fas fa-stethoscope"></i><span class="nav-tooltip">Dashboard</span></a>
   <a href="login.html" class="nav-circle" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i><span class="nav-tooltip">Đăng xuất</span></a>
 </div>
 
 <div class="header">
   <div class="header-content">
     <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Quay lại</button>
-    <div><i class="fas fa-stethoscope"></i> <span id="userName"></span></div>
+    <div><i class="fas fa-clipboard-list"></i> Kết luận sức khỏe</div>
   </div>
 </div>
 
@@ -128,221 +67,234 @@
       <div><strong>Giới tính:</strong> <span id="patientGender"></span></div>
     </div>
   </div>
-  
-  <div class="exam-card">
-    <h3>📋 TỔNG HỢP KẾT QUẢ KHÁM</h3>
-    <div id="summaryTable"></div>
-  </div>
-  
-  <div class="exam-card">
-    <h3>🏆 PHÂN LOẠI SỨC KHỎE TỔNG THỂ (I-V)</h3>
-    <div class="health-grid" id="healthGrid">
-      <div class="health-btn" data-class="1" onclick="selectHealthClass(1)"><div class="health-num">I</div><div>Rất tốt</div></div>
-      <div class="health-btn" data-class="2" onclick="selectHealthClass(2)"><div class="health-num">II</div><div>Tốt</div></div>
-      <div class="health-btn" data-class="3" onclick="selectHealthClass(3)"><div class="health-num">III</div><div>Trung bình</div></div>
-      <div class="health-btn" data-class="4" onclick="selectHealthClass(4)"><div class="health-num">IV</div><div>Kém</div></div>
-      <div class="health-btn" data-class="5" onclick="selectHealthClass(5)"><div class="health-num">V</div><div>Rất kém</div></div>
-    </div>
-  </div>
-  
-  <div class="exam-card">
-    <h3>✅ KẾT LUẬN</h3>
-    <div class="form-group">
-      <label>Các bệnh tật (nếu có)</label>
-      <textarea id="diseases" placeholder="Liệt kê các bệnh phát hiện..."></textarea>
-    </div>
-    <div class="form-group">
-      <label>Kết luận đủ/không đủ sức khỏe làm việc</label>
-      <div class="radio-group" id="fitGroup">
-        <label class="radio-label" onclick="selectFit(this, 'Đủ sức khỏe')">✅ Đủ sức khỏe</label>
-        <label class="radio-label" onclick="selectFit(this, 'Không đủ sức khỏe')">❌ Không đủ</label>
-        <label class="radio-label" onclick="selectFit(this, 'Tạm thời không đủ')">⏸ Tạm hoãn</label>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">🏆</span><h2>Phân loại sức khỏe tổng thể</h2></div>
+    <div class="card-body">
+      <div class="health-grid" id="healthClassGrid">
+        <div class="health-option" data-class="1"><div class="health-num">I</div><div class="health-label">Rất tốt</div></div>
+        <div class="health-option" data-class="2"><div class="health-num">II</div><div class="health-label">Tốt</div></div>
+        <div class="health-option" data-class="3"><div class="health-num">III</div><div class="health-label">Trung bình</div></div>
+        <div class="health-option" data-class="4"><div class="health-num">IV</div><div class="health-label">Kém</div></div>
+        <div class="health-option" data-class="5"><div class="health-num">V</div><div class="health-label">Rất kém</div></div>
       </div>
     </div>
-    <div class="form-group">
-      <label>Hướng giải quyết / ghi chú thêm</label>
-      <textarea id="resolution" placeholder="Chuyển khám chuyên sâu, theo dõi định kỳ..."></textarea>
-    </div>
-    <div class="form-group">
-      <label>Họ tên bác sĩ kết luận</label>
-      <input type="text" id="doctorName" placeholder="BS. Nguyễn Văn A">
-    </div>
-    <div class="form-group">
-      <label>Ngày ký</label>
-      <input type="date" id="signDate">
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">✅</span><h2>Kết luận</h2></div>
+    <div class="card-body">
+      <div class="form-group">
+        <label>Các bệnh tật (nếu có)</label>
+        <textarea id="diseases" rows="3" placeholder="Liệt kê các bệnh phát hiện..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Kết luận đủ/không đủ sức khỏe làm việc</label>
+        <div class="radio-group" id="fitGroup">
+          <label class="radio-label" onclick="selectFit(this, 'Đủ sức khỏe')">✅ Đủ sức khỏe</label>
+          <label class="radio-label" onclick="selectFit(this, 'Không đủ sức khỏe')">❌ Không đủ</label>
+          <label class="radio-label" onclick="selectFit(this, 'Tạm thời không đủ')">⏸ Tạm hoãn</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Hướng giải quyết / ghi chú thêm</label>
+        <textarea id="resolution" rows="3"></textarea>
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-group"><label>Họ tên bác sĩ</label><input type="text" id="doctorName" placeholder="BS. Nguyễn Văn A"></div>
+        <div class="form-group"><label>Ngày ký</label><input type="date" id="signDate"></div>
+      </div>
+      <div class="form-group"><label>Cơ sở khám bệnh</label><input type="text" id="clinicName" placeholder="Trung tâm y tế / BV..."></div>
     </div>
   </div>
-  
+
   <div class="action-buttons">
     <button class="btn-secondary" onclick="saveDraft()"><i class="fas fa-save"></i> Lưu tạm</button>
-    <button class="btn-primary" onclick="completeExam()"><i class="fas fa-check-circle"></i> Hoàn tất phiếu</button>
+    <button class="btn-primary" onclick="completeConclusion()"><i class="fas fa-check-circle"></i> Hoàn tất kết luận</button>
   </div>
 </div>
 
 <div class="toast" id="toast"><i class="fas fa-info-circle"></i> <span id="toastMsg"></span></div>
 
-<script>
-let currentUser = null;
-let currentPatient = null;
-let selectedHealthClass = null;
-let selectedFit = null;
+<script type="module">
+  import api from './js/api.js';
 
-function loadUser() {
-  const stored = sessionStorage.getItem('currentUser');
-  if(!stored) {
-    window.location.href = 'login.html';
-    return;
+  let currentPatient = null;
+  let currentUser = null;
+
+  async function loadUser() {
+    try {
+      const res = await api.getCurrentUser();
+      currentUser = res.user;
+      document.getElementById('doctorName').value = currentUser.name;
+    } catch (err) {
+      window.location.href = 'login.html';
+    }
   }
-  currentUser = JSON.parse(stored);
-  document.getElementById('userName').innerHTML = `${currentUser.icon} ${currentUser.name}`;
-}
 
-function loadPatient() {
-  const stored = sessionStorage.getItem('examPatient');
-  if(!stored) {
-    showToast('Không tìm thấy thông tin bệnh nhân!', true);
+  async function loadPatient() {
+    const stored = sessionStorage.getItem('examPatient');
+    if (!stored) {
+      showToast('Không tìm thấy bệnh nhân', true);
+      setTimeout(() => window.location.href = 'doctor-dashboard.html', 1500);
+      return;
+    }
+    currentPatient = JSON.parse(stored);
+    document.getElementById('patientId').textContent = currentPatient.id;
+    document.getElementById('patientName').textContent = currentPatient.name;
+    document.getElementById('patientDept').textContent = currentPatient.dept || '—';
+    document.getElementById('patientDob').textContent = currentPatient.dob || '—';
+    document.getElementById('patientGender').textContent = currentPatient.gender || '—';
+    document.getElementById('signDate').value = new Date().toISOString().slice(0,10);
+    await loadExistingConclusion();
+  }
+
+  async function loadExistingConclusion() {
+    try {
+      const res = await api.getLatestExamination(currentPatient.id);
+      const exam = res.data;
+      if (exam && exam.data && exam.data.kl) {
+        const kl = exam.data.kl;
+        if (kl.healthClass) {
+          document.querySelector(`.health-option[data-class="${kl.healthClass}"]`).classList.add('selected');
+        }
+        if (kl.diseases) document.getElementById('diseases').value = kl.diseases;
+        if (kl.fit) {
+          document.querySelectorAll('#fitGroup .radio-label').forEach(l => {
+            if (l.textContent.trim() === kl.fit) l.classList.add('selected');
+          });
+        }
+        if (kl.resolution) document.getElementById('resolution').value = kl.resolution;
+        if (kl.doctor) document.getElementById('doctorName').value = kl.doctor;
+        if (kl.signDate) document.getElementById('signDate').value = kl.signDate;
+        if (kl.clinic) document.getElementById('clinicName').value = kl.clinic;
+      }
+    } catch (err) { console.error(err); }
+  }
+
+  function selectHealthClass(element) {
+    document.querySelectorAll('.health-option').forEach(opt => opt.classList.remove('selected'));
+    element.classList.add('selected');
+  }
+  window.selectHealthClass = function(element) { selectHealthClass(element); };
+
+  function selectFit(element, value) {
+    document.querySelectorAll('#fitGroup .radio-label').forEach(l => l.classList.remove('selected'));
+    element.classList.add('selected');
+  }
+  window.selectFit = selectFit;
+
+  function getSelectedHealthClass() {
+    const selected = document.querySelector('.health-option.selected');
+    return selected ? parseInt(selected.getAttribute('data-class')) : null;
+  }
+
+  function getSelectedFit() {
+    const selected = document.querySelector('#fitGroup .radio-label.selected');
+    return selected ? selected.textContent.trim() : null;
+  }
+
+  async function saveDraft() {
+    if (!currentPatient) return;
+    const examData = {
+      kl: {
+        healthClass: getSelectedHealthClass(),
+        diseases: document.getElementById('diseases').value,
+        fit: getSelectedFit(),
+        resolution: document.getElementById('resolution').value,
+        doctor: document.getElementById('doctorName').value,
+        signDate: document.getElementById('signDate').value,
+        clinic: document.getElementById('clinicName').value
+      }
+    };
+    // Lưu draft vào localStorage tạm thời
+    localStorage.setItem('conclusionDraft_' + currentPatient.id, JSON.stringify(examData.kl));
+    showToast('Đã lưu tạm');
+  }
+  window.saveDraft = saveDraft;
+
+  async function loadDraft() {
+    const draft = localStorage.getItem('conclusionDraft_' + currentPatient.id);
+    if (draft) {
+      const kl = JSON.parse(draft);
+      if (kl.healthClass) {
+        document.querySelector(`.health-option[data-class="${kl.healthClass}"]`).classList.add('selected');
+      }
+      if (kl.diseases) document.getElementById('diseases').value = kl.diseases;
+      if (kl.fit) {
+        document.querySelectorAll('#fitGroup .radio-label').forEach(l => {
+          if (l.textContent.trim() === kl.fit) l.classList.add('selected');
+        });
+      }
+      if (kl.resolution) document.getElementById('resolution').value = kl.resolution;
+      if (kl.doctor) document.getElementById('doctorName').value = kl.doctor;
+      if (kl.signDate) document.getElementById('signDate').value = kl.signDate;
+      if (kl.clinic) document.getElementById('clinicName').value = kl.clinic;
+    }
+  }
+
+  async function completeConclusion() {
+    if (!currentPatient) return;
+    const klData = {
+      healthClass: getSelectedHealthClass(),
+      diseases: document.getElementById('diseases').value,
+      fit: getSelectedFit(),
+      resolution: document.getElementById('resolution').value,
+      doctor: document.getElementById('doctorName').value,
+      signDate: document.getElementById('signDate').value,
+      clinic: document.getElementById('clinicName').value
+    };
+    if (!klData.healthClass) {
+      showToast('Vui lòng chọn phân loại sức khỏe (I-V)');
+      return;
+    }
+    if (!klData.fit) {
+      showToast('Vui lòng chọn kết luận đủ/không đủ sức khỏe');
+      return;
+    }
+
+    // Lấy phiếu khám hiện tại
+    let existingExam = null;
+    try {
+      const res = await api.getLatestExamination(currentPatient.id);
+      existingExam = res.data;
+    } catch (err) {}
+    let examDataObj = existingExam ? existingExam.data : {};
+    examDataObj.kl = klData;
+    let sections = existingExam?.completed_sections ? JSON.parse(existingExam.completed_sections) : [];
+    if (!sections.includes('kl')) sections.push('kl');
+    await api.saveExamination(currentPatient.id, { ...examDataObj, completed_sections: sections });
+    localStorage.removeItem('conclusionDraft_' + currentPatient.id);
+    showToast('✅ Đã hoàn tất kết luận!');
     setTimeout(() => window.location.href = 'doctor-dashboard.html', 1500);
-    return;
   }
-  currentPatient = JSON.parse(stored);
-  document.getElementById('patientId').textContent = currentPatient.id;
-  document.getElementById('patientName').textContent = currentPatient.name;
-  document.getElementById('patientDept').textContent = currentPatient.dept || '—';
-  document.getElementById('patientDob').textContent = currentPatient.dob || '—';
-  document.getElementById('patientGender').textContent = currentPatient.gender || '—';
-  document.getElementById('signDate').value = new Date().toISOString().slice(0,10);
-  loadSummary();
-  loadSavedConclusion();
-}
+  window.completeConclusion = completeConclusion;
 
-function loadSummary() {
-  const completedExams = JSON.parse(localStorage.getItem('completedExams') || '[]');
-  const exam = completedExams.find(e => e.patient?.empId === currentPatient.id);
-  const data = exam?.examData || {};
-  const tq = data.tq || {};
-  const nk = data.nk || {};
-  const ng = data.ng || {};
-  const mt = data.mt || {};
-  const tmh = data.tmh || {};
-  const rhm = data.rhm || {};
-  
-  let html = `<table style="width:100%; border-collapse:collapse;">`;
-  if(tq.height) html += `<tr><td style="padding:6px; border-bottom:1px solid #eee"><strong>Tổng quát</strong></td><td style="padding:6px; border-bottom:1px solid #eee">${tq.height}cm / ${tq.weight}kg | 💓 ${tq.pulse} | 🩸 ${tq.bpDisplay}<br>Thể lực: ${tq.physicalClass || '—'}</td></tr>`;
-  if(nk.th_class) html += `<tr><td style="padding:6px; border-bottom:1px solid #eee"><strong>Nội khoa</strong></td><td style="padding:6px; border-bottom:1px solid #eee">Tuần hoàn: ${nk.th_class}, Hô hấp: ${nk.hh_class}, Tiêu hóa: ${nk.thoa_class}, ...</td></tr>`;
-  if(ng.ngoai_class) html += `<tr><td style="padding:6px; border-bottom:1px solid #eee"><strong>Ngoại khoa/Da liễu</strong></td><td style="padding:6px; border-bottom:1px solid #eee">Ngoại: ${ng.ngoai_class}, Da: ${ng.da_class}</td></tr>`;
-  if(mt.class) html += `<tr><td style="padding:6px; border-bottom:1px solid #eee"><strong>Mắt</strong></td><td style="padding:6px; border-bottom:1px solid #eee">${mt.class}</td></tr>`;
-  if(tmh.class) html += `<tr><td style="padding:6px; border-bottom:1px solid #eee"><strong>TMH</strong></td><td style="padding:6px; border-bottom:1px solid #eee">${tmh.class}</td></tr>`;
-  if(rhm.class) html += `<tr><td style="padding:6px; border-bottom:1px solid #eee"><strong>RHM</strong></td><td style="padding:6px; border-bottom:1px solid #eee">${rhm.class}</td></tr>`;
-  html += `</table>`;
-  document.getElementById('summaryTable').innerHTML = html;
-}
+  function goBack() { window.location.href = 'doctor-dashboard.html'; }
+  window.goBack = goBack;
 
-function selectHealthClass(cls) {
-  selectedHealthClass = cls;
-  document.querySelectorAll('.health-btn').forEach(btn => btn.classList.remove('selected'));
-  document.querySelector(`.health-btn[data-class="${cls}"]`).classList.add('selected');
-}
+  function logout() { api.logout(); sessionStorage.clear(); window.location.href = 'login.html'; }
+  window.logout = logout;
 
-function selectFit(element, value) {
-  selectedFit = value;
-  document.querySelectorAll('#fitGroup .radio-label').forEach(l => l.classList.remove('selected'));
-  element.classList.add('selected');
-}
-
-function saveDraft() {
-  const data = {
-    healthClass: selectedHealthClass,
-    diseases: document.getElementById('diseases').value,
-    fit: selectedFit,
-    resolution: document.getElementById('resolution').value,
-    doctor: document.getElementById('doctorName').value,
-    signDate: document.getElementById('signDate').value
-  };
-  let allConclusion = JSON.parse(localStorage.getItem('conclusionDrafts') || '{}');
-  allConclusion[currentPatient.id] = data;
-  localStorage.setItem('conclusionDrafts', JSON.stringify(allConclusion));
-  showToast('Đã lưu tạm kết luận');
-}
-
-function loadSavedConclusion() {
-  const drafts = JSON.parse(localStorage.getItem('conclusionDrafts') || '{}');
-  const saved = drafts[currentPatient.id];
-  if(saved) {
-    if(saved.healthClass) selectHealthClass(saved.healthClass);
-    document.getElementById('diseases').value = saved.diseases || '';
-    if(saved.fit) selectFit(document.querySelector(`#fitGroup .radio-label:contains('${saved.fit}')`), saved.fit);
-    document.getElementById('resolution').value = saved.resolution || '';
-    document.getElementById('doctorName').value = saved.doctor || '';
-    document.getElementById('signDate').value = saved.signDate || new Date().toISOString().slice(0,10);
+  function showToast(msg, isError = false) {
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMsg');
+    toastMsg.textContent = msg;
+    toast.style.background = isError ? '#EF4444' : '#1F2937';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
   }
-}
 
-function completeExam() {
-  if(!selectedHealthClass) {
-    showToast('Vui lòng chọn phân loại sức khỏe tổng thể (I-V)');
-    return;
-  }
-  if(!selectedFit) {
-    showToast('Vui lòng chọn kết luận đủ/không đủ sức khỏe');
-    return;
-  }
-  
-  const conclusionData = {
-    healthClass: selectedHealthClass,
-    diseases: document.getElementById('diseases').value,
-    fit: selectedFit,
-    resolution: document.getElementById('resolution').value,
-    doctor: document.getElementById('doctorName').value,
-    signDate: document.getElementById('signDate').value
-  };
-  
-  let completedExams = JSON.parse(localStorage.getItem('completedExams') || '[]');
-  let existing = completedExams.find(e => e.patient?.empId === currentPatient.id);
-  if(existing) {
-    if(!existing.examData) existing.examData = {};
-    existing.examData.kl = conclusionData;
-    if(!existing.completedSections.includes('kl')) existing.completedSections.push('kl');
-  } else {
-    completedExams.push({
-      patient: currentPatient,
-      examData: { kl: conclusionData },
-      completedSections: ['kl'],
-      completeDate: new Date().toISOString()
-    });
-  }
-  localStorage.setItem('completedExams', JSON.stringify(completedExams));
-  
-  // Xóa draft
-  let drafts = JSON.parse(localStorage.getItem('conclusionDrafts') || '{}');
-  delete drafts[currentPatient.id];
-  localStorage.setItem('conclusionDrafts', JSON.stringify(drafts));
-  
-  showToast('✅ Đã hoàn tất phiếu khám!');
-  setTimeout(() => window.location.href = 'doctor-dashboard.html', 1500);
-}
+  // Gán sự kiện cho các ô phân loại sức khỏe
+  document.querySelectorAll('.health-option').forEach(opt => {
+    opt.onclick = () => selectHealthClass(opt);
+  });
 
-function goBack() {
-  window.location.href = 'doctor-dashboard.html';
-}
-
-function logout() {
-  sessionStorage.clear();
-  window.location.href = 'login.html';
-}
-
-function showToast(msg, isError = false) {
-  const toast = document.getElementById('toast');
-  const toastMsg = document.getElementById('toastMsg');
-  toastMsg.textContent = msg;
-  toast.style.background = isError ? '#EF4444' : '#1F2937';
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2000);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  loadUser();
-  loadPatient();
-});
+  document.addEventListener('DOMContentLoaded', async () => {
+    await loadUser();
+    await loadPatient();
+    loadDraft();
+  });
 </script>
 </body>
 </html>
