@@ -122,6 +122,15 @@
   let currentPatient = null;
   let currentUser = null;
 
+  function showToast(msg, isError = false) {
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMsg');
+    toastMsg.textContent = msg;
+    toast.style.background = isError ? '#EF4444' : '#1F2937';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
   async function loadUser() {
     try {
       const res = await api.getCurrentUser();
@@ -156,7 +165,8 @@
       if (exam && exam.data && exam.data.kl) {
         const kl = exam.data.kl;
         if (kl.healthClass) {
-          document.querySelector(`.health-option[data-class="${kl.healthClass}"]`).classList.add('selected');
+          const opt = document.querySelector(`.health-option[data-class="${kl.healthClass}"]`);
+          if (opt) opt.classList.add('selected');
         }
         if (kl.diseases) document.getElementById('diseases').value = kl.diseases;
         if (kl.fit) {
@@ -196,19 +206,16 @@
 
   async function saveDraft() {
     if (!currentPatient) return;
-    const examData = {
-      kl: {
-        healthClass: getSelectedHealthClass(),
-        diseases: document.getElementById('diseases').value,
-        fit: getSelectedFit(),
-        resolution: document.getElementById('resolution').value,
-        doctor: document.getElementById('doctorName').value,
-        signDate: document.getElementById('signDate').value,
-        clinic: document.getElementById('clinicName').value
-      }
+    const klData = {
+      healthClass: getSelectedHealthClass(),
+      diseases: document.getElementById('diseases').value,
+      fit: getSelectedFit(),
+      resolution: document.getElementById('resolution').value,
+      doctor: document.getElementById('doctorName').value,
+      signDate: document.getElementById('signDate').value,
+      clinic: document.getElementById('clinicName').value
     };
-    // Lưu draft vào localStorage tạm thời
-    localStorage.setItem('conclusionDraft_' + currentPatient.id, JSON.stringify(examData.kl));
+    localStorage.setItem('conclusionDraft_' + currentPatient.id, JSON.stringify(klData));
     showToast('Đã lưu tạm');
   }
   window.saveDraft = saveDraft;
@@ -218,7 +225,8 @@
     if (draft) {
       const kl = JSON.parse(draft);
       if (kl.healthClass) {
-        document.querySelector(`.health-option[data-class="${kl.healthClass}"]`).classList.add('selected');
+        const opt = document.querySelector(`.health-option[data-class="${kl.healthClass}"]`);
+        if (opt) opt.classList.add('selected');
       }
       if (kl.diseases) document.getElementById('diseases').value = kl.diseases;
       if (kl.fit) {
@@ -253,20 +261,46 @@
       return;
     }
 
-    // Lấy phiếu khám hiện tại
     let existingExam = null;
     try {
       const res = await api.getLatestExamination(currentPatient.id);
       existingExam = res.data;
-    } catch (err) {}
+    } catch (err) {
+      console.error(err);
+    }
+
     let examDataObj = existingExam ? existingExam.data : {};
     examDataObj.kl = klData;
-    let sections = existingExam?.completed_sections ? JSON.parse(existingExam.completed_sections) : [];
+
+    // Xử lý completed_sections an toàn
+    let sections = [];
+    if (existingExam?.completed_sections) {
+      try {
+        if (typeof existingExam.completed_sections === 'string') {
+          if (existingExam.completed_sections.trim().startsWith('[')) {
+            sections = JSON.parse(existingExam.completed_sections);
+          } else {
+            sections = existingExam.completed_sections.split(',').map(s => s.trim());
+          }
+        } else if (Array.isArray(existingExam.completed_sections)) {
+          sections = existingExam.completed_sections;
+        }
+      } catch (e) {
+        console.warn('Lỗi parse completed_sections, reset về mảng rỗng', e);
+        sections = [];
+      }
+    }
     if (!sections.includes('kl')) sections.push('kl');
-    await api.saveExamination(currentPatient.id, { ...examDataObj, completed_sections: sections });
-    localStorage.removeItem('conclusionDraft_' + currentPatient.id);
-    showToast('✅ Đã hoàn tất kết luận!');
-    setTimeout(() => window.location.href = 'doctor-dashboard.html', 1500);
+
+    try {
+      await api.saveExamination(currentPatient.id, { ...examDataObj, completed_sections: sections });
+      localStorage.removeItem('conclusionDraft_' + currentPatient.id);
+      showToast('✅ Đã hoàn tất kết luận!');
+      setTimeout(() => window.location.href = 'doctor-dashboard.html', 1500);
+    } catch (err) {
+      console.error(err);
+      showToast('Lỗi lưu kết luận: ' + err.message, true);
+    }
   }
   window.completeConclusion = completeConclusion;
 
@@ -276,16 +310,6 @@
   function logout() { api.logout(); sessionStorage.clear(); window.location.href = 'login.html'; }
   window.logout = logout;
 
-  function showToast(msg, isError = false) {
-    const toast = document.getElementById('toast');
-    const toastMsg = document.getElementById('toastMsg');
-    toastMsg.textContent = msg;
-    toast.style.background = isError ? '#EF4444' : '#1F2937';
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2000);
-  }
-
-  // Gán sự kiện cho các ô phân loại sức khỏe
   document.querySelectorAll('.health-option').forEach(opt => {
     opt.onclick = () => selectHealthClass(opt);
   });
