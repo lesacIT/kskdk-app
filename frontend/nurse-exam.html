@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Khám tổng quát - Điều dưỡng TKG</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-  /* (Giữ nguyên style như file gốc) */
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khám tổng quát - Điều dưỡng TKG</title>
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
   *{margin:0;padding:0;box-sizing:border-box}
   :root{--primary:#1D9E75;--primary-dark:#0F6E56;--primary-light:#E1F5EE;--bg:#f5f7f5;--card:#fff;--border:#e0e0e0;--radius:12px}
   body{font-family:'Segoe UI',sans-serif;background:var(--bg);min-height:100vh}
@@ -37,71 +37,99 @@
   .toast.show{opacity:1}
   @media(max-width:768px){.form-row{grid-template-columns:1fr}.sidebar-nav{left:10px}.nav-circle{width:40px;height:40px;font-size:18px}}
 </style>
-</head>
-<body>
+  </head>
+  <body>
 
-<div class="sidebar-nav">
-  <a href="index.html" class="nav-circle"><i class="fas fa-home"></i><span class="nav-tooltip">Trang chủ</span></a>
-  <a href="exam-summary.html" class="nav-circle"><i class="fas fa-chart-line"></i><span class="nav-tooltip">Tổng hợp</span></a>
-  <a href="employee-manager.html" class="nav-circle"><i class="fas fa-users"></i><span class="nav-tooltip">Quản lý NV</span></a>
-  <a href="doctor-dashboard.html" class="nav-circle"><i class="fas fa-stethoscope"></i><span class="nav-tooltip">Dashboard</span></a>
-  <a href="login.html" class="nav-circle" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i><span class="nav-tooltip">Đăng xuất</span></a>
-</div>
+    <div class="sidebar-nav">
+      <a href="index.html" class="nav-circle"><i class="fas fa-home"></i><span
+          class="nav-tooltip">Trang chủ</span></a>
+      <a href="exam-summary.html" class="nav-circle"><i
+          class="fas fa-chart-line"></i><span class="nav-tooltip">Tổng
+          hợp</span></a>
+      <a href="employee-manager.html" class="nav-circle"><i
+          class="fas fa-users"></i><span class="nav-tooltip">Quản lý
+          NV</span></a>
+      <a href="doctor-dashboard.html" class="nav-circle"><i
+          class="fas fa-stethoscope"></i><span
+          class="nav-tooltip">Dashboard</span></a>
+      <a href="login.html" class="nav-circle"
+        onclick="logout(); return false;"><i
+          class="fas fa-sign-out-alt"></i><span class="nav-tooltip">Đăng
+          xuất</span></a>
+    </div>
 
-<div class="header">
-  <div class="header-content">
-    <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Quay lại</button>
-    <div><i class="fas fa-stethoscope"></i> Khám tổng quát</div>
-  </div>
-</div>
-
-<div class="main">
-  <div class="patient-card">
-    <h3><i class="fas fa-user-circle"></i> Thông tin bệnh nhân</h3>
-    <div class="patient-info">
-      <div><strong>Mã NV:</strong> <span id="patientId"></span></div>
-      <div><strong>Họ tên:</strong> <span id="patientName"></span></div>
-      <div><strong>Phòng ban:</strong> <span id="patientDept"></span></div>
-      <div><strong>Ngày sinh:</strong> <span id="patientDob"></span></div>
-      <div><strong>Giới tính:</strong> <span id="patientGender"></span></div>
-    </div>
-  </div>
-
-  <div class="exam-card">
-    <h3>📏 KHÁM TỔNG QUÁT</h3>
-    <div class="form-row">
-      <div class="form-group"><label>Chiều cao (cm)</label><input type="number" id="height" placeholder="170" oninput="calcBMI()"></div>
-      <div class="form-group"><label>Cân nặng (kg)</label><input type="number" id="weight" placeholder="65" oninput="calcBMI()"></div>
-    </div>
-    <div id="bmiCard" style="background:var(--primary-light);padding:10px;border-radius:8px;text-align:center;display:none;margin-bottom:16px">
-      <div><strong>BMI:</strong> <span id="bmiValue">—</span></div>
-      <div><span id="bmiStatus">—</span></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Mạch (lần/phút)</label><input type="number" id="pulse" placeholder="72"></div>
-      <div class="form-group"><label>Huyết áp</label><input type="text" id="bpDisplay" placeholder="120/80"></div>
-    </div>
-    <div class="form-group">
-      <label>Phân loại thể lực</label>
-      <div class="radio-group" id="physicalClass">
-        <label class="radio-label" onclick="selectPhysical(this,'Loại I')">Loại I – Rất tốt</label>
-        <label class="radio-label" onclick="selectPhysical(this,'Loại II')">Loại II – Tốt</label>
-        <label class="radio-label" onclick="selectPhysical(this,'Loại III')">Loại III – Trung bình</label>
-        <label class="radio-label" onclick="selectPhysical(this,'Loại IV')">Loại IV – Kém</label>
-        <label class="radio-label" onclick="selectPhysical(this,'Loại V')">Loại V – Rất kém</label>
+    <div class="header">
+      <div class="header-content">
+        <button class="back-btn" onclick="goBack()"><i
+            class="fas fa-arrow-left"></i> Quay lại</button>
+        <div><i class="fas fa-stethoscope"></i> Khám tổng quát</div>
       </div>
     </div>
-  </div>
 
-  <div class="action-buttons">
-    <button class="btn-secondary" onclick="saveDraft()"><i class="fas fa-save"></i> Lưu tạm</button>
-    <button class="btn-primary" onclick="completeExam()"><i class="fas fa-check-circle"></i> Hoàn thành khám</button>
-  </div>
-</div>
+    <div class="main">
+      <div class="patient-card">
+        <h3><i class="fas fa-user-circle"></i> Thông tin bệnh nhân</h3>
+        <div class="patient-info">
+          <div><strong>Mã NV:</strong> <span id="patientId"></span></div>
+          <div><strong>Họ tên:</strong> <span id="patientName"></span></div>
+          <div><strong>Phòng ban:</strong> <span id="patientDept"></span></div>
+          <div><strong>Ngày sinh:</strong> <span id="patientDob"></span></div>
+          <div><strong>Giới tính:</strong> <span
+              id="patientGender"></span></div>
+        </div>
+      </div>
 
-<div class="toast" id="toast"><i class="fas fa-info-circle"></i> <span id="toastMsg"></span></div>
+      <div class="exam-card">
+        <h3>📏 KHÁM TỔNG QUÁT</h3>
+        <div class="form-row">
+          <div class="form-group"><label>Chiều cao (cm)</label><input
+              type="number" id="height" placeholder="170"
+              oninput="calcBMI()"></div>
+          <div class="form-group"><label>Cân nặng (kg)</label><input
+              type="number" id="weight" placeholder="65"
+              oninput="calcBMI()"></div>
+        </div>
+        <div id="bmiCard"
+          style="background:var(--primary-light);padding:10px;border-radius:8px;text-align:center;display:none;margin-bottom:16px">
+          <div><strong>BMI:</strong> <span id="bmiValue">—</span></div>
+          <div><span id="bmiStatus">—</span></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Mạch (lần/phút)</label><input
+              type="number" id="pulse" placeholder="72"></div>
+          <div class="form-group"><label>Huyết áp</label><input type="text"
+              id="bpDisplay" placeholder="120/80"></div>
+        </div>
+        <div class="form-group">
+          <label>Phân loại thể lực</label>
+          <div class="radio-group" id="physicalClass">
+            <label class="radio-label"
+              onclick="selectPhysical(this,'Loại I')">Loại I – Rất tốt</label>
+            <label class="radio-label"
+              onclick="selectPhysical(this,'Loại II')">Loại II – Tốt</label>
+            <label class="radio-label"
+              onclick="selectPhysical(this,'Loại III')">Loại III – Trung
+              bình</label>
+            <label class="radio-label"
+              onclick="selectPhysical(this,'Loại IV')">Loại IV – Kém</label>
+            <label class="radio-label"
+              onclick="selectPhysical(this,'Loại V')">Loại V – Rất kém</label>
+          </div>
+        </div>
+      </div>
 
-<script type="module">
+      <div class="action-buttons">
+        <button class="btn-secondary" onclick="saveDraft()"><i
+            class="fas fa-save"></i> Lưu tạm</button>
+        <button class="btn-primary" onclick="completeExam()"><i
+            class="fas fa-check-circle"></i> Hoàn thành khám</button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"><i class="fas fa-info-circle"></i> <span
+        id="toastMsg"></span></div>
+
+    <script type="module">
   import api from './js/api.js';
 
   let currentPatient = null;
@@ -117,7 +145,7 @@
     document.getElementById('patientGender').textContent = currentPatient.gender || '—';
   }
 
-  function calcBMI() { /* giữ nguyên */ }
+  
   window.calcBMI = calcBMI;
 
   function selectPhysical(el, value) {
@@ -163,6 +191,8 @@
     }
   }
 
+ 
+
   async function completeExam() {
     if (!currentPatient) return;
     const examData = {
@@ -176,7 +206,7 @@
     if (!examData.height || !examData.weight) { showToast('Vui lòng nhập chiều cao và cân nặng'); return; }
     if (!examData.physicalClass) { showToast('Vui lòng chọn phân loại thể lực'); return; }
 
-    // Lấy phiếu khám hiện tại
+    // 1. Lưu vào hệ thống cũ (MySQL)
     let existingExam = null;
     try {
       const res = await api.getLatestExamination(currentPatient.id);
@@ -187,6 +217,8 @@
     let sections = existingExam?.completed_sections ? JSON.parse(existingExam.completed_sections) : [];
     if (!sections.includes('tq')) sections.push('tq');
     await api.saveExamination(currentPatient.id, { ...examDataObj, completed_sections: sections });
+    
+   
     localStorage.removeItem('nurseDraft_'+currentPatient.id);
     showToast('✅ Hoàn thành khám tổng quát!');
     setTimeout(() => window.location.href = 'doctor-dashboard.html', 1500);
@@ -213,5 +245,5 @@
     loadDraft();
   });
 </script>
-</body>
+  </body>
 </html>

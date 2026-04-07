@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lịch sử khám - TKG TAEKWANG</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử khám - TKG TAEKWANG</title>
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Segoe UI',sans-serif;background:#f5f7f5;padding:20px}
   .header{background:#1D9E75;color:white;padding:15px 20px;border-radius:12px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between}
   .header h1{font-size:20px;display:flex;align-items:center;gap:10px}
-  .back-btn{background:rgba(255,255,255,0.2);border:none;color:white;padding:8px 16px;border-radius:30px;cursor:pointer;text-decoration:none}
+  .back-btn, .logout-btn{background:rgba(255,255,255,0.2);border:none;color:white;padding:8px 16px;border-radius:30px;cursor:pointer;text-decoration:none;margin-left:10px}
   .search-card{background:white;border-radius:12px;padding:20px;margin-bottom:20px}
   .search-bar{display:flex;gap:12px;flex-wrap:wrap}
   .search-bar input{flex:2;padding:12px;border:1.5px solid #e0e0e0;border-radius:8px}
@@ -20,29 +21,52 @@
   th,td{border:1px solid #ddd;padding:8px;text-align:left}
   th{background:#f0f0f0}
   .loading{text-align:center;padding:40px}
+  pre{white-space:pre-wrap;word-wrap:break-word;background:#f8f8f8;padding:8px;border-radius:6px}
 </style>
-</head>
-<body>
-<div class="header">
-  <h1><i class="fas fa-history"></i> Lịch sử khám</h1>
-  <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Quay lại</a>
-</div>
+  </head>
+  <body>
 
-<div class="search-card">
-  <div class="search-bar">
-    <input type="text" id="searchEmpId" placeholder="Nhập mã nhân viên">
-    <button onclick="searchHistory()"><i class="fas fa-search"></i> Tìm kiếm</button>
-  </div>
-</div>
+    <div class="header">
+      <h1><i class="fas fa-history"></i> Lịch sử khám</h1>
+      <div>
+        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i>
+          Quay lại</a>
+        <button class="logout-btn" onclick="logout()"><i
+            class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+      </div>
+    </div>
 
-<div class="container" id="historyContainer">
-  <div class="loading">Nhập mã nhân viên để xem lịch sử</div>
-</div>
+    <div class="search-card">
+      <div class="search-bar">
+        <input type="text" id="searchEmpId" placeholder="Nhập mã nhân viên">
+        <button onclick="searchHistory()"><i class="fas fa-search"></i> Tìm
+          kiếm</button>
+      </div>
+    </div>
 
-<script type="module">
+    <div class="container" id="historyContainer">
+      <div class="loading">Nhập mã nhân viên để xem lịch sử</div>
+    </div>
+
+    <script type="module">
   import api from './js/api.js';
 
-  async function searchHistory() {
+  // Kiểm tra đăng nhập: nếu không có currentUser thì chuyển về login
+  const currentUserStr = sessionStorage.getItem('currentUser');
+  if (!currentUserStr) {
+    window.location.href = 'login.html';
+  }
+  // Có thể lấy thông tin user nếu cần
+  // const currentUser = JSON.parse(currentUserStr);
+
+  window.logout = function() {
+    sessionStorage.removeItem('currentUser');
+    // Nếu có token trong localStorage (nếu dùng rememberMe) thì cũng xóa
+    localStorage.removeItem('token');
+    window.location.href = 'login.html';
+  };
+
+  window.searchHistory = async function() {
     const empId = document.getElementById('searchEmpId').value.trim();
     if (!empId) {
       alert('Vui lòng nhập mã nhân viên');
@@ -51,8 +75,7 @@
     const container = document.getElementById('historyContainer');
     container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Đang tải...</div>';
     try {
-      // Lấy phiếu khám mới nhất (hiện tại API chỉ có 1 phiếu mới nhất, không có lịch sử nhiều phiếu)
-      // Để đơn giản, ta chỉ hiển thị phiếu hiện tại. Có thể mở rộng thêm bảng lưu nhiều phiếu.
+      // Gọi API lấy phiếu khám mới nhất (có thể thay bằng API danh sách nếu có)
       const examRes = await api.getLatestExamination(empId);
       const exam = examRes.data;
       if (!exam) {
@@ -68,8 +91,13 @@
     } catch (err) {
       container.innerHTML = `<p style="color:red">Lỗi: ${err.message}</p>`;
     }
+  };
+
+  // (Tuỳ chọn) Hiển thị tên người dùng đã đăng nhập
+  if (currentUserStr) {
+    const user = JSON.parse(currentUserStr);
+    // Có thể thêm tên vào header nếu muốn
   }
-  window.searchHistory = searchHistory;
 </script>
-</body>
+  </body>
 </html>

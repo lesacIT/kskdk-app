@@ -28,6 +28,7 @@
     "express": "^4.22.1",
     "express-session": "^1.19.0",
     "jsonwebtoken": "^9.0.3",
+    "mssql": "^12.2.1",
     "mysql2": "^3.20.0",
     "pdfkit": "^0.18.0",
     "sqlite": "^5.1.1",
