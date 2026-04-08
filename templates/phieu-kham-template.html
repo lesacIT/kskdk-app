@@ -1,0 +1,228 @@
+<!-- Nội dung HTML template ở đây -->
+<!-- Phần đầu: đơn vị -->
+<style>
+    body {
+      margin: 0;
+      padding: 10px;
+      font-family: 'Times New Roman', Times, serif;
+    }
+    @media print {
+      body {
+        padding: 0;
+        margin: 0;
+        font-size: 11pt;
+      }
+      .no-print { display: none; }
+      @page {
+        size: A4 portrait;
+        margin: 15mm;
+      }
+      table {
+        width: 100%;
+        table-layout: fixed;
+        word-wrap: break-word;
+      }
+      th, td {
+        padding: 4px;
+      }
+    }
+    .no-print {
+      text-align: right;
+      margin-bottom: 15px;
+    }
+    .no-print button {
+      padding: 6px 12px;
+      background: #1D9E75;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #000;
+      padding: 6px;
+      vertical-align: top;
+    }
+  </style>
+<table style="border: none; width: 100%; margin-bottom: 10px;">
+        <tr style="border: none; ">
+                <td style="border: none; width: 60%; vertical-align: top;">
+                        <strong>CỤC HẬU CẦN - KỸ THUẬT QK9</strong><br>
+                        <strong>BỆNH VIỆN QUÂN Y 121</strong><br>
+                        Số: ...../GKSK-BV
+                </td>
+                <td
+                        style="border: none; text-align: center; vertical-align: top; width: 100%; ">
+                        <strong>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</strong><br>
+                        Độc lập - Tự do - Hạnh phúc
+                </td>
+        </tr>
+</table>
+
+<h2 style="text-align: center; text-transform: uppercase;">PHIẾU KHÁM SỨC KHỎE
+        TRƯỚC KHI BỐ TRÍ VIỆC LÀM</h2>
+
+<!-- Thông tin hành chính -->
+<table>
+        <tr>
+                <td style="width: 25%;">1. Họ tên</td>
+                <td colspan="3">{{HOTEN}}</td>
+                <td style="width: 20%; text-align: center; "
+                        rowspan="5" Ảnh<br>(4x6
+                        cm)</td>
+        </tr>
+        <tr><td>2. Giới tính</td><td colspan="3">{{GIOI_TINH}}</td></tr>
+        <tr><td>3. Ngày tháng năm sinh</td><td colspan="3">{{NGAY_SINH}} (Tuổi:
+                        {{TUOI}})</td></tr>
+        <tr><td>4. MSNV/CCCD</td><td
+                        colspan="3">{{SO_CMND}}</td></tr>
+        <tr><td>5. Cấp ngày tại</td><td colspan="4">Cục cảnh sát quản lý hành
+                        chính
+                        về trật tự xã hội</td></tr>
+        <tr><td>6. Số điện thoại</td><td colspan="4"> {{DIENTHOAI}}</td></tr>
+        <tr><td>7. Vị trí nghề/công việc dự kiến bố trí</td><td
+                        colspan="4">{{VITRI_NGHE}}</td></tr>
+</table>
+
+<p><strong>I. TIỀN SỬ BỆNH, TẬT</strong> (ghi rõ tên bệnh/hội chứng/triệu chứng
+        đã mắc hoặc đang mắc):<br> {{TIENSU}}</p>
+<p><strong>YẾU TỐ CÓ HẠI TẠI VỊ TRÍ NGHỀ/CÔNG VIỆC DỰ KIẾN BỐ TRÍ:</strong><br>
+        {{YEUTO_HAI}}</p>
+
+<h3>NỘI DUNG KHÁM</h3>
+<p><strong>1. Khám tổng quát</strong><br>
+        - Chiều cao: {{CHIEU_CAO}} cm; Cân nặng: {{CAN_NANG}} kg; Chỉ số BMI:
+        {{BMI}}<br>
+        - Mạch: {{MACH}} lần/phút; Huyết áp: {{HUYET_AP}} mmHg. Phân loại thể
+        lực:
+        {{PHANLOAI_THE_LUC}}.</p>
+
+<p><strong>2. Khám lâm sàng</strong></p>
+
+<table>
+        <thead>
+                <tr><th style="width: 25%;">Nội dung khám</th><th
+                                style="width: 55%;">Kết quả / Phân loại</th><th
+                                style="width: 20%;">Họ tên và chữ ký của Bác
+                                sĩ</th></tr>
+        </thead>
+        <tbody>
+                <tr><td colspan="3" class="bold"><strong>1. Nội
+                                        khoa</strong></td></tr>
+                <tr><td>a) Tuần hoàn</td><td>{{TUAN_HOAN}}<br>Phân loại:
+                                {{PHAN_LOAI_TUAN_HOAN}}</td><td
+                                rowspan="8">{{SIG_NOI_KHOA}}</td></tr>
+                <tr><td>b) Hô hấp</td><td>{{HO_HAP}}<br>Phân loại:
+                                {{PHAN_LOAI_HO_HAP}}</td></tr>
+                <tr><td>c) Tiêu hóa</td><td>{{TIEU_HOA}}<br>Phân loại:
+                                {{PHAN_LOAI_TIEU_HOA}}</td></tr>
+                <tr><td>d) Thận - Tiết niệu</td><td>{{THAN_TIET_NIEU}}<br>Phân
+                                loại:
+                                {{PHAN_LOAI_THAN_TIET_NIEU}}</td></tr>
+                <tr><td>đ) Nội tiết</td><td>{{NOI_TIET}}<br>Phân loại:
+                                {{PHAN_LOAI_NOI_TIET}}</td></tr>
+                <tr><td>e) Cơ - xương - khớp</td><td>{{CO_XUONG_KHOP}}<br>Phân
+                                loại:
+                                {{PHAN_LOAI_CO_XUONG_KHOP}}</td></tr>
+                <tr><td>g) Thần kinh</td><td>{{THAN_KINH}}<br>Phân loại:
+                                {{PHAN_LOAI_THAN_KINH}}</td></tr>
+                <tr><td>h) Tâm thần</td><td>{{TAM_THAN}}<br>Phân loại:
+                                {{PHAN_LOAI_TAM_THAN}}</td></tr>
+
+                <tr><td colspan="3" class="bold"><strong>2. Ngoại khoa, Da
+                                        liễu</strong></td></tr>
+                <tr><td>a) Ngoại khoa</td><td>{{NG_NGOAI_KHOA}}<br>Phân loại:
+                                {{PHAN_LOAI_NGOAI_KHOA}}</td><td
+                                rowspan="2">{{SIG_NGOAI_KHOA}}</td></tr>
+                <tr><td>b) Da liễu</td><td>{{NG_DA_LIEU}}</td></tr>
+
+                <tr><td colspan="3" class="bold"><strong>3. Sản phụ
+                                        khoa</strong></td></tr>
+                <tr><td>Các bệnh sản phụ khoa (nếu
+                                có)</td><td>{{SP_CONTENT}}<br>Phân
+                                loại:
+                                {{PHAN_LOAI_SP}}</td><td>{{SIG_SAN_PHU_KHOA}}</td></tr>
+
+                <tr><td colspan="3" class="bold"><strong>4.
+                                        Mắt</strong></td></tr>
+                <tr><td>Thị lực không kính</td><td>Mắt phải:
+                                {{MT_KHONG_KINH_R}}; Mắt
+                                trái: {{MT_KHONG_KINH_L}}</td><td
+                                rowspan="3">{{SIG_MAT}}</td></tr>
+                <tr><td>Thị lực có kính</td><td>Mắt phải: {{MT_CO_KINH_R}}; Mắt
+                                trái:
+                                {{MT_CO_KINH_L}}</td></tr>
+                <tr><td>Bệnh về mắt</td><td>{{MT_BENH}}<br>Phân loại:
+                                {{PHAN_LOAI_MT}}</td></tr>
+
+                <tr><td colspan="3" class="bold"><strong>5. Tai - Mũi -
+                                        Họng</strong></td></tr>
+                <tr><td>Thính lực</td><td>Tai trái: nói thường
+                                {{TMH_TAI_TRAI_THUONG}}
+                                m, nói thầm {{TMH_TAI_TRAI_THAM}} m<br>Tai phải:
+                                nói thường
+                                {{TMH_TAI_PHAI_THUONG}} m, nói thầm
+                                {{TMH_TAI_PHAI_THAM}}
+                                m</td><td
+                                rowspan="3">{{SIG_TAI_MUI_HONG}}</td></tr>
+                <tr><td>Bệnh tai mũi họng</td><td>{{TMH_BENH}}<br>Phân loại:
+                                {{PHAN_LOAI_TMH}}</td></tr>
+                <tr><td>Ghi chú thính lực (nếu có)</td><td>{{TMH_NH}}</td></tr>
+
+                <tr><td colspan="3" class="bold"><strong>6. Răng - Hàm -
+                                        Mặt</strong></td></tr>
+                <tr><td>Kết quả khám</td><td>{{RHM_KET_QUA}}<br>Phân loại:
+                                {{PHAN_LOAI_RHM}}</td><td>{{SIG_RANG_HAM_MAT}}</td></tr>
+        </tbody>
+</table>
+
+<p><strong>3. Khám phát hiện bệnh liên quan đến vị trí làm</strong><br>
+        a) Lâm sàng: {{LAM_SANG}}<br>
+        b) Cận lâm sàng: {{CAN_LAM_SANG}}</p>
+
+<h3 style="margin: 0;">KẾT LUẬN</h3>
+<p style="margin: 0;">1. Phân loại sức khỏe: {{PHAN_LOAI_SK}}<br>
+        2. Các bệnh, tật (nếu có): {{BENH_TAT}}<br>
+        3. Hiện tại đủ/không đủ sức khỏe làm việc cho ngành nghề, công việc (ghi
+        cụ
+        thể nếu có), hướng giải quyết (nếu có):<br>
+        {{KETLUAN_CHUNG}}</p>
+
+<div style="text-align: right;">
+
+        <div style="display: flex; justify-content: space-between;">
+                <div style="width: 45%; text-align: center;">
+                        <strong>NGƯỜI KẾT LUẬN</strong><br>
+                        (Ký và ghi rõ họ, tên)<br><br><br>
+                </div>
+                <div style="width: 45%; text-align: center;">
+                        <p
+                                style="width: 90%; text-align: center;margin-left: 30px; ">
+                                <em id="ketQuaNgay"></em></p>
+                        <script>
+                                // Hàm định dạng ngày theo mẫu "ngày DD tháng MM năm YYYY"
+                                function dinhDangNgay(dateString) {
+                                // dateString có dạng "YYYY-MM-DD"
+                                const parts = dateString.split('-');
+                                const nam = parts[0];
+                                const thang = parts[1].padStart(2, '0');
+                                const ngay = parts[2].padStart(2, '0');
+                                return `Cần Thơ, Ngày ${ngay} Tháng ${thang} Năm ${nam}`;
+                                }
+
+                                // Dữ liệu ngày (bạn có thể lấy từ API, biến, hoặc nhập từ form)
+                                const NGAY_KET_LUAN = "2026-03-14";  // Giống ảnh: 14/03/2026
+
+                                // Định dạng và in ra thẻ <em>
+                                const ketQua = dinhDangNgay(NGAY_KET_LUAN);
+                                document.getElementById('ketQuaNgay').innerText = ketQua;
+                        </script>
+                        <strong>GIÁM ĐỐC</strong><br>
+                        (Ký và ghi rõ họ, tên)<br><br><br>
+                </div>
+        </div>
+</div>

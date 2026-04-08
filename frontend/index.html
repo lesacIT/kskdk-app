@@ -123,18 +123,8 @@
   import api from './js/api.js';
   import { checkAuth } from './js/auth.js';
 
-  // Kiểm tra đăng nhập – nếu chưa đăng nhập sẽ tự động chuyển về login.html
-  const user = checkAuth();
-  if (!user) {
-    // Đã được chuyển hướng, dừng thực thi phần còn lại
-    return;
-  }
+ 
 
-  // Bây giờ mới chạy các logic của trang
-  window.searchHistory = async function() {
-    // ...
-  };
-  // ...
 </script>
   </head>
   <body>
@@ -259,7 +249,7 @@
         id="toastMessage"></span></div>
 
     <script type="module">
-  import api from './js/api.js';
+
 
   let employees = [];
 
@@ -365,6 +355,37 @@
 
   // Các hàm helper (selectGender, calculateAge, resetForm, showToast, generateRegistrationPDF) giữ nguyên như file cũ.
   // Lưu ý: generateRegistrationPDF không cần sửa.
+   // Hàm kiểm tra đăng nhập - duy nhất một bản
+  async function checkAuth() {
+    try {
+      const response = await fetch('/api/auth/me', {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.user;
+      } else {
+        window.location.href = '/login.html';
+        return null;
+      }
+    } catch (error) {
+      console.error('Lỗi kiểm tra auth:', error);
+      window.location.href = '/login.html';
+      return null;
+    }
+  }
+
+  // Tự động chạy khi trang load
+  (async function() {
+    const user = await checkAuth();
+    if (!user) return;
+    // Hiển thị tên user nếu có
+    const userNameSpan = document.getElementById('user-name');
+    if (userNameSpan) userNameSpan.innerText = user.name;
+    // ... các logic khác
+  })();
 </script>
   </body>
 </html>

@@ -214,6 +214,8 @@ ALTER TABLE `registrations`
   ADD CONSTRAINT `registrations_ibfk_1` FOREIGN KEY (`emp_id`) REFERENCES `employees` (`patient_code`) ON DELETE CASCADE;
 COMMIT;
 
+ALTER TABLE `examinations` 
+ADD COLUMN `signatures` JSON DEFAULT NULL COMMENT 'Lưu danh sách chữ ký bác sĩ: [{doctor_name, signed_at, specialty}]';
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

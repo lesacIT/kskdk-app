@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <title>Phiếu khám sức khỏe</title>
+        <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Times New Roman', Arial, sans-serif;
+      font-size: 13px;
+      padding: 20px;
+      color: #000;
+    }
+    h1, h2, h3 { text-align: center; margin: 10px 0; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .info-row { display: flex; margin: 5px 0; }
+    .info-label { width: 180px; font-weight: bold; }
+    .info-value { flex: 1; border-bottom: 1px dotted #000; }
+    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+    th, td { border: 1px solid #000; padding: 6px; vertical-align: top; }
+    th { background: #f0f0f0; text-align: center; }
+    .sign-line { display: flex; justify-content: space-between; margin-top: 30px; }
+    .page-break { page-break-before: always; }
+  </style>
+    </head>
+    <body>
+        <div class="header">
+            <h2>PHIẾU KHÁM SỨC KHỎE TRƯỚC KHI BỐ TRÍ VIỆC LÀM</h2>
+            <p>Số: .... /GKSK-BV</p>
+        </div>
+
+        <!-- Thông tin cá nhân -->
+        <div class="info-row"><div class="info-label">1. Họ tên:</div><div
+                class="info-value"><%= employee.name %></div></div>
+        <div class="info-row"><div class="info-label">2. Giới tính:</div><div
+                class="info-value"><%= employee.gender %></div></div>
+        <div class="info-row"><div class="info-label">3. Ngày sinh:</div><div
+                class="info-value"><%= employee.dob %></div></div>
+        <div class="info-row"><div class="info-label">4. Số CMND/CCCD:</div><div
+                class="info-value">123456789012</div></div>
+        <div class="info-row"><div class="info-label">5. Chỗ ở hiện
+                tại:</div><div class="info-value">Phường 1 Bảo Lộc, Lâm
+                Đồng</div></div>
+        <div class="info-row"><div class="info-label">6. Vị trí nghề dự
+                kiến:</div><div class="info-value">vị trí nghề</div></div>
+
+        <!-- Tiền sử, yếu tố có hại -->
+        <div class="info-row"><div class="info-label">I. Tiền sử bệnh,
+                tật:</div><div class="info-value">tiền sử bệnh</div></div>
+        <div class="info-row"><div class="info-label">II. Yếu tố có
+                hại:</div><div class="info-value">yếu tố có hại</div></div>
+
+        <!-- Khám tổng quát -->
+        <h3>III. NỘI DUNG KHÁM</h3>
+        <h4>3.1. Khám tổng quát</h4>
+        <%
+        const tq = examData.tq || {};
+        const bmi = tq.bmi || '';
+        const bp = tq.bpDisplay || '';
+        %>
+        <div class="info-row"><div class="info-label">- Chiều cao:</div><div
+                class="info-value"><%= tq.height || '' %> cm</div></div>
+        <div class="info-row"><div class="info-label">- Cân nặng:</div><div
+                class="info-value"><%= tq.weight || '' %> kg</div></div>
+        <div class="info-row"><div class="info-label">- BMI:</div><div
+                class="info-value"><%= bmi %></div></div>
+        <div class="info-row"><div class="info-label">- Mạch:</div><div
+                class="info-value"><%= tq.pulse || '' %> lần/phút</div></div>
+        <div class="info-row"><div class="info-label">- Huyết áp:</div><div
+                class="info-value"><%= bp %></div></div>
+        <div class="info-row"><div class="info-label">Phân loại thể
+                lực:</div><div class="info-value"><%= tq.physicalClass || ''
+                %></div></div>
+
+        <!-- Khám lâm sàng các chuyên khoa -->
+        <h4>3.2. Khám lâm sàng</h4>
+        <table>
+            <thead>
+                <tr><th>Chuyên khoa</th><th>Nội dung</th><th>Phân
+                        loại</th><th>Bác sĩ ký</th></tr>
+            </thead>
+            <tbody>
+                <!-- Nội khoa -->
+                <tr><td rowspan="8">Nội khoa</td><td>a) Tuần hoàn</td><td><%=
+                        (examData.nk && examData.nk.nkTH) || '' %></td><td
+                        rowspan="8"><%= (examData.nk && examData.nk.class) || ''
+                        %></td></tr>
+                <tr><td>b) Hô hấp</td><td><%= (examData.nk && examData.nk.nkHH)
+                        || '' %></td></tr>
+                <tr><td>c) Tiêu hóa</td><td><%= (examData.nk &&
+                        examData.nk.nkTHoa) || '' %></td></tr>
+                <tr><td>d) Thận – Tiết niệu</td><td><%= (examData.nk &&
+                        examData.nk.nkTTN) || '' %></td></tr>
+                <tr><td>đ) Nội tiết</td><td><%= (examData.nk &&
+                        examData.nk.nkNT) || '' %></td></tr>
+                <tr><td>e) Cơ – Xương – Khớp</td><td><%= (examData.nk &&
+                        examData.nk.nkCXK) || '' %></td></tr>
+                <tr><td>g) Thần kinh</td><td><%= (examData.nk &&
+                        examData.nk.nkTK) || '' %></td></tr>
+                <tr><td>h) Tâm thần</td><td><%= (examData.nk &&
+                        examData.nk.nkTThan) || '' %></td></tr>
+
+                <!-- Ngoại khoa + Da liễu -->
+                <tr><td>Ngoại khoa</td><td><%= (examData.ng &&
+                        examData.ng.ngNgoai) || '' %></td><td rowspan="2"><%=
+                        (examData.ng && examData.ng.class) || ''
+                        %></td><td></td></tr>
+                <tr><td>Da liễu</td><td><%= (examData.ng && examData.ng.ngDa) ||
+                        '' %></td><td></td></tr>
+
+                <!-- Sản phụ khoa -->
+                <tr><td>Sản phụ khoa</td><td><%= (examData.sp &&
+                        examData.sp.spContent) || '' %></td><td><%= (examData.sp
+                        && examData.sp.class) || '' %></td><td></td></tr>
+
+                <!-- Mắt -->
+                <tr><td>Mắt</td><td>Thị lực: ...</td><td><%= (examData.mt &&
+                        examData.mt.class) || '' %></td><td></td></tr>
+
+                <!-- Tai mũi họng -->
+                <tr><td>Tai – Mũi – Họng</td><td>Thính lực: ...</td><td><%=
+                        (examData.tmh && examData.tmh.class) || ''
+                        %></td><td></td></tr>
+
+                <!-- Răng hàm mặt -->
+                <tr><td>Răng – Hàm – Mặt</td><td><%= (examData.rhm &&
+                        examData.rhm.rhmNotes) || '' %></td><td><%=
+                        (examData.rhm && examData.rhm.class) || ''
+                        %></td><td></td></tr>
+            </tbody>
+        </table>
+
+        <!-- Khám phát hiện bệnh nghề nghiệp -->
+        <h4>2. Khám phát hiện bệnh liên quan đến vị trí làm</h4>
+        <div class="info-row"><div class="info-label">2.1. Lâm sàng:</div><div
+                class="info-value">lâm sàng</div></div>
+        <div class="info-row"><div class="info-label">2.2. Cận lâm
+                sàng:</div><div class="info-value">cận lâm sàng</div></div>
+
+        <!-- Kết luận -->
+        <h3>IV. KẾT LUẬN</h3>
+        <div class="info-row"><div class="info-label">1. Phân loại sức
+                khỏe:</div><div class="info-value">Sức khỏe loại 1</div></div>
+        <div class="info-row"><div class="info-label">2. Các bệnh,
+                tật:</div><div class="info-value">các bệnh tật nếu
+                có</div></div>
+        <div class="info-row"><div class="info-label">3. Kết luận
+                chung:</div><div class="info-value">Đủ sức khỏe làm
+                việc</div></div>
+
+        <div class="sign-line">
+            <div>Ngày ... tháng ... năm ...</div>
+            <div>GIÁM ĐỐC<br />(Ký, họ tên)</div>
+        </div>
+    </body>
+</html>

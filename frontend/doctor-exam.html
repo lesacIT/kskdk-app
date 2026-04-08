@@ -26,9 +26,9 @@
   .form-group label{display:block;margin-bottom:6px;font-weight:500;color:#666}
   .form-group textarea{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;min-height:100px}
   .form-group input{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px}
-  .radio-group{display:flex;gap:12px;flex-wrap:wrap}
-  .radio-label{padding:8px 16px;border:1.5px solid var(--border);border-radius:30px;cursor:pointer}
-  .radio-label.selected{background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark)}
+  .radio-group{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+  .radio-label{padding:8px 16px;border:1.5px solid var(--border);border-radius:30px;cursor:pointer;transition:all 0.2s;background:white}
+  .radio-label.selected{background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark);font-weight:bold}
   .action-buttons{display:flex;gap:12px;margin-top:20px}
   .btn-primary{flex:1;background:var(--primary);color:white;border:none;padding:14px;border-radius:10px;font-weight:600;cursor:pointer}
   .btn-secondary{flex:1;background:#fff;color:var(--primary-dark);border:1.5px solid var(--primary);padding:14px;border-radius:10px;cursor:pointer}
@@ -82,6 +82,15 @@
   let currentDoctor = null;
   let currentPatient = null;
 
+  // Định nghĩa thang điểm 1-5 cho tất cả chuyên khoa
+  const RATING_LEVELS = [
+    { value: "1", label: "1 - Rất tốt" },
+    { value: "2", label: "2 - Tốt" },
+    { value: "3", label: "3 - Trung bình" },
+    { value: "4", label: "4 - Kém" },
+    { value: "5", label: "5 - Rất kém" }
+  ];
+
   const specialtyForms = {
     nk: {
       title: "🫀 KHÁM NỘI KHOA",
@@ -94,16 +103,14 @@
         { id: "nkCXK", label: "e) Cơ – Xương – Khớp", placeholder: "Biến dạng khớp, hạn chế vận động..." },
         { id: "nkTK", label: "g) Thần kinh", placeholder: "Dấu hiệu thần kinh khu trú, phản xạ..." },
         { id: "nkTThan", label: "h) Tâm thần", placeholder: "Hành vi, giao tiếp, định hướng..." }
-      ],
-      classifications: ["Bình thường", "Bệnh lý"]
+      ]
     },
     ng: {
       title: "🩺 KHÁM NGOẠI KHOA & DA LIỄU",
       fields: [
         { id: "ngNgoai", label: "Ngoại khoa", placeholder: "Dị tật, thoát vị, khối u ngoài, sẹo phẫu thuật..." },
         { id: "ngDa", label: "Da liễu", placeholder: "Nấm da, viêm da, vảy nến, loét, dị ứng..." }
-      ],
-      classifications: ["Bình thường", "Bệnh lý"]
+      ]
     },
     mt: {
       title: "👁 KHÁM MẮT",
@@ -113,8 +120,7 @@
         { id: "mtGlassR", label: "Thị lực có kính - Mắt phải", placeholder: "VD: 10/10", isInput: true },
         { id: "mtGlassL", label: "Thị lực có kính - Mắt trái", placeholder: "VD: 10/10", isInput: true },
         { id: "mtDiag", label: "Chẩn đoán bệnh về mắt", placeholder: "Cận thị, viễn thị, loạn thị, đục thủy tinh thể...", isTextarea: true }
-      ],
-      classifications: ["Bình thường", "Có kính đạt", "Bệnh lý"]
+      ]
     },
     tmh: {
       title: "👂 KHÁM TAI MŨI HỌNG",
@@ -125,22 +131,19 @@
         { id: "tmhLW", label: "Thính lực - Tai trái (nói thầm m)", placeholder: "≥1", isInput: true },
         { id: "tmhNH", label: "Mũi – Họng – Thanh quản", placeholder: "Viêm mũi dị ứng, polyp, viêm họng mạn, amidan...", isTextarea: true },
         { id: "tmhDiag", label: "Chẩn đoán bệnh TMH", placeholder: "Điếc nghề nghiệp, viêm tai mạn, thủng nhĩ...", isTextarea: true }
-      ],
-      classifications: ["Bình thường", "Cần theo dõi", "Bệnh lý"]
+      ]
     },
     rhm: {
       title: "🦷 KHÁM RĂNG HÀM MẶT",
       fields: [
         { id: "rhmNotes", label: "Ghi chú lâm sàng", placeholder: "Sâu răng, viêm lợi, khớp cắn sai, thiếu răng...", isTextarea: true }
-      ],
-      classifications: ["Bình thường", "Cần điều trị", "Bệnh lý nặng"]
+      ]
     },
     sp: {
       title: "👶 KHÁM SẢN PHỤ KHOA",
       fields: [
         { id: "spContent", label: "Chi tiết nội dung khám", placeholder: "Tử cung, phần phụ, kinh nguyệt, thai (nếu có)...", isTextarea: true }
-      ],
-      classifications: ["Bình thường", "Cần theo dõi", "Bệnh lý"]
+      ]
     }
   };
 
@@ -171,6 +174,16 @@
     document.getElementById('patientGender').textContent = currentPatient.gender || '—';
   }
 
+  function renderRatingRadios(selectedValue = null) {
+    let html = `<div class="radio-group" id="classGroup">`;
+    for (let level of RATING_LEVELS) {
+      const isSelected = (selectedValue === level.value);
+      html += `<label class="radio-label ${isSelected ? 'selected' : ''}" onclick="selectRating(this, '${level.value}')" data-value="${level.value}">${level.label}</label>`;
+    }
+    html += `</div>`;
+    return html;
+  }
+
   async function renderExamForm() {
     const config = specialtyForms[currentDoctor.id];
     if (!config) return;
@@ -182,23 +195,21 @@
       else html += `<textarea id="${f.id}" placeholder="${f.placeholder}"></textarea>`;
       html += `</div>`;
     }
-    html += `<div class="form-group"><label>📊 Phân loại</label><div class="radio-group" id="classGroup">`;
-    for (let cls of config.classifications) {
-      html += `<label class="radio-label" onclick="selectClass(this,'${cls}')" data-value="${cls}">${cls}</label>`;
-    }
-    html += `</div></div>`;
+    html += `<div class="form-group"><label>📊 Phân loại (1→5)</label>`;
+    html += renderRatingRadios();
+    html += `</div>`;
     document.getElementById('examContent').innerHTML = html;
     await loadSavedData();
   }
 
-  window.selectClass = function(el, val) {
-    document.querySelectorAll('.radio-label').forEach(l=>l.classList.remove('selected'));
+  window.selectRating = function(el, val) {
+    document.querySelectorAll('#classGroup .radio-label').forEach(l => l.classList.remove('selected'));
     el.classList.add('selected');
   };
 
-  function getSelectedClass() {
-    const sel = document.querySelector('.radio-label.selected');
-    return sel ? sel.getAttribute('data-value') : null;
+  function getSelectedRating() {
+    const selected = document.querySelector('#classGroup .radio-label.selected');
+    return selected ? selected.getAttribute('data-value') : null;
   }
 
   async function saveDraft() {
@@ -209,7 +220,7 @@
       const el = document.getElementById(f.id);
       if (el) data[f.id] = el.value;
     }
-    data.class = getSelectedClass();
+    data.class = getSelectedRating();  // lưu giá trị 1-5
     let drafts = JSON.parse(localStorage.getItem('doctorDrafts') || '{}');
     if (!drafts[currentDoctor.id]) drafts[currentDoctor.id] = {};
     drafts[currentDoctor.id][currentPatient.id] = data;
@@ -228,7 +239,8 @@
         if (el && saved[f.id]) el.value = saved[f.id];
       }
       if (saved.class) {
-        document.querySelectorAll('.radio-label').forEach(l => {
+        // Chọn lại rating
+        document.querySelectorAll('#classGroup .radio-label').forEach(l => {
           if (l.getAttribute('data-value') === saved.class) l.classList.add('selected');
         });
       }
@@ -243,8 +255,9 @@
       const el = document.getElementById(f.id);
       if (el) examData[f.id] = el.value;
     }
-    examData.class = getSelectedClass();
-    if (!examData.class) { showToast('Vui lòng chọn phân loại!'); return; }
+    const rating = getSelectedRating();
+    if (!rating) { showToast('Vui lòng chọn phân loại (1→5)!'); return; }
+    examData.class = rating;   // lưu dạng "1", "2", ...
 
     let existingExam = null;
     try {
@@ -252,23 +265,19 @@
       existingExam = res.data;
     } catch (err) { /* chưa có */ }
 
-    // --- Đoạn code xử lý sections một cách an toàn ---
     let sections = [];
     if (existingExam?.completed_sections) {
       try {
-        // Nếu là chuỗi thì parse, nếu là mảng thì dùng trực tiếp
         sections = typeof existingExam.completed_sections === 'string'
           ? JSON.parse(existingExam.completed_sections)
           : existingExam.completed_sections;
-        // Đảm bảo sections là mảng
         if (!Array.isArray(sections)) sections = [sections];
       } catch (e) {
-        console.warn('Lỗi parse completed_sections, reset về mảng rỗng', e);
+        console.warn('Lỗi parse completed_sections', e);
         sections = [];
       }
     }
     if (!sections.includes(currentDoctor.id)) sections.push(currentDoctor.id);
-    // --------------------------------------------
 
     let examDataObj = existingExam ? existingExam.data : {};
     examDataObj[currentDoctor.id] = examData;
