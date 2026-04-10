@@ -12,128 +12,64 @@
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-
-  *{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --primary:#1D9E75;--primary-dark:#0F6E56;--primary-light:#E1F5EE;
-    --accent:#185FA5;--accent-light:#E6F1FB;
-    --warn:#BA7517;--warn-light:#FAEEDA;
-    --danger:#A32D2D;--danger-light:#FCEBEB;
-    --text:#1a1a1a;--text-muted:#666;--text-hint:#999;
-    --bg:#f5f7f5;--card:#fff;--border:#e0e0e0;
-    --radius:12px;--radius-sm:8px;
-  }
-  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px}
-  .app-header{background:var(--primary);color:#fff;padding:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,100,60,.25)}
-  .header-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
-  .header-top h1{font-size:17px;font-weight:600}
-  .back-btn{background:rgba(255,255,255,.2);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
-  .patient-bar{background:rgba(0,0,0,.15);padding:8px 16px;font-size:13px;display:flex;gap:16px;overflow-x:auto}
-  .patient-bar strong{color:#fff}
-  .main{padding:16px;max-width:600px;margin:0 auto}
-  .card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:14px;overflow:hidden}
-  .card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
-  .card-header h2{font-size:15px;font-weight:600;color:var(--primary-dark)}
-  .card-body{padding:14px 16px}
-  .section-label{font-size:12px;font-weight:600;color:var(--text-hint);margin-bottom:8px;margin-top:16px}
-  .form-row{display:grid;gap:10px;margin-bottom:10px}
-  .form-row.cols-2{grid-template-columns:1fr 1fr}
-  .form-group{display:flex;flex-direction:column;gap:4px}
-  .form-group label{font-size:13px;color:var(--text-muted);font-weight:500}
-  .form-group input,.form-group select,.form-group textarea{
-    border:1.5px solid var(--border);border-radius:var(--radius-sm);
-    padding:10px 12px;font-size:15px;width:100%;font-family:inherit;
-  }
-  .form-group input:focus,.form-group select:focus{border-color:var(--primary);outline:none}
-  input[readonly]{background:#f8f8f8}
-  .gender-select{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-  .gender-card{border:2px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;background:#fff}
-  .gender-card.selected{border-color:var(--primary);background:var(--primary-light)}
-  .gender-card .gender-icon{font-size:32px;margin-bottom:4px}
-  .bottom-action{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:10px;z-index:50}
-  .btn-primary{flex:1;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:13px;font-weight:600;cursor:pointer}
-  .btn-secondary{background:#fff;color:var(--primary-dark);border:1.5px solid var(--primary);border-radius:var(--radius-sm);padding:13px 18px;cursor:pointer}
-  .btn-success{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:13px;cursor:pointer}
-  .hero{text-align:center;padding:24px 16px 16px}
-  .hero-icon{font-size:56px;margin-bottom:12px}
-  .hero h2{font-size:22px;color:var(--primary-dark)}
-  .emp-card{border:1px solid var(--border);border-radius:var(--radius);padding:16px;background:#fff;margin-top:16px}
-  .emp-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee}
-  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
-  .stat-card{background:white;border-radius:12px;padding:16px;text-align:center;border:1px solid var(--border);cursor:pointer;transition:all 0.3s}
-  .stat-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
-  .stat-number{font-size:28px;font-weight:700;color:var(--primary)}
-  .stat-label{font-size:12px;color:var(--text-muted);margin-top:4px}
-  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;opacity:0;transition:opacity .3s;z-index:999;display:flex;align-items:center;gap:8px}
-  .toast.show{opacity:1}
-  .sidebar-nav{
-    position:fixed;
-    left:20px;
-    top:50%;
-    transform:translateY(-50%);
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    z-index:1000;
-  }
-  .nav-circle{
-    width:50px;
-    height:50px;
-    border-radius:50%;
-    background:white;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-decoration:none;
-    color:var(--primary);
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-    transition:all 0.3s;
-    font-size:22px;
-  }
-  .nav-circle:hover{
-    transform:scale(1.1);
-    background:var(--primary);
-    color:white;
-  }
-  .nav-tooltip{
-    position:absolute;
-    left:60px;
-    background:#333;
-    color:white;
-    padding:5px 10px;
-    border-radius:8px;
-    font-size:12px;
-    white-space:nowrap;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity 0.3s;
-  }
-  .nav-circle:hover .nav-tooltip{
-    opacity:1;
-  }
-  @media(max-width:640px){
-    .form-row.cols-2{grid-template-columns:1fr}
-    .stats-grid{grid-template-columns:1fr}
-    .sidebar-nav{left:10px}
-    .nav-circle{width:40px;height:40px;font-size:18px}
-    .nav-tooltip{left:50px;font-size:10px}
-  }
-</style>
-    <script type="module">
-  import api from './js/api.js';
-  import { checkAuth } from './js/auth.js';
-
- 
-
-</script>
+    /* ... giữ nguyên style ... */
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--primary:#1D9E75;--primary-dark:#0F6E56;--primary-light:#E1F5EE;--accent:#185FA5;--accent-light:#E6F1FB;--warn:#BA7517;--warn-light:#FAEEDA;--danger:#A32D2D;--danger-light:#FCEBEB;--text:#1a1a1a;--text-muted:#666;--text-hint:#999;--bg:#f5f7f5;--card:#fff;--border:#e0e0e0;--radius:12px;--radius-sm:8px}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px}
+    .app-header{background:var(--primary);color:#fff;padding:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,100,60,.25)}
+    .header-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+    .header-top h1{font-size:17px;font-weight:600}
+    .back-btn{background:rgba(255,255,255,.2);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+    .patient-bar{background:rgba(0,0,0,.15);padding:8px 16px;font-size:13px;display:flex;gap:16px;overflow-x:auto}
+    .patient-bar strong{color:#fff}
+    .main{padding:16px;max-width:600px;margin:0 auto}
+    .card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:14px;overflow:hidden}
+    .card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+    .card-header h2{font-size:15px;font-weight:600;color:var(--primary-dark)}
+    .card-body{padding:14px 16px}
+    .section-label{font-size:12px;font-weight:600;color:var(--text-hint);margin-bottom:8px;margin-top:16px}
+    .form-row{display:grid;gap:10px;margin-bottom:10px}
+    .form-row.cols-2{grid-template-columns:1fr 1fr}
+    .form-group{display:flex;flex-direction:column;gap:4px}
+    .form-group label{font-size:13px;color:var(--text-muted);font-weight:500}
+    .form-group input,.form-group select,.form-group textarea{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:15px;width:100%;font-family:inherit}
+    .form-group input:focus,.form-group select:focus{border-color:var(--primary);outline:none}
+    input[readonly]{background:#f8f8f8}
+    .gender-select{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+    .gender-card{border:2px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;background:#fff}
+    .gender-card.selected{border-color:var(--primary);background:var(--primary-light)}
+    .gender-card .gender-icon{font-size:32px;margin-bottom:4px}
+    .bottom-action{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:10px;z-index:50}
+    .btn-primary{flex:1;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:13px;font-weight:600;cursor:pointer}
+    .btn-secondary{background:#fff;color:var(--primary-dark);border:1.5px solid var(--primary);border-radius:var(--radius-sm);padding:13px 18px;cursor:pointer}
+    .btn-success{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:13px;cursor:pointer}
+    .hero{text-align:center;padding:24px 16px 16px}
+    .hero-icon{font-size:56px;margin-bottom:12px}
+    .hero h2{font-size:22px;color:var(--primary-dark)}
+    .emp-card{border:1px solid var(--border);border-radius:var(--radius);padding:16px;background:#fff;margin-top:16px}
+    .emp-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee}
+    .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+    .stat-card{background:white;border-radius:12px;padding:16px;text-align:center;border:1px solid var(--border);cursor:pointer;transition:all 0.3s}
+    .stat-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+    .stat-number{font-size:28px;font-weight:700;color:var(--primary)}
+    .stat-label{font-size:12px;color:var(--text-muted);margin-top:4px}
+    .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;opacity:0;transition:opacity .3s;z-index:999;display:flex;align-items:center;gap:8px}
+    .toast.show{opacity:1}
+    .sidebar-nav{position:fixed;left:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;z-index:1000}
+    .nav-circle{width:50px;height:50px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--primary);box-shadow:0 2px 10px rgba(0,0,0,0.1);transition:all 0.3s;font-size:22px}
+    .nav-circle:hover{transform:scale(1.1);background:var(--primary);color:white}
+    .nav-tooltip{position:absolute;left:60px;background:#333;color:white;padding:5px 10px;border-radius:8px;font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.3s}
+    .nav-circle:hover .nav-tooltip{opacity:1}
+    @media(max-width:640px){.form-row.cols-2{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr}.sidebar-nav{left:10px}.nav-circle{width:40px;height:40px;font-size:18px}.nav-tooltip{left:50px;font-size:10px}}
+  </style>
   </head>
   <body>
 
     <div class="app-header">
       <div class="header-top">
-        <button class="back-btn" id="backBtn" onclick="history.back()"
-          style="visibility:visible">←</button>
-        <h1 id="headerTitle">Đăng ký khám sức khỏe</h1>
+        <button class="back-btn" id="backBtn"
+          onclick="history.back()">←</button>
+        <h1>Đăng ký khám sức khỏe</h1>
         <a href="login.html" class="doctor-login-btn"
           style="background:rgba(255,255,255,0.2);color:white;padding:6px 12px;border-radius:20px;text-decoration:none;font-size:13px;display:flex;align-items:center;gap:6px">
           <i class="fas fa-user-md"></i> BS
@@ -209,8 +145,16 @@
                 class="gender-icon">👩</div><span>Nữ</span></div>
           </div>
           <div class="form-group"><label><i class="fas fa-briefcase"></i> Vị trí
+            
               công việc</label><input type="text" id="patientJob"
               placeholder="VD: Kỹ sư, Công nhân..."></div>
+          <!-- <div class="form-group"><label><i class="fas fa-notes-medical"></i>
+              Tiền sử bệnh (nếu có)</label><textarea id="patientHistory"
+              rows="2" placeholder="Ghi chú tiền sử bệnh..."></textarea></div> -->
+          <!-- <div class="form-group"><label><i
+                class="fas fa-exclamation-triangle"></i> Yếu tố có hại (nếu
+              có)</label><textarea id="hazardFactors" rows="2"
+              placeholder="Yếu tố nguy cơ..."></textarea></div> -->
           <div style="display:flex;gap:10px;margin-top:16px">
             <button class="btn-secondary" onclick="searchEmployee()"
               style="flex:1"><i class="fas fa-search"></i> Tra cứu</button>
@@ -238,8 +182,8 @@
           class="fas fa-file-excel"></i><span class="nav-tooltip">Lịch sử
           khám</span></a>
       <a href="excel-viewer.html" class="nav-circle"><i
-          class="fas fa-chart-simple"></i><span class="nav-tooltip">Kết quả
-          Khám TKG</span></a>
+          class="fas fa-chart-simple"></i><span class="nav-tooltip">Kết quả Khám
+          TKG</span></a>
       <a href="login.html" class="nav-circle"><i
           class="fas fa-stethoscope"></i><span class="nav-tooltip">Đăng nhập
           BS</span></a>
@@ -249,88 +193,148 @@
         id="toastMessage"></span></div>
 
     <script type="module">
+  import api from './js/api.js';
 
-
-  let employees = [];
-
-  async function loadEmployees() {
-    try {
-      const res = await api.getEmployees();
-      employees = res.data;
-      document.getElementById('totalEmployees').textContent = employees.length;
-    } catch (err) { console.error(err); }
+  // ========== Các hàm helper ==========
+  function showToast(msg, type = 'info') {
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMessage');
+    toastMsg.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
   }
+  window.showToast = showToast;
 
-  async function loadStats() {
-    try {
-      const res = await api.getTodayRegistrations();
-      document.getElementById('totalRegistered').textContent = res.data.length;
-      // Lấy danh sách đã hoàn thành từ bảng examinations (tạm thời chưa có API thống kê)
-      // Bạn có thể tạo API riêng, ở đây tạm để 0
-      document.getElementById('totalCompleted').textContent = 0;
-    } catch (err) { console.error(err); }
+  function calculateAge() {
+    const dob = document.getElementById('patientDob').value;
+    if (dob) {
+      const birthDate = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+      document.getElementById('patientAge').value = age;
+    } else {
+      document.getElementById('patientAge').value = '';
+    }
   }
+  window.calculateAge = calculateAge;
+
+  function selectGender(gender) {
+    const namCard = document.getElementById('genderNam');
+    const nuCard = document.getElementById('genderNu');
+    if (gender === 'Nam') {
+      namCard.classList.add('selected');
+      nuCard.classList.remove('selected');
+    } else {
+      nuCard.classList.add('selected');
+      namCard.classList.remove('selected');
+    }
+  }
+  window.selectGender = selectGender;
+
+  function resetForm() {
+    document.getElementById('empId').value = '';
+    document.getElementById('patientName').value = '';
+    document.getElementById('patientDept').value = '';
+    document.getElementById('patientDob').value = '';
+    document.getElementById('patientAge').value = '';
+    document.getElementById('patientJob').value = '';
+    document.getElementById('patientHistory').value = '';
+    document.getElementById('hazardFactors').value = '';
+    selectGender('Nam');
+    document.getElementById('empInfo').innerHTML = '';
+  }
+  window.resetForm = resetForm;
 
   async function searchEmployee() {
-    const empId = document.getElementById('empId')?.value.trim();
-    if (!empId) { showToast('Nhập mã nhân viên', 'warning'); return; }
+    const empId = document.getElementById('empId').value.trim();
+    if (!empId) {
+      showToast('Nhập mã nhân viên', 'warning');
+      return;
+    }
     try {
       const res = await api.getEmployee(empId);
       const emp = res.data;
-      const infoDiv = document.getElementById('empInfo');
-      infoDiv.innerHTML = `<div class="emp-card"><h3>✅ Thông tin</h3><div class="emp-row"><span>Họ tên</span><span><strong>${emp.name}</strong></span></div><div class="emp-row"><span>Mã NV</span><span>${emp.patient_code}</span></div><div class="emp-row"><span>Phòng ban</span><span>${emp.dept || '—'}</span></div></div>`;
+      // Cập nhật form
       document.getElementById('patientName').value = emp.name;
       document.getElementById('patientDept').value = emp.dept || '';
       if (emp.dob) document.getElementById('patientDob').value = emp.dob;
       if (emp.gender) selectGender(emp.gender);
       calculateAge();
+      // Hiển thị thông tin bổ sung
+      const infoDiv = document.getElementById('empInfo');
+      infoDiv.innerHTML = `<div class="emp-card"><h3>✅ Thông tin nhân viên</h3><div class="emp-row"><span>Họ tên</span><span><strong>${emp.name}</strong></span></div><div class="emp-row"><span>Mã NV</span><span>${emp.patient_code}</span></div><div class="emp-row"><span>Phòng ban</span><span>${emp.dept || '—'}</span></div><div class="emp-row"><span>Số điện thoại</span><span>${emp.phone || '—'}</span></div></div>`;
       showToast(`Đã tìm thấy: ${emp.name}`, 'success');
     } catch (err) {
-      document.getElementById('empInfo').innerHTML = `<div class="emp-card" style="border-color:var(--warn);background:var(--warn-light);"><h3>❌ Không tìm thấy</h3><p>Mã ${empId} chưa có. Vui lòng đăng ký!</p><div class="form-row"><div class="form-group"><label>Họ tên *</label><input type="text" id="newEmpName" placeholder="Họ và tên"></div></div><button class="btn-primary" onclick="quickRegister('${empId}')" style="margin-top:12px">➕ Đăng ký nhân viên mới</button></div>`;
+      console.error(err);
+      // Không tìm thấy => hiển thị form đăng ký nhân viên mới
+      document.getElementById('empInfo').innerHTML = `<div class="emp-card" style="border-color:var(--warn);background:var(--warn-light);"><h3>❌ Không tìm thấy</h3><p>Mã ${empId} chưa có trong hệ thống. Vui lòng đăng ký thông tin bên dưới.</p>
+        <div class="form-group"><label>Họ tên *</label><input type="text" id="newEmpName" placeholder="Họ và tên đầy đủ"></div>
+        <div class="form-group"><label>Phòng ban</label><input type="text" id="newEmpDept" placeholder="Phòng ban"></div>
+        <div class="form-group"><label>Số điện thoại</label><input type="text" id="newEmpPhone" placeholder="Số điện thoại"></div>
+        <button class="btn-primary" onclick="quickRegister('${empId}')" style="margin-top:12px">➕ Đăng ký nhân viên mới</button></div>`;
     }
   }
   window.searchEmployee = searchEmployee;
 
   async function quickRegister(empId) {
     const name = document.getElementById('newEmpName')?.value.trim();
-    if (!name) { showToast('Nhập họ tên', 'error'); return; }
+    if (!name) {
+      showToast('Vui lòng nhập họ tên', 'warning');
+      return;
+    }
+    const dept = document.getElementById('newEmpDept')?.value.trim() || '';
+    const phone = document.getElementById('newEmpPhone')?.value.trim() || '';
     const newEmp = {
       patient_code: empId,
       name: name.toUpperCase(),
       gender: 'Nam',
       dob: '',
-      dept: '',
+      dept: dept,
       position: '',
-      phone: '',
+      phone: phone,
       email: '',
       note: ''
     };
     try {
       await api.createEmployee(newEmp);
-      await loadEmployees();
-      document.getElementById('patientName').value = name.toUpperCase();
-      document.getElementById('empInfo').innerHTML = `<div class="emp-card"><h3>✅ Đã thêm</h3><div class="emp-row"><span>${name.toUpperCase()}</span><span>${empId}</span></div></div>`;
-      showToast(`Đã thêm: ${name}`, 'success');
+      // Sau khi tạo, tự động tìm lại để cập nhật form
+      const res = await api.getEmployee(empId);
+      const emp = res.data;
+      document.getElementById('patientName').value = emp.name;
+      document.getElementById('patientDept').value = emp.dept || '';
+      if (emp.dob) document.getElementById('patientDob').value = emp.dob;
+      if (emp.gender) selectGender(emp.gender);
+      calculateAge();
+      document.getElementById('empInfo').innerHTML = `<div class="emp-card"><h3>✅ Đã thêm nhân viên</h3><div class="emp-row"><span>${emp.name}</span><span>${emp.patient_code}</span></div></div>`;
+      showToast(`Đã thêm nhân viên: ${name}`, 'success');
+      // Load lại tổng số nhân viên
+      const empRes = await api.getEmployees();
+      document.getElementById('totalEmployees').textContent = empRes.data.length;
     } catch (err) {
-      showToast(err.message, 'error');
+      showToast('Lỗi: ' + err.message, 'error');
     }
   }
   window.quickRegister = quickRegister;
 
   async function registerExam() {
-    const empId = document.getElementById('empId')?.value.trim();
-    const name = document.getElementById('patientName')?.value.trim();
-    if (!empId || !name) { showToast('Vui lòng tra cứu nhân viên trước', 'warning'); return; }
+    const empId = document.getElementById('empId').value.trim();
+    const name = document.getElementById('patientName').value.trim();
+    if (!empId || !name) {
+      showToast('Vui lòng tra cứu nhân viên trước', 'warning');
+      return;
+    }
     const patientData = {
       empId: empId,
       name: name,
       gender: document.querySelector('.gender-card.selected span')?.textContent || '',
-      dob: document.getElementById('patientDob')?.value || '',
-      age: document.getElementById('patientAge')?.value || '',
-      job: document.getElementById('patientJob')?.value || '',
-      history: document.getElementById('patientHistory')?.value || '',
-      hazard: document.getElementById('hazardFactors')?.value || '',
-      dept: document.getElementById('patientDept')?.value || ''
+      dob: document.getElementById('patientDob').value || '',
+      age: document.getElementById('patientAge').value || '',
+      job: document.getElementById('patientJob').value || '',
+      history: document.getElementById('patientHistory').value || '',
+      hazard: document.getElementById('hazardFactors').value || '',
+      dept: document.getElementById('patientDept').value || ''
     };
     try {
       await api.createRegistration({
@@ -347,45 +351,62 @@
       });
       showToast('Đăng ký khám thành công!', 'success');
       generateRegistrationPDF(patientData);
+      // Reload thống kê
+      const regRes = await api.getTodayRegistrations();
+      document.getElementById('totalRegistered').textContent = regRes.data.length;
     } catch (err) {
       showToast('Lỗi đăng ký: ' + err.message, 'error');
     }
   }
   window.registerExam = registerExam;
 
-  // Các hàm helper (selectGender, calculateAge, resetForm, showToast, generateRegistrationPDF) giữ nguyên như file cũ.
-  // Lưu ý: generateRegistrationPDF không cần sửa.
-   // Hàm kiểm tra đăng nhập - duy nhất một bản
-  async function checkAuth() {
+  async function loadEmployees() {
     try {
-      const response = await fetch('/api/auth/me', {
-        method: 'GET',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        return data.user;
-      } else {
-        window.location.href = '/login.html';
-        return null;
-      }
-    } catch (error) {
-      console.error('Lỗi kiểm tra auth:', error);
-      window.location.href = '/login.html';
-      return null;
-    }
+      const res = await api.getEmployees();
+      document.getElementById('totalEmployees').textContent = res.data.length;
+    } catch (err) { console.error(err); }
   }
 
-  // Tự động chạy khi trang load
-  (async function() {
-    const user = await checkAuth();
-    if (!user) return;
-    // Hiển thị tên user nếu có
-    const userNameSpan = document.getElementById('user-name');
-    if (userNameSpan) userNameSpan.innerText = user.name;
-    // ... các logic khác
-  })();
+  async function loadStats() {
+    try {
+      const res = await api.getTodayRegistrations();
+      document.getElementById('totalRegistered').textContent = res.data.length;
+      // Có thể gọi API thống kê khám hoàn thành (tạm thời để 0)
+      document.getElementById('totalCompleted').textContent = 0;
+    } catch (err) { console.error(err); }
+  }
+
+  function generateRegistrationPDF(data) {
+    // Hàm tạo PDF đơn giản (có thể tùy chỉnh)
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('PHIẾU ĐĂNG KÝ KHÁM SỨC KHỎE', 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Mã nhân viên: ${data.empId}`, 20, 40);
+    doc.text(`Họ tên: ${data.name}`, 20, 50);
+    doc.text(`Giới tính: ${data.gender}`, 20, 60);
+    doc.text(`Ngày sinh: ${data.dob}`, 20, 70);
+    doc.text(`Tuổi: ${data.age}`, 20, 80);
+    doc.text(`Vị trí công việc: ${data.job}`, 20, 90);
+    doc.text(`Phòng ban: ${data.dept}`, 20, 100);
+    doc.text(`Ngày đăng ký: ${new Date().toLocaleDateString('vi-VN')}`, 20, 120);
+    doc.save(`DangKy_Kham_${data.empId}.pdf`);
+  }
+  window.generateRegistrationPDF = generateRegistrationPDF;
+
+  // Các hàm placeholder cho thống kê
+  window.showTodayRegistrations = function() { showToast('Chức năng đang phát triển'); };
+  window.showCompletedExams = function() { showToast('Chức năng đang phát triển'); };
+  window.refreshData = function() { loadEmployees(); loadStats(); };
+
+  // Khởi tạo
+  document.addEventListener('DOMContentLoaded', () => {
+    loadEmployees();
+    loadStats();
+    // Gán sự kiện tính tuổi khi thay đổi ngày sinh
+    document.getElementById('patientDob').addEventListener('change', calculateAge);
+  });
 </script>
   </body>
 </html>

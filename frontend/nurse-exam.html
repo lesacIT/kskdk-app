@@ -130,120 +130,152 @@
         id="toastMsg"></span></div>
 
     <script type="module">
-  import api from './js/api.js';
+    import api from './js/api.js';
 
-  let currentPatient = null;
+    let currentPatient = null;
 
-  async function loadPatient() {
-    const stored = sessionStorage.getItem('examPatient');
-    if (!stored) { showToast('Không tìm thấy bệnh nhân', true); setTimeout(() => window.location.href = 'doctor-dashboard.html', 1500); return; }
-    currentPatient = JSON.parse(stored);
-    document.getElementById('patientId').textContent = currentPatient.id;
-    document.getElementById('patientName').textContent = currentPatient.name;
-    document.getElementById('patientDept').textContent = currentPatient.dept || '—';
-    document.getElementById('patientDob').textContent = currentPatient.dob || '—';
-    document.getElementById('patientGender').textContent = currentPatient.gender || '—';
-  }
-
-  
-  window.calcBMI = calcBMI;
-
-  function selectPhysical(el, value) {
-    document.querySelectorAll('#physicalClass .radio-label').forEach(l=>l.classList.remove('selected'));
-    el.classList.add('selected');
-  }
-  window.selectPhysical = selectPhysical;
-
-  function getPhysicalClass() {
-    const selected = document.querySelector('#physicalClass .radio-label.selected');
-    return selected ? selected.textContent.trim() : null;
-  }
-
-  async function saveDraft() {
-    if (!currentPatient) return;
-    const data = {
-      height: document.getElementById('height').value,
-      weight: document.getElementById('weight').value,
-      bmi: document.getElementById('bmiValue').textContent,
-      pulse: document.getElementById('pulse').value,
-      bpDisplay: document.getElementById('bpDisplay').value,
-      physicalClass: getPhysicalClass()
-    };
-    localStorage.setItem('nurseDraft_'+currentPatient.id, JSON.stringify(data));
-    showToast('Đã lưu tạm');
-  }
-  window.saveDraft = saveDraft;
-
-  function loadDraft() {
-    const saved = localStorage.getItem('nurseDraft_'+currentPatient.id);
-    if (saved) {
-      const data = JSON.parse(saved);
-      if (data.height) document.getElementById('height').value = data.height;
-      if (data.weight) document.getElementById('weight').value = data.weight;
-      if (data.pulse) document.getElementById('pulse').value = data.pulse;
-      if (data.bpDisplay) document.getElementById('bpDisplay').value = data.bpDisplay;
-      if (data.height && data.weight) calcBMI();
-      if (data.physicalClass) {
-        document.querySelectorAll('#physicalClass .radio-label').forEach(el => {
-          if (el.textContent.trim() === data.physicalClass) el.classList.add('selected');
-        });
+    function calcBMI() {
+      const height = parseFloat(document.getElementById('height')?.value);
+      const weight = parseFloat(document.getElementById('weight')?.value);
+      const bmiSpan = document.getElementById('bmiValue');
+      const bmiStatusSpan = document.getElementById('bmiStatus');
+      const bmiCard = document.getElementById('bmiCard');
+      if (height && weight && height > 0) {
+        const bmi = weight / ((height / 100) ** 2);
+        bmiSpan.innerText = bmi.toFixed(1);
+        let status = '';
+        if (bmi < 18.5) status = 'Gầy';
+        else if (bmi < 25) status = 'Bình thường';
+        else if (bmi < 30) status = 'Thừa cân';
+        else status = 'Béo phì';
+        bmiStatusSpan.innerText = status;
+        bmiCard.style.display = 'block';
+      } else {
+        bmiSpan.innerText = '—';
+        bmiStatusSpan.innerText = '—';
+        bmiCard.style.display = 'none';
       }
     }
-  }
 
- 
+    function selectPhysical(el, value) {
+      document.querySelectorAll('#physicalClass .radio-label').forEach(l => l.classList.remove('selected'));
+      el.classList.add('selected');
+    }
 
-  async function completeExam() {
-    if (!currentPatient) return;
-    const examData = {
-      height: document.getElementById('height').value,
-      weight: document.getElementById('weight').value,
-      bmi: document.getElementById('bmiValue').textContent,
-      pulse: document.getElementById('pulse').value,
-      bpDisplay: document.getElementById('bpDisplay').value,
-      physicalClass: getPhysicalClass()
-    };
-    if (!examData.height || !examData.weight) { showToast('Vui lòng nhập chiều cao và cân nặng'); return; }
-    if (!examData.physicalClass) { showToast('Vui lòng chọn phân loại thể lực'); return; }
+    function getPhysicalClass() {
+      const selected = document.querySelector('#physicalClass .radio-label.selected');
+      return selected ? selected.textContent.trim() : null;
+    }
 
-    // 1. Lưu vào hệ thống cũ (MySQL)
-    let existingExam = null;
-    try {
-      const res = await api.getLatestExamination(currentPatient.id);
-      existingExam = res.data;
-    } catch (err) {}
-    let examDataObj = existingExam ? existingExam.data : {};
-    examDataObj.tq = examData;
-    let sections = existingExam?.completed_sections ? JSON.parse(existingExam.completed_sections) : [];
-    if (!sections.includes('tq')) sections.push('tq');
-    await api.saveExamination(currentPatient.id, { ...examDataObj, completed_sections: sections });
-    
-   
-    localStorage.removeItem('nurseDraft_'+currentPatient.id);
-    showToast('✅ Hoàn thành khám tổng quát!');
-    setTimeout(() => window.location.href = 'doctor-dashboard.html', 1500);
-  }
-  window.completeExam = completeExam;
+    async function loadPatient() {
+      const stored = sessionStorage.getItem('examPatient');
+      if (!stored) {
+        showToast('Không tìm thấy bệnh nhân', true);
+        setTimeout(() => window.location.href = 'doctor-dashboard.html', 1500);
+        return;
+      }
+      currentPatient = JSON.parse(stored);
+      document.getElementById('patientId').textContent = currentPatient.id;
+      document.getElementById('patientName').textContent = currentPatient.name;
+      document.getElementById('patientDept').textContent = currentPatient.dept || '—';
+      document.getElementById('patientDob').textContent = currentPatient.dob || '—';
+      document.getElementById('patientGender').textContent = currentPatient.gender || '—';
+    }
 
-  function goBack() { window.location.href = 'doctor-dashboard.html'; }
-  window.goBack = goBack;
+    async function saveDraft() {
+      if (!currentPatient) return;
+      const data = {
+        height: document.getElementById('height').value,
+        weight: document.getElementById('weight').value,
+        bmi: document.getElementById('bmiValue').textContent,
+        pulse: document.getElementById('pulse').value,
+        bpDisplay: document.getElementById('bpDisplay').value,
+        physicalClass: getPhysicalClass()
+      };
+      localStorage.setItem('nurseDraft_'+currentPatient.id, JSON.stringify(data));
+      showToast('Đã lưu tạm');
+    }
 
-  function logout() { api.logout(); sessionStorage.clear(); window.location.href = 'login.html'; }
-  window.logout = logout;
+    function loadDraft() {
+      const saved = localStorage.getItem('nurseDraft_'+currentPatient.id);
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.height) document.getElementById('height').value = data.height;
+        if (data.weight) document.getElementById('weight').value = data.weight;
+        if (data.pulse) document.getElementById('pulse').value = data.pulse;
+        if (data.bpDisplay) document.getElementById('bpDisplay').value = data.bpDisplay;
+        if (data.height && data.weight) calcBMI();
+        if (data.physicalClass) {
+          document.querySelectorAll('#physicalClass .radio-label').forEach(el => {
+            if (el.textContent.trim() === data.physicalClass) el.classList.add('selected');
+          });
+        }
+      }
+    }
 
-  function showToast(msg, isError = false) {
-    const toast = document.getElementById('toast');
-    const toastMsg = document.getElementById('toastMsg');
-    toastMsg.textContent = msg;
-    toast.style.background = isError ? '#EF4444' : '#1F2937';
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2000);
-  }
+    async function completeExam() {
+      if (!currentPatient) return;
+      const examData = {
+        height: document.getElementById('height').value,
+        weight: document.getElementById('weight').value,
+        bmi: document.getElementById('bmiValue').textContent,
+        pulse: document.getElementById('pulse').value,
+        bpDisplay: document.getElementById('bpDisplay').value,
+        physicalClass: getPhysicalClass()
+      };
+      if (!examData.height || !examData.weight) {
+        showToast('Vui lòng nhập chiều cao và cân nặng');
+        return;
+      }
+      if (!examData.physicalClass) {
+        showToast('Vui lòng chọn phân loại thể lực');
+        return;
+      }
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    await loadPatient();
-    loadDraft();
-  });
-</script>
+      // Lấy examination hiện tại (nếu có)
+      let existingExam = null;
+      try {
+        const res = await api.getLatestExamination(currentPatient.id);
+        existingExam = res.data;
+      } catch (err) {}
+
+      let examDataObj = existingExam ? existingExam.data : {};
+      examDataObj.tq = examData;
+
+      let sections = existingExam?.completed_sections || [];
+      if (!sections.includes('tq')) sections.push('tq');
+
+      // Lưu vào hệ thống (api đã xử lý tạo mới nếu chưa có)
+      await api.saveExamination(currentPatient.id, { ...examDataObj, completed_sections: sections });
+
+      localStorage.removeItem('nurseDraft_'+currentPatient.id);
+      showToast('✅ Hoàn thành khám tổng quát!');
+      setTimeout(() => window.location.href = 'doctor-dashboard.html', 1500);
+    }
+
+    function goBack() { window.location.href = 'doctor-dashboard.html'; }
+    function logout() { api.logout(); sessionStorage.clear(); window.location.href = 'login.html'; }
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.textContent = msg;
+      toast.style.background = isError ? '#EF4444' : '#1F2937';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // Gán các hàm ra global để dùng trong onclick
+    window.calcBMI = calcBMI;
+    window.selectPhysical = selectPhysical;
+    window.saveDraft = saveDraft;
+    window.completeExam = completeExam;
+    window.goBack = goBack;
+    window.logout = logout;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadPatient();
+      loadDraft();
+    });
+  </script>
   </body>
 </html>

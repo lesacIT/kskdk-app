@@ -8,6 +8,7 @@ const { initDatabase, getDb } = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const { PythonShell } = require('python-shell');
 
 // Cấu hình session – phải đặt trước các route
 app.use(session({
@@ -85,6 +86,178 @@ app.post('/api/auth/login', async (req, res) => {
     res.status(500).json({ error: 'Lỗi server' });
   }
 });
+// ========== XUẤT PHIẾU KHÁM (DOCX/PDF) ==========
+app.post('/api/xuat-phieu', requireAuth, async (req, res) => {
+  try {
+    const hoso = req.body; // Dữ liệu đầu vào từ frontend
+    const jsonData = JSON.stringify({ hoso });
+
+    const options = {
+      mode: 'json',
+      pythonPath: 'py',
+      scriptPath: path.join(__dirname, 'python-scripts'),
+      args: [jsonData]
+    };
+
+    PythonShell.run('xuat_phieu_kham.py', options)
+      .then((messages) => {
+        const result = messages[0];
+        if (result.success) {
+          // Đọc file đã tạo (DOCX hoặc PDF)
+          const fileBuffer = fs.readFileSync(result.filePath);
+          const base64 = fileBuffer.toString('base64');
+          const filename = path.basename(result.filePath);
+          // Xóa file tạm sau khi đọc (giải phóng bộ nhớ)
+          fs.unlinkSync(result.filePath);
+          res.json({ success: true, base64, filename });
+        } else {
+          res.status(500).json({ error: result.error });
+        }
+      })
+      .catch((err) => {
+        console.error('Python error:', err);
+        res.status(500).json({ error: err.message });
+      });
+  } catch (err) {
+    console.error('API error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const bwipjs = require('bwip-js');
+app.post('/api/examinations', requireAuth, async (req, res) => {
+  const { patient_code, exam_date } = req.body;
+  if (!patient_code) return res.status(400).json({ success: false, error: 'Thiếu patient_code' });
+  try {
+    const db = getDb();
+    // Kiểm tra xem đã có chưa (để tránh trùng)
+    const [existing] = await db.execute('SELECT id FROM examinations WHERE emp_id = ?', [patient_code]);
+    if (existing.length > 0) {
+      return res.json({ success: true, data: existing[0], message: 'Đã tồn tại' });
+    }
+    const [result] = await db.execute(
+      `INSERT INTO examinations (emp_id, exam_date, data, completed_sections, status) 
+       VALUES (?, ?, ?, ?, ?)`,
+      [patient_code, exam_date || new Date(), '{}', '[]', 'pending']
+    );
+    res.json({ success: true, data: { id: result.insertId } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+app.put('/api/examinations/:id', requireAuth, async (req, res) => {
+  const examId = req.params.id;
+  const { data, completed_sections, status, doctor_name, sign_date } = req.body;
+  try {
+    const db = getDb();
+    const [rows] = await db.execute('SELECT data, completed_sections FROM examinations WHERE id = ?', [examId]);
+    if (rows.length === 0) return res.status(404).json({ success: false, error: 'Không tìm thấy' });
+
+    let currentData = {};
+    try { currentData = JSON.parse(rows[0].data); } catch (e) { }
+    let currentSections = [];
+    try { currentSections = JSON.parse(rows[0].completed_sections || '[]'); } catch (e) { }
+
+    const newData = data ? { ...currentData, ...data } : currentData;
+    const newSections = completed_sections
+      ? [...new Set([...currentSections, ...completed_sections])]
+      : currentSections;
+
+    // Log để kiểm tra
+    console.log('Updating exam', examId, 'with sections:', newSections);
+
+    await db.execute(
+      `UPDATE examinations 
+       SET data = ?, completed_sections = ?, status = ?, doctor_name = ?, sign_date = ?
+       WHERE id = ?`,
+      [JSON.stringify(newData), JSON.stringify(newSections), status || 'pending',
+      doctor_name || req.session.user?.name, sign_date || null, examId]
+    );
+    res.json({ success: true, message: 'Cập nhật thành công' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+// API tạo mã vạch từ patient_code
+app.get('/api/barcode/:code', async (req, res) => {
+  const code = req.params.code;
+  if (!code) return res.status(400).send('Missing code');
+  try {
+    const buffer = await bwipjs.toBuffer({
+      bcid: 'code128',        // loại mã vạch (code128 phổ biến)
+      text: code,
+      scale: 3,
+      height: 10,             // chiều cao (mm)
+      includetext: true,      // hiển thị số bên dưới
+      textxalign: 'center',
+    });
+    res.setHeader('Content-Type', 'image/png');
+    res.send(buffer);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Lỗi tạo mã vạch');
+  }
+});
+// ========== TEST PYTHON ==========
+app.post('/api/xuat-phieu', requireAuth, async (req, res) => {
+  try {
+    // Giả sử bạn có dữ liệu hoso từ database
+    const hoso = req.body;  // hoặc lấy từ database dựa trên ID
+
+    // Chuyển dữ liệu thành JSON string
+    const jsonData = JSON.stringify({ hoso });
+
+    const options = {
+      mode: 'json',
+      pythonPath: 'py',
+      scriptPath: path.join(__dirname, 'python-scripts'),
+      args: [jsonData]
+    };
+
+    PythonShell.run('xuat_phieu_kham.py', options)
+      .then(messages => {
+        const result = messages[0];
+        if (result.success) {
+          // Trả về đường dẫn file hoặc nội dung file cho client tải về
+          res.json({ success: true, filePath: result.filePath });
+        } else {
+          res.status(500).json({ error: result.error });
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+      });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+app.get('/test-python', (req, res) => {
+  PythonShell.run('test.py', { scriptPath: './python-scripts' })
+    .then(messages => res.send(messages))
+    .catch(err => res.status(500).send(err.message));
+});
+
+// ========== TẠO QR CODE TỪ MÃ ==========
+app.get('/api/qr/:code', async (req, res) => {
+  const code = req.params.code;
+  if (!code) return res.status(400).send('Missing code');
+  try {
+    const QRCode = require('qrcode');
+    const qrBuffer = await QRCode.toBuffer(code, { width: 200 });
+    res.setHeader('Content-Type', 'image/png');
+    res.send(qrBuffer);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Lỗi tạo QR');
+  }
+});
+
+
 
 app.get('/api/auth/me', requireAuth, (req, res) => {
   res.json({ success: true, user: req.session.user });
@@ -172,356 +345,67 @@ app.get('/api/registrations/today', requireAuth, async (req, res) => {
 });
 
 // ========== EXAMINATIONS ==========
-app.get('/api/examinations/:patientCode', requireAuth, async (req, res) => {
-  const db = getDb();
-  const [rows] = await db.execute(
-    `SELECT * FROM examinations WHERE emp_id = ? ORDER BY exam_date DESC LIMIT 1`,
-    [req.params.patientCode]
-  );
-  if (rows.length === 0) {
-    return res.json({ success: true, data: null });
+// Lấy danh sách tất cả examinations (hoặc lọc theo specialty)
+// Cập nhật dữ liệu khám theo id
+app.put('/api/examinations/:id', requireAuth, async (req, res) => {
+  const examId = req.params.id;
+  const { data, completed_sections, status, doctor_name, sign_date } = req.body;
+  try {
+    const db = getDb();
+    const [rows] = await db.execute('SELECT data, completed_sections FROM examinations WHERE id = ?', [examId]);
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Không tìm thấy phiếu khám' });
+    }
+
+    let currentData = {};
+    try { currentData = JSON.parse(rows[0].data); } catch (e) { }
+    let currentSections = [];
+    try { currentSections = JSON.parse(rows[0].completed_sections || '[]'); } catch (e) { }
+
+    // Merge dữ liệu mới (nếu data được gửi lên)
+    const newData = data ? { ...currentData, ...data } : currentData;
+    const newSections = completed_sections
+      ? [...new Set([...currentSections, ...completed_sections])]
+      : currentSections;
+
+    const updateQuery = `
+      UPDATE examinations 
+      SET data = ?, completed_sections = ?, status = ?, doctor_name = ?, sign_date = ?
+      WHERE id = ?
+    `;
+    await db.execute(updateQuery, [
+      JSON.stringify(newData),
+      JSON.stringify(newSections),
+      status || 'pending',
+      doctor_name || req.session.user?.name,
+      sign_date || null,
+      examId
+    ]);
+    res.json({ success: true, message: 'Cập nhật thành công' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
   }
-  const exam = rows[0];
-  exam.data = JSON.parse(exam.data);
-  exam.completed_sections = exam.completed_sections ? JSON.parse(exam.completed_sections) : [];
-  res.json({ success: true, data: exam });
 });
-
-
-// ========== HTML RESULT (IN PDF) - THEO ĐÚNG MẪU ==========
-// app.get('/api/exams/:id/html', requireAuth, async (req, res) => {
-//   const examinationId = req.params.id;
-//   try {
-//     const db = getDb();
-//     const [rows] = await db.execute(`
-//       SELECT e.*, emp.name as emp_name, emp.gender, emp.dob, emp.dept, emp.phone, emp.email
-//       FROM examinations e
-//       JOIN employees emp ON e.emp_id = emp.patient_code
-//       WHERE e.id = ?
-//     `, [examinationId]);
-//     if (rows.length === 0) {
-//       return res.status(404).send('<h3>Không tìm thấy phiếu khám</h3>');
-//     }
-//     const exam = rows[0];
-//     let examData = {};
-//     try { examData = JSON.parse(exam.data); } catch (e) { }
-
-//     // Lấy thông tin đăng ký (tiền sử, yếu tố có hại, vị trí nghề)
-//     let registration = null;
-//     try {
-//       const [regRows] = await db.execute(
-//         `SELECT history, hazard, job FROM registrations WHERE emp_id = ? ORDER BY register_date DESC LIMIT 1`,
-//         [exam.emp_id]
-//       );
-//       if (regRows.length) registration = regRows[0];
-//     } catch (e) { }
-
-//     // Lấy chữ ký bác sĩ (nếu có bảng examination_signatures)
-//     let signatures = {};
-//     try {
-//       const [sigRows] = await db.execute(
-//         `SELECT specialty, doctor_name, signed_at FROM examination_signatures WHERE examination_id = ?`,
-//         [examinationId]
-//       );
-//       for (let s of sigRows) {
-//         signatures[s.specialty] = { doctor_name: s.doctor_name, signed_at: s.signed_at };
-//       }
-//     } catch (e) { }
-
-//     const safe = (val) => (val !== undefined && val !== null) ? val : '';
-//     const formatClass = (cls) => cls ? `Loại ${cls}` : 'Chưa phân loại';
-
-//     // Hàm lấy chữ ký theo chuyên khoa (ánh xạ tên chuyên khoa sang key trong signatures)
-//     const getSignature = (specialtyKey) => {
-//       const sig = signatures[specialtyKey];
-//       if (sig) return `Ngày ký: ${new Date(sig.signed_at).toLocaleString('vi-VN')}<br>Người ký: ${sig.doctor_name}`;
-//       return '';
-//     };
-
-//     // Dữ liệu từng chuyên khoa
-//     const tq = examData.tq || {};
-//     const nk = examData.nk || {};
-//     const ng = examData.ng || {};
-//     const mt = examData.mt || {};
-//     const tmh = examData.tmh || {};
-//     const rhm = examData.rhm || {};
-//     const sp = examData.sp || {};
-//     const kl = examData.kl || {};
-
-//     // Tính tuổi
-//     let age = '';
-//     if (exam.dob) {
-//       const birth = new Date(exam.dob);
-//       const today = new Date();
-//       let ageNum = today.getFullYear() - birth.getFullYear();
-//       const m = today.getMonth() - birth.getMonth();
-//       if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) ageNum--;
-//       age = ageNum.toString();
-//     }
-
-//     // Helper để tạo dòng cho bảng Nội khoa (8 dòng)
-//     const nkRows = [
-//       { label: 'a) Tuần hoàn', value: nk.nkTH, class: nk.class, sigKey: 'Nội khoa' },
-//       { label: 'b) Hô hấp', value: nk.nkHH, class: nk.class, sigKey: 'Nội khoa' },
-//       { label: 'c) Tiêu hóa', value: nk.nkTHoa, class: nk.class, sigKey: 'Nội khoa' },
-//       { label: 'd) Thận - Tiết niệu', value: nk.nkTTN, class: nk.class, sigKey: 'Nội khoa' },
-//       { label: 'đ) Nội tiết', value: nk.nkNT, class: nk.class, sigKey: 'Nội khoa' },
-//       { label: 'e) Cơ - xương - khớp', value: nk.nkCXK, class: nk.class, sigKey: 'Nội khoa' },
-//       { label: 'g) Thần kinh', value: nk.nkTK, class: nk.class, sigKey: 'Nội khoa' },
-//       { label: 'h) Tâm thần', value: nk.nkTThan, class: nk.class, sigKey: 'Nội khoa' }
-//     ];
-
-//     // Hàm tạo bảng HTML cho phần khám lâm sàng (giống mẫu)
-//     const renderClinicalTable = () => {
-//       let html = `<table class="clinical-table" style="width:100%; border-collapse: collapse; border: 1px solid #000;">
-//         <thead>
-//           <tr>
-//             <th style="border:1px solid #000; padding:6px; width:18%">Chuyên khoa</th>
-//             <th style="border:1px solid #000; padding:6px; width:42%">Nội dung khám</th>
-//             <th style="border:1px solid #000; padding:6px; width:15%">Phân loại</th>
-//             <th style="border:1px solid #000; padding:6px; width:25%">Họ tên và chữ ký của<br>Bác sĩ chuyên khoa</th>
-//           </tr>
-//         </thead>
-//         <tbody>`;
-
-//       // 1. Nội khoa (gộp 8 dòng)
-//       html += `<tr><td rowspan="8" style="border:1px solid #000; padding:6px; vertical-align:top; background:#f9f9f9;"><strong>1. Nội khoa</strong></td>`;
-//       for (let i = 0; i < nkRows.length; i++) {
-//         const r = nkRows[i];
-//         html += `<td style="border:1px solid #000; padding:6px; vertical-align:top;"><strong>${r.label}</strong><br>${safe(r.value)}</td>
-//                  <td style="border:1px solid #000; padding:6px; vertical-align:top;">${formatClass(r.class)}</td>
-//                  <td style="border:1px solid #000; padding:6px; vertical-align:top;">${getSignature(r.sigKey)}</td></tr>`;
-//         if (i < nkRows.length - 1) html += `<tr>`;
-//       }
-
-//       // 2. Ngoại khoa, Da liễu (2 dòng riêng biệt? Mẫu gộp chung một dòng? Theo mẫu: 2. Ngoại khoa, Da liễu có a) Ngoại khoa, b) Da liễu)
-//       html += `<tr><td style="border:1px solid #000; padding:6px; background:#f9f9f9;"><strong>2. Ngoại khoa, Da liễu</strong></td>
-//                <td style="border:1px solid #000; padding:6px;"><strong>a) Ngoại khoa</strong><br>${safe(ng.ngNgoai)}<br><strong>b) Da liễu</strong><br>${safe(ng.ngDa)}</td>
-//                <td style="border:1px solid #000; padding:6px;">${formatClass(ng.class)}</td>
-//                <td style="border:1px solid #000; padding:6px;">${getSignature('Ngoại khoa')}</td></tr>`;
-
-//       // 3. Sản phụ khoa (nếu nữ)
-//       if (exam.gender === 'Nữ') {
-//         html += `<tr><td style="border:1px solid #000; padding:6px; background:#f9f9f9;"><strong>3. Sản phụ khoa</strong></td>
-//                  <td style="border:1px solid #000; padding:6px;">Các bệnh sản phụ khoa (nếu có): ${safe(sp.spContent)}</td>
-//                  <td style="border:1px solid #000; padding:6px;">${formatClass(sp.class)}</td>
-//                  <td style="border:1px solid #000; padding:6px;">${getSignature('Sản phụ khoa')}</td></tr>`;
-//       }
-
-//       // 4. Mắt
-//       html += `<tr><td style="border:1px solid #000; padding:6px; background:#f9f9f9;"><strong>4. Mắt</strong></td>
-//                <td style="border:1px solid #000; padding:6px;">
-//                  Kết quả khám thị lực:<br>
-//                  + Không kính: Mắt phải ${safe(mt.mtNoGlassR)}; Mắt trái ${safe(mt.mtNoGlassL)}<br>
-//                  + Có kính: Mắt phải ${safe(mt.mtGlassR)}; Mắt trái ${safe(mt.mtGlassL)}<br>
-//                  Các bệnh về mắt (nếu có): ${safe(mt.mtDiag)}
-//                </td>
-//                <td style="border:1px solid #000; padding:6px;">${formatClass(mt.class)}</td>
-//                <td style="border:1px solid #000; padding:6px;">${getSignature('Mắt')}</td></tr>`;
-
-//       // 5. Tai – Mũi – Họng
-//       html += `<tr><td style="border:1px solid #000; padding:6px; background:#f9f9f9;"><strong>5. Tai – Mũi – Họng</strong></td>
-//                <td style="border:1px solid #000; padding:6px;">
-//                  Kết quả khám thính lực:<br>
-//                  + Tai trái: Nói thường ${safe(tmh.tmhLN)} m; Nói thầm ${safe(tmh.tmhLW)} m<br>
-//                  + Tai phải: Nói thường ${safe(tmh.tmhRN)} m; Nói thầm ${safe(tmh.tmhRW)} m<br>
-//                  Các bệnh về TMH (nếu có): ${safe(tmh.tmhDiag)}<br>
-//                  Mũi – Họng – Thanh quản: ${safe(tmh.tmhNH)}
-//                </td>
-//                <td style="border:1px solid #000; padding:6px;">${formatClass(tmh.class)}</td>
-//                <td style="border:1px solid #000; padding:6px;">${getSignature('Tai Mũi Họng')}</td></tr>`;
-
-//       // 6. Răng – Hàm – Mặt
-//       html += `<tr><td style="border:1px solid #000; padding:6px; background:#f9f9f9;"><strong>6. Răng – Hàm – Mặt</strong></td>
-//                <td style="border:1px solid #000; padding:6px;">Kết quả khám: ${safe(rhm.rhmNotes)}<br>Các bệnh về răng hàm mặt (nếu có): ${safe(rhm.rhmNotes)}</td>
-//                <td style="border:1px solid #000; padding:6px;">${formatClass(rhm.class)}</td>
-//                <td style="border:1px solid #000; padding:6px;">${getSignature('Răng Hàm Mặt')}</td></tr>`;
-
-//       html += `</tbody></table>`;
-//       return html;
-//     };
-
-//     const html = `<!DOCTYPE html>
-// <html lang="vi">
-// <head>
-//   <meta charset="UTF-8">
-//   <title>Phiếu khám sức khỏe</title>
-//   <style>
-//     * { margin: 0; padding: 0; box-sizing: border-box; }
-//     body {
-//       font-family: 'Times New Roman', Times, serif;
-//       font-size: 13px;
-//       padding: 15px;
-//       background: white;
-//       color: black;
-//     }
-//     @media print {
-//       body { padding: 0; margin: 0; }
-//       .no-print { display: none; }
-//     }
-//     .container {
-//       max-width: 1100px;
-//       margin: 0 auto;
-//     }
-//     .header {
-//       text-align: center;
-//       margin-bottom: 15px;
-//     }
-//     .header .unit {
-//       font-weight: bold;
-//       font-size: 14px;
-//     }
-//     .header .hospital {
-//       font-weight: bold;
-//       font-size: 14px;
-//       margin-top: 2px;
-//     }
-//     .header .so-phieu {
-//       margin-top: 5px;
-//       font-style: italic;
-//     }
-//     .header .social {
-//       margin-top: 8px;
-//       font-weight: bold;
-//     }
-//     .header .title {
-//       margin: 8px 0;
-//       font-size: 16px;
-//       font-weight: bold;
-//       text-transform: uppercase;
-//     }
-//     .info-row {
-//       display: flex;
-//       margin: 4px 0;
-//       flex-wrap: wrap;
-//     }
-//     .info-label {
-//       width: 190px;
-//       font-weight: bold;
-//     }
-//     .info-value {
-//       flex: 1;
-//       border-bottom: 1px dotted #000;
-//       padding-left: 5px;
-//     }
-//     .photo {
-//       float: left;
-//       width: 100px;
-//       height: 120px;
-//       border: 1px solid #000;
-//       text-align: center;
-//       line-height: 120px;
-//       margin-right: 15px;
-//       margin-bottom: 10px;
-//     }
-//     h3, h4 {
-//       margin: 12px 0 6px 0;
-//     }
-//     .clinical-table {
-//       width: 100%;
-//       border-collapse: collapse;
-//       margin: 10px 0;
-//       font-size: 12px;
-//     }
-//     .clinical-table th, .clinical-table td {
-//       border: 1px solid #000;
-//       padding: 6px;
-//       vertical-align: top;
-//     }
-//     .clinical-table th {
-//       background: #f2f2f2;
-//       text-align: center;
-//     }
-//     .sign-line {
-//       display: flex;
-//       justify-content: space-between;
-//       margin-top: 30px;
-//     }
-//     .clinic-name {
-//       text-align: right;
-//       font-style: italic;
-//       margin-top: 10px;
-//     }
-//     .center {
-//       text-align: center;
-//     }
-//     .bold {
-//       font-weight: bold;
-//     }
-//     .subnote {
-//       font-size: 11px;
-//       font-style: italic;
-//       margin-top: 10px;
-//     }
-//   </style>
-// </head>
-// <body>
-// <div class="container">
-//   <div class="no-print" style="text-align:right; margin-bottom:10px;">
-//     <button onclick="window.print()" style="padding:6px 12px; background:#1D9E75; color:white; border:none; border-radius:4px;">🖨️ In / Lưu PDF</button>
-//   </div>
-//   <div class="header">
-//     <div class="unit">CỤC HẬU CẦN - KỸ THUẬT QK9</div>
-//     <div class="hospital">BỆNH VIỆN QUÂN Y 121</div>
-//     <div class="so-phieu">Số: .... /GKSK-BV</div>
-//     <div class="social">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
-//     <div>Độc lập – Tự do – Hạnh phúc</div>
-//     <div class="title">PHIẾU KHÁM SỨC KHỎE<br>TRƯỚC KHI BỐ TRÍ VIỆC LÀM</div>
-//   </div>
-
-//   <!-- Thông tin cá nhân + ảnh -->
-//   <div style="position: relative;">
-//     <div class="photo">Ảnh (4x6)</div>
-//     <div class="info-row"><div class="info-label">1. Họ tên:</div><div class="info-value">${safe(exam.emp_name)}</div></div>
-//     <div class="info-row"><div class="info-label">2. Giới tính:</div><div class="info-value">${safe(exam.gender)}</div></div>
-//     <div class="info-row"><div class="info-label">3. Ngày tháng năm sinh:</div><div class="info-value">${safe(exam.dob)} (Tuổi: ${age})</div></div>
-//     <div class="info-row"><div class="info-label">4. Số CMND/CCCD:</div><div class="info-value">${safe(exam.email?.split('@')[0] || '')}</div></div>
-//     <div class="info-row"><div class="info-label">5. Cấp ngày ……… tại Cục cảnh sát quản lý hành chính về trật tự xã hội</div><div class="info-value"></div></div>
-//     <div class="info-row"><div class="info-label">6. Chỗ ở hiện tại:</div><div class="info-value">${safe(exam.dept)}</div></div>
-//     <div class="info-row"><div class="info-label">Số điện thoại liên hệ:</div><div class="info-value">${safe(exam.phone)}</div></div>
-//     <div class="info-row"><div class="info-label">7. Vị trí nghề/công việc dự kiến bố trí:</div><div class="info-value">${safe(registration?.job || '')}</div></div>
-//   </div>
-
-//   <div class="info-row"><div class="info-label">I. TIỀN SỬ BỆNH, TẬT:</div><div class="info-value">${safe(registration?.history || '')}</div></div>
-//   <div class="info-row"><div class="info-label">II. YẾU TỐ CÓ HẠI:</div><div class="info-value">${safe(registration?.hazard || '')}</div></div>
-
-//   <h3>III. NỘI DUNG KHÁM</h3>
-//   <h4>3.1. Khám tổng quát</h4>
-//   <div class="info-row"><div class="info-label">- Chiều cao:</div><div class="info-value">${safe(tq.height)} cm</div></div>
-//   <div class="info-row"><div class="info-label">- Cân nặng:</div><div class="info-value">${safe(tq.weight)} kg</div></div>
-//   <div class="info-row"><div class="info-label">- Chỉ số BMI:</div><div class="info-value">${safe(tq.bmi)}</div></div>
-//   <div class="info-row"><div class="info-label">- Mạch:</div><div class="info-value">${safe(tq.pulse)} lần/phút</div></div>
-//   <div class="info-row"><div class="info-label">- Huyết áp:</div><div class="info-value">${safe(tq.bpDisplay)} mmHg</div></div>
-//   <div class="info-row"><div class="info-label">Phân loại thể lực:</div><div class="info-value">${safe(tq.physicalClass)}</div></div>
-
-//   <h4>3.2. Khám lâm sàng</h4>
-//   ${renderClinicalTable()}
-
-//   <div class="subnote">*Trường hợp người lao động đã khám sức khỏe tuyển dụng/khám sức khỏe định kỳ còn giá trị sử dụng theo quy định tại Thông tư 32/2023/TT-BYT ngày 31/12/2023 của Bộ Y tế hướng dẫn luật khám chữa bệnh sẽ không phải khám lại nội dung này.</div>
-
-//   <h4>2. Khám phát hiện bệnh liên quan đến vị trí làm</h4>
-//   <div class="info-row"><div class="info-label">2.1. Lâm sàng:</div><div class="info-value">${safe(kl.clinical || '')}</div></div>
-//   <div class="info-row"><div class="info-label">2.2. Cận lâm sàng:</div><div class="info-value">${safe(kl.paraclinical || '')}</div></div>
-
-//   <h3>IV. KẾT LUẬN</h3>
-//   <div class="info-row"><div class="info-label">1. Phân loại sức khỏe:</div><div class="info-value">${safe(kl.healthClass || '')}</div></div>
-//   <div class="info-row"><div class="info-label">2. Các bệnh, tật (nếu có):</div><div class="info-value">${safe(kl.diseases || '')}</div></div>
-//   <div class="info-row"><div class="info-label">3. Hiện tại đủ/không đủ khám sức khỏe làm việc cho ngành nghề, công việc (Ghi cụ thể nếu có), hướng giải quyết (nếu có):</div><div class="info-value">${safe(kl.conclusion || '')}</div></div>
-
-//   <div class="sign-line">
-//     <div>${exam.sign_date ? new Date(exam.sign_date).toLocaleDateString('vi-VN') : ''}</div>
-//     <div>GIÁM ĐỐC<br>(Ký, họ tên)</div>
-//   </div>
-//   <div class="clinic-name">(Đã ký điện tử)</div>
-// </div>
-// </body>
-// </html>`;
-//     res.send(html);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send('<h3>Lỗi hiển thị kết quả</h3>');
-//   }
-// });
+// Lấy examination mới nhất theo mã bệnh nhân
+app.get('/api/examinations/:patientCode', requireAuth, async (req, res) => {
+  const patientCode = req.params.patientCode;
+  try {
+    const db = getDb();
+    const [rows] = await db.execute(
+      `SELECT * FROM examinations WHERE emp_id = ? ORDER BY exam_date DESC LIMIT 1`,
+      [patientCode]
+    );
+    if (rows.length === 0) return res.json({ success: true, data: null });
+    const exam = rows[0];
+    exam.data = exam.data ? JSON.parse(exam.data) : {};
+    exam.completed_sections = exam.completed_sections ? JSON.parse(exam.completed_sections) : [];
+    res.json({ success: true, data: exam });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 // Ở ĐẦU FILE (app.js hoặc server.js) phải có:
 
@@ -762,6 +646,139 @@ ${htmlContent}
   }
 });
 
+// ========== LẤY TOÀN BỘ DỮ LIỆU PHIẾU KHÁM ==========
+app.get('/api/exam-full/:id', requireAuth, async (req, res) => {
+  const examId = req.params.id;
+  try {
+    const db = getDb();
+
+    // 1. Lấy thông tin khám
+    const [examRows] = await db.execute(`
+      SELECT e.*, emp.patient_code, emp.name as emp_name, emp.gender, emp.dob, emp.dept, emp.phone, emp.email, emp.position
+      FROM examinations e
+      JOIN employees emp ON e.emp_id = emp.patient_code
+      WHERE e.id = ?
+    `, [examId]);
+
+    if (examRows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Không tìm thấy phiếu khám' });
+    }
+
+    const exam = examRows[0];
+    const examData = exam.data ? JSON.parse(exam.data) : {};
+
+    // 2. Lấy thông tin đăng ký khám (tiền sử, yếu tố có hại, công việc)
+    const [regRows] = await db.execute(`
+      SELECT history, hazard, job FROM registrations WHERE emp_id = ? ORDER BY register_date DESC LIMIT 1
+    `, [exam.emp_id]);
+    const registration = regRows[0] || {};
+
+    // 3. Lấy chữ ký của các bác sĩ (kèm đường dẫn ảnh nếu có)
+    const [signRows] = await db.execute(`
+      SELECT specialty, doctor_name, signed_at, signature_image_path
+      FROM examination_signatures
+      WHERE examination_id = ?
+    `, [examId]);
+
+    const signatures = {};
+    signRows.forEach(s => {
+      signatures[s.specialty] = {
+        doctor_name: s.doctor_name,
+        signed_at: s.signed_at,
+        image_path: s.signature_image_path || null
+      };
+    });
+
+    // 4. Gom nhóm theo cấu trúc hoso của template
+    const hoso = {
+      makcb_barcode: exam.patient_code,
+      hoten: exam.emp_name,
+      tenphai: exam.gender === 'Nam' ? 'Nam' : 'Nữ',
+      ngaysinh: exam.dob,
+      tuoi: exam.age || '',
+      socmnd: exam.patient_code,
+      ngaycapcmnd: '',
+      noicapcmnd: '',
+      diachi: exam.dept,
+      dienthoai: exam.phone,
+      vitricongviec: registration.job || '',
+      tiensubenh: registration.history || '',
+      yeutocohai: registration.hazard || '',
+      chieucao: examData.tq?.height || '',
+      cannang: examData.tq?.weight || '',
+      bmi: examData.tq?.bmi || '',
+      mach: examData.tq?.pulse || '',
+      huyetap: examData.tq?.bpDisplay || '',
+      khamtheluc_pl: examData.tq?.physicalClass || '',
+
+      // Khám lâm sàng nội khoa
+      tuanhoan: examData.nk?.nkTH || '',
+      tuanhoan_pl: examData.nk?.classTH || '',
+      hohap: examData.nk?.nkHH || '',
+      hohap_pl: examData.nk?.classHH || '',
+      tieuhoa: examData.nk?.nkTHoa || '',
+      tieuhoa_pl: examData.nk?.classTHoa || '',
+      thantietnieu: examData.nk?.nkTTN || '',
+      thantietnieu_pl: examData.nk?.classTTN || '',
+      noitiet: examData.nk?.nkNT || '',
+      noitiet_pl: examData.nk?.classNT || '',
+      coxuongkhop: examData.nk?.nkCXK || '',
+      coxuongkhop_pl: examData.nk?.classCXK || '',
+      thankinh: examData.nk?.nkTK || '',
+      thankinh_pl: examData.nk?.classTK || '',
+      tamthan: examData.nk?.nkTThan || '',
+      tamthan_pl: examData.nk?.classTThan || '',
+
+      // Ngoại khoa - da liễu
+      ngoaikhoa: examData.ng?.ngNgoai || '',
+      ngoaikhoa_pl: examData.ng?.class || '',
+      dalieu: examData.ng?.ngDa || '',
+      dalieu_pl: examData.ng?.classDa || '',
+
+      // Sản phụ khoa
+      san: examData.sp?.spContent || '',
+      san_pl: examData.sp?.class || '',
+
+      // Mắt
+      mat_kk_matphai: examData.mt?.mtNoGlassR || '',
+      mat_kk_mattrai: examData.mt?.mtNoGlassL || '',
+      mat_ck_matphai: examData.mt?.mtGlassR || '',
+      mat_ck_mattrai: examData.mt?.mtGlassL || '',
+      mat_benh: examData.mt?.mtDiag || '',
+      mat_pl: examData.mt?.class || '',
+
+      // Tai mũi họng
+      tmh_tt_noithuong: examData.tmh?.tmhLN || '',
+      tmh_tt_noitham: examData.tmh?.tmhLW || '',
+      tmh_tp_noithuong: examData.tmh?.tmhRN || '',
+      tmh_tp_noitham: examData.tmh?.tmhRW || '',
+      tmh_benh: examData.tmh?.tmhDiag || '',
+      tmh_pl: examData.tmh?.class || '',
+
+      // Răng hàm mặt
+      rhm_hamtren: examData.rhm?.rhmNotes || '',
+      rhm_benh: examData.rhm?.rhmBenh || '',
+      rhm_pl: examData.rhm?.class || '',
+
+      // Kết luận
+      lamsang: examData.kl?.clinical || '',
+      canlamsang: examData.kl?.paraclinical || '',
+      kl_TenPL: examData.kl?.healthClass || '',
+      kl_tenBenh: examData.kl?.diseases || '',
+      kl_ngayKL: exam.sign_date || new Date(),
+
+      // Chữ ký (text tạm, sau sẽ thay bằng ảnh)
+      tuanhoan_sign: signatures['Nội khoa']?.doctor_name || '',
+      hohap_sign: signatures['Nội khoa']?.doctor_name || '',
+      // ... tương tự cho các khoa khác, bạn có thể map theo specialty
+    };
+
+    res.json({ success: true, data: hoso });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 
 // ========== REGISTER ==========
