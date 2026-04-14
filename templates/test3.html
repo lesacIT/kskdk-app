@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Phiếu khám sức khỏe trước khi bố trí việc làm</title>
+        <style>
+        @page { size: 8.5in 11in; margin: 0.59in }
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 12pt;
+            line-height: 1.15;
+            margin: 0;
+            padding: 0;
+            background: white;
+        }
+        p {
+            margin-top: 0.06in;
+            margin-bottom: 0;
+            text-align: left;
+            orphans: 0;
+            widows: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.04in 0;
+        }
+        td, th {
+            border: 1px solid #000000;
+            padding: 0.08in;
+            vertical-align: top;
+        }
+        .center {
+            text-align: center;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        .italic {
+            font-style: italic;
+        }
+    </style>
+    </head>
+    <body>
+
+        <p class="western"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-right: -0.1in; margin-top: 0in">
+            <font size="4" style="font-size: 14pt"> <font color="#000000"><font
+                        size="3" style="font-size: 13pt"><span
+                            style="letter-spacing: -0.3pt">CỤC
+                            HẬU CẦN - KỸ THUẬT QK9 </span></font></font><font
+                    color="#000000"><font size="3" style="font-size: 13pt"><span
+                            style="letter-spacing: -0.3pt"><b>CỘNG
+                                HÒA XÃ HỘI CHỦ NGHĨA VIỆT
+                                NAM</b></span></font></font></font></p>
+        <p class="western"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0in">
+            <font size="4" style="font-size: 14pt"><font color="#000000"><font
+                        size="3" style="font-size: 13pt"><span
+                            style="letter-spacing: -0.3pt"><b> BỆNH
+                                VIỆN QUÂN Y 121 Độc lập – Tự do – Hạnh
+                                phúc</b></span></font></font></font></p>
+        <p class="western"
+            style="orphans: 2; widows: 2; margin-top: 0.17in"><font size="4"
+                style="font-size: 14pt"><font color="#000000"> </font><font
+                    color="#000000"><font size="3" style="font-size: 13pt">Số:
+                        ….. /GKSK-BV </font></font></font></p>
+        <p class="western" style="orphans: 2; widows: 2; margin-top: 0in"><br />
+
+        </p>
+        <p class="western" align="center"
+            style="orphans: 2; widows: 2; margin-top: 0in">
+            <font size="4" style="font-size: 14pt"><b>PHIẾU KHÁM SỨC KHỎE
+                    TRƯỚC KHI BỐ TRÍ VIỆC LÀM</b></font></p>
+        <p class="western" style="orphans: 2; widows: 2; margin-top: 0in"><br />
+
+        </p>
+        <p class="western"
+            style="line-height: 150%; orphans: 2; widows: 2; margin-top: 0in">
+            <font size="4" style="font-size: 14pt"> </font></p>
+        <p class="western"
+            style="line-height: 150%; orphans: 2; widows: 2; margin-top: 0in">
+            <br />
+
+        </p>
+        <p class="western"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt">1.
+                    Họ tên: </font><font size="3"
+                    style="font-size: 13pt"><b>{{hoso.hoten}}</b></font></font></p>
+        <p class="western"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt"> 2.
+                    Giới tính: </font><font size="3"
+                    style="font-size: 13pt"><b>{{hoso.tenphai}}</b></font></font></p>
+        <p class="western"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt"> 3.
+                    Ngày tháng năm sinh: {%if </font><font size="3"
+                    style="font-size: 13pt"><b>hoso.ngaysinh
+                        %}{{hoso.ngaysinh.strftime('%d/%m/%Y')
+                        }}</b></font><font size="3" style="font-size: 13pt">}
+                    (Tuổi: </font><font size="3"
+                    style="font-size: 13pt"><b>{{hoso.tuoi}}</b></font><font
+                    size="3" style="font-size: 13pt">){%
+                    endif %}</font></font></p>
+        <p class="western"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt"> 4.
+                    Số CMND/CCCD/Hộ chiếu/Định danh CD: </font><font size="3"
+                    style="font-size: 13pt"><b>{{hoso.socmnd}}</b></font></font></p>
+        <p class="western"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt"> 5.
+                    Cấp ngày {{ hoso.ngaycapcmnd | default('……….', true)}} tại
+                </font><font size="3"
+                    style="font-size: 13pt"><b>{{hoso.noicapcmnd}}</b></font></font></p>
+        <p class="western"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt"> 6.
+                    Chỗ ở hiện tại: </font><font size="3"
+                    style="font-size: 13pt"><b>{{hoso.diachi}}</b></font></font></p>
+        <p class="western"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt"> Số
+                    điện thoại liên hệ: </font><font size="3"
+                    style="font-size: 13pt"><b>{{hoso.dienthoai|default('',true)}}</b></font></font></p>
+        <p class="western"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt">7.
+                    Vị trí nghề/công việc dự kiến bố trí:
+                    {{hoso.vitricongviec}}</font></font></p>
+        <p class="western" align="justify"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt"><b>I.
+                        TIỀN SỬ BỆNH, TẬT</b></font><font size="3"
+                    style="font-size: 13pt">
+                    (ghi rõ tên bệnh/hội chứng bệnh/triệu chứng bệnh đã
+                    mắc hoặc đang mắc):</font></font></p>
+        <p class="western" align="justify"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt">{{hoso.tiensubenh|default('',true)}}</font></font></p>
+        <p class="western" align="justify"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt"><b>II.
+                        YẾU TỐ CÓ HẠI TẠI VỊ TRÍ NGHỀ/CÔNG VIỆC DỰ KIẾN
+                        BỐ TRÍ:</b></font></font></p>
+        <p class="western" align="justify"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt">{{hoso.yeutocohai|default('',true)}}</font></font></p>
+        <p class="western"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="4" style="font-size: 14pt"><b>III. NỘI DUNG
+                    KHÁM</b></font></p>
+        <p class="western" align="justify"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt"><b>3.1.
+                        Khám tổng quát</b></font></font></p>
+        <p lang="vi-VN" class="western"
+            style="line-height: 115%; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="3" style="font-size: 13pt"><span lang="en-US"><b>-
+                    </b></span></font><font size="3"
+                style="font-size: 13pt"><span lang="en-US">Chiều
+                    cao: </span></font><font size="3"
+                style="font-size: 13pt"><span
+                    lang="en-US"><b>{{hoso.chieucao}}</b></span></font><font
+                size="3" style="font-size: 13pt"><span lang="en-US">
+                    cm; Cân nặng: </span></font><font size="3"
+                style="font-size: 13pt"><span
+                    lang="en-US"><b>{{hoso.cannang}}</b></span></font><font
+                size="3" style="font-size: 13pt"><span lang="en-US">
+                    kg; Chỉ số BMI: </span></font><font size="3"
+                style="font-size: 13pt"><span
+                    lang="en-US"><b>{{hoso.bmi}}</b></span></font></p>
+        <p lang="vi-VN" class="western"
+            style="line-height: 115%; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="3" style="font-size: 13pt">- Mạch: </font><font size="3"
+                style="font-size: 13pt"><span
+                    lang="en-US"><b>{{hoso.mach}}</b></span></font><font
+                size="3" style="font-size: 13pt"><span lang="en-US">
+                </span></font><font size="3" style="font-size: 13pt">lần/phút;
+                Huyết áp:</font><font size="3" style="font-size: 13pt"><span
+                    lang="en-US">
+                </span></font><font size="3" style="font-size: 13pt"><span
+                    lang="en-US"><b>{{hoso.huyetap}}</b></span></font><font
+                size="3" style="font-size: 13pt"><span lang="en-US">
+                </span></font><font size="3"
+                style="font-size: 13pt">mmHg</font></p>
+        <p lang="vi-VN" class="western"
+            style="line-height: 115%; margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="3" style="font-size: 13pt">Phân loại thể
+                lực:</font><font size="3" style="font-size: 13pt"><span
+                    lang="en-US">
+                </span></font><font size="3" style="font-size: 13pt"><span
+                    lang="en-US"><b>{{hoso.khamtheluc_pl}}</b></span></font><font
+                size="3" style="font-size: 13pt"><span
+                    lang="en-US">.</span></font></p>
+        <p lang="vi-VN" class="western"
+            style="margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="3" style="font-size: 13pt"><span lang="en-US"><b>3.2.
+                        Khám lâm sàng</b></span></font></p>
+        <table width="702" cellpadding="7" cellspacing="0">
+            <col width="19" />
+            <col width="102" />
+            <col width="343" />
+            <col width="180" />
+            <tr>
+                <td colspan="3" width="491" height="11"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="center"
+                        style="margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>Nội
+                                    dung khám</b></span></font></p>
+                    <p lang="vi-VN" class="western" align="center"
+                        style="margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><i>Phải
+                                    khám đầy đủ các nội dung theo chuyên khoa để
+                                    khẳng
+                                    định có/hay không có bệnh, tật theo quy
+                                    định</i></span></font></p>
+                </td>
+                <td width="180" valign="top"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="center"
+                        style="margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>Họ
+                                    tên và chữ ký của Bác sĩ chuyên
+                                    khoa</b></span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" width="686" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" style="margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>1.
+                                    Nội khoa</b></span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="2" width="19" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>a)</b></span></font></p>
+                </td>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><i>Tuần
+                                    hoàn</i></span></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{hoso.tuanhoan</span></font><font
+                            size="3"
+                            style="font-size: 13pt">|default('',true)</font><font
+                            size="3" style="font-size: 13pt"><span
+                                lang="en-US">}}</span></font></p>
+                </td>
+                <td rowspan="2" width="180"
+                    style="border: 1px solid #000000; padding: 0in"><p
+                        lang="vi-VN" class="western" align="center"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>{{hoso.tuanhoan_sign}}</b></span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">Phân
+                                loại</span></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{'Loại
+                                ' ~ hoso.tuanhoan_pl|default('Chưa phân loại.',
+                                true)}}</span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="2" width="19" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>b)</b></span></font></p>
+                </td>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><i>Hô
+                                    hấp</i></span></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{hoso.hohap</span></font><font
+                            size="3"
+                            style="font-size: 13pt">|default('',true)</font><font
+                            size="3" style="font-size: 13pt"><span
+                                lang="en-US">}}</span></font></p>
+                </td>
+                <td rowspan="2" width="180"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="center"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>{{hoso.hohap_sign}}</b></span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">Phân
+                                loại</span></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{'Loại
+                                ' ~ hoso.hohap_pl|default('Chưa phân loại.',
+                                true)}}</span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="2" width="19" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>c)</b></span></font></p>
+                </td>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN"
+                        style="page-break-inside: avoid; margin-left: 0in; margin-top: 0in">
+                        <font size="2" style="font-size: 11pt"><font size="3"
+                                style="font-size: 13pt"><i>Tiêu
+                                </i></font><font size="3"
+                                style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.3pt"><i>hóa</i></span></font></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{hoso.tieuhoa</span></font><font
+                            size="3"
+                            style="font-size: 13pt">|default('',true)</font><font
+                            size="3" style="font-size: 13pt"><span
+                                lang="en-US">}}</span></font></p>
+                </td>
+                <td rowspan="2" width="180"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="center"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>{{hoso.tieuhoa_sign}}</b></span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN"
+                        style="page-break-inside: avoid; margin-left: 0in; margin-top: 0in">
+                        <font size="2" style="font-size: 11pt"><font size="3"
+                                style="font-size: 13pt">Phân</font><font
+                                size="3" style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.1pt">
+                                </span></font><font size="3"
+                                style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.2pt">loại</span></font></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{'Loại
+                                ' ~ hoso.tieuhoa_pl|default('Chưa phân loại.',
+                                true)}}</span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="2" width="19" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>d)</b></span></font></p>
+                </td>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN"
+                        style="page-break-inside: avoid; margin-left: 0in; margin-top: 0in">
+                        <font size="2" style="font-size: 11pt"><font size="3"
+                                style="font-size: 13pt"><i>Thận-Tiết</i></font><font
+                                size="3" style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.1pt"><i>
+                                    </i></span></font><font size="3"
+                                style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.2pt"><i>niệu</i></span></font></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{hoso.thantietnieu</span></font><font
+                            size="3"
+                            style="font-size: 13pt">|default('',true)</font><font
+                            size="3" style="font-size: 13pt"><span
+                                lang="en-US">}}</span></font></p>
+                </td>
+                <td rowspan="2" width="180"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="center"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>{{hoso.than_sign}}</b></span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN"
+                        style="page-break-inside: avoid; margin-left: 0in; margin-top: 0in">
+                        <font size="2" style="font-size: 11pt"><font size="3"
+                                style="font-size: 13pt">Phân</font><font
+                                size="3" style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.1pt">
+                                </span></font><font size="3"
+                                style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.2pt">loại</span></font></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{'Loại
+                                ' ~
+                                hoso.thantietnieu_pl|default('Chưa phân loại.',
+                                true)}}</span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="2" width="19" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>đ)</b></span></font></p>
+                </td>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN"
+                        style="page-break-inside: avoid; margin-left: 0in; margin-top: 0in">
+                        <font size="2" style="font-size: 11pt"><font size="3"
+                                style="font-size: 13pt"><i>Nội
+                                </i></font><font size="3"
+                                style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.2pt"><i>tiết</i></span></font></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{hoso.noitiet</span></font><font
+                            size="3"
+                            style="font-size: 13pt">|default('',true)</font><font
+                            size="3" style="font-size: 13pt"><span
+                                lang="en-US">}}</span></font></p>
+                </td>
+                <td rowspan="2" width="180"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="center"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>{{hoso.noitiet_sign}}</b></span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN"
+                        style="page-break-inside: avoid; margin-left: 0in; margin-top: 0in">
+                        <font size="2" style="font-size: 11pt"><font size="3"
+                                style="font-size: 13pt">Phân</font><font
+                                size="3" style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.1pt">
+                                </span></font><font size="3"
+                                style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.2pt">loại</span></font></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{'Loại
+                                ' ~ hoso.noitiet_pl|default('Chưa phân loại.',
+                                true)}}</span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="2" width="19" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>e)</b></span></font></p>
+                </td>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN"
+                        style="page-break-inside: avoid; margin-left: 0in; margin-top: 0in">
+                        <font size="2" style="font-size: 11pt"><font size="3"
+                                style="font-size: 13pt"><i>Cơ</i></font><font
+                                size="3" style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.2pt"><i>
+                                    </i></span></font><font size="3"
+                                style="font-size: 13pt"><i>-</i></font><font
+                                size="3" style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.1pt"><i>
+                                    </i></span></font><font size="3"
+                                style="font-size: 13pt"><i>xương</i></font><font
+                                size="3" style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.1pt"><i>
+                                    </i></span></font><font size="3"
+                                style="font-size: 13pt"><i>-</i></font><font
+                                size="3" style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.1pt"><i>
+                                    </i></span></font><font size="3"
+                                style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.2pt"><i>khớp</i></span></font></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{hoso.coxuongkhop</span></font><font
+                            size="3"
+                            style="font-size: 13pt">|default('',true)</font><font
+                            size="3" style="font-size: 13pt"><span
+                                lang="en-US">}}</span></font></p>
+                </td>
+                <td rowspan="2" width="180"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="center"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>{{hoso.co_sign}}</b></span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN"
+                        style="page-break-inside: avoid; margin-left: 0in; margin-top: 0in">
+                        <font size="2" style="font-size: 11pt"><font size="3"
+                                style="font-size: 13pt">Phân</font><font
+                                size="3" style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.1pt">
+                                </span></font><font size="3"
+                                style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.2pt">loại</span></font></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{'Loại
+                                ' ~
+                                hoso.coxuongkhop_pl|default('Chưa phân loại.',
+                                true)}}</span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="2" width="19" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>g)</b></span></font></p>
+                </td>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN"
+                        style="page-break-inside: avoid; margin-left: 0in; margin-top: 0in">
+                        <font size="2" style="font-size: 11pt"><font size="3"
+                                style="font-size: 13pt"><i>Thần</i></font><font
+                                size="3" style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.1pt"><i>
+                                    </i></span></font><font size="3"
+                                style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.2pt"><i>kinh</i></span></font></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{hoso.thankinh</span></font><font
+                            size="3"
+                            style="font-size: 13pt">|default('',true)</font><font
+                            size="3" style="font-size: 13pt"><span
+                                lang="en-US">}}</span></font></p>
+                </td>
+                <td rowspan="2" width="180"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="center"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>{{hoso.thankinh_sign}}</b></span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN"
+                        style="page-break-inside: avoid; margin-left: 0in; margin-top: 0in">
+                        <font size="2" style="font-size: 11pt"><font size="3"
+                                style="font-size: 13pt">Phân</font><font
+                                size="3" style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.1pt">
+                                </span></font><font size="3"
+                                style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.2pt">loại</span></font></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{'Loại
+                                ' ~ hoso.thankinh_pl|default('Chưa phân loại.',
+                                true)}}</span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="2" width="19" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>h)</b></span></font></p>
+                </td>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN"
+                        style="page-break-inside: avoid; margin-left: 0in; margin-top: 0in">
+                        <font size="2" style="font-size: 11pt"><font size="3"
+                                style="font-size: 13pt"><i>Tâm
+                                    thần</i></font></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{hoso.tamthan</span></font><font
+                            size="3"
+                            style="font-size: 13pt">|default('',true)</font><font
+                            size="3" style="font-size: 13pt"><span
+                                lang="en-US">}}</span></font></p>
+                </td>
+                <td rowspan="2" width="180"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="center"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>{{hoso.tamthan_sign}}</b></span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN"
+                        style="page-break-inside: avoid; margin-left: 0in; margin-top: 0in">
+                        <font size="2" style="font-size: 11pt"><font size="3"
+                                style="font-size: 13pt">Phân</font><font
+                                size="3" style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.1pt">
+                                </span></font><font size="3"
+                                style="font-size: 13pt"><span
+                                    style="letter-spacing: -0.2pt">loại</span></font></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{'Loại
+                                ' ~ hoso.tamthan_pl|default('Chưa phân loại.',
+                                true)}}</span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" width="686" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" style="margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>2.
+                                    Ngoại khoa, Da liễu:</b></span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="2" width="19" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>a)</b></span></font></p>
+                </td>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><i>Ngoại
+                                    khoa</i></span></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{hoso.ngoaikhoa</span></font><font
+                            size="3"
+                            style="font-size: 13pt">|default('',true)</font><font
+                            size="3" style="font-size: 13pt"><span
+                                lang="en-US">}}</span></font></p>
+                </td>
+                <td rowspan="2" width="180"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="center"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>{{hoso.ngoaikhoa_sign}}</b></span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">Phân
+                                loại</span></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{'Loại
+                                ' ~ hoso.ngoaikhoa_pl|default('Chưa phân loại.',
+                                true)}}</span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="2" width="19" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>b</b></span></font><font
+                            size="3" style="font-size: 13pt"><span
+                                lang="en-US"><i><b>)</b></i></span></font></p>
+                </td>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><i>Da
+                                    liễu</i></span></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{hoso.dalieu</span></font><font
+                            size="3"
+                            style="font-size: 13pt">|default('',true)</font><font
+                            size="3" style="font-size: 13pt"><span
+                                lang="en-US">}}</span></font></p>
+                </td>
+                <td rowspan="2" width="180"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="center"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>{{hoso.dalieu_sign}}</b></span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td width="102"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">Phân
+                                loại</span></font></p>
+                </td>
+                <td width="343"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">{{'Loại
+                                ' ~ hoso.dalieu_pl|default('Chưa phân loại.',
+                                true)}}</span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td width="19" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>3.</b></span></font></p>
+                </td>
+                <td colspan="3" width="653"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>Sản
+                                    phụ khoa</b></span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" width="491" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><i>Các
+                                    bệnh sản phụ khoa (nếu có):
+                                </i></span></font><font size="3"
+                            style="font-size: 13pt"><span
+                                lang="en-US">{{hoso.san</span></font><font
+                            size="3"
+                            style="font-size: 13pt">|default('',true)</font><font
+                            size="3" style="font-size: 13pt"><span
+                                lang="en-US">}}</span></font></p>
+                </td>
+                <td rowspan="2" width="180"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="center"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US"><b>{{hoso.san_sign}}</b></span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" width="491" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        lang="vi-VN" class="western" align="justify"
+                        style="page-break-inside: avoid; margin-top: 0in">
+                        <font size="3" style="font-size: 13pt"><span
+                                lang="en-US">Phân
+                                loại: {{'Loại ' ~ hoso.san_pl|default('Chưa phân
+                                loại.', true)}}</span></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td width="19" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt"><b>4.</b></font></font></p>
+                </td>
+                <td colspan="3" width="653"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt"><b>Mắt</b></font></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" width="491" height="12" valign="top"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0.08in; margin-bottom: 0.08in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt">Kết
+                                quả khám thị lực:</font></font></p>
+                    <p class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0.08in; margin-bottom: 0.08in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt">+
+                                Không kính: Mắt phải
+                            </font><font size="3"
+                                style="font-size: 13pt"><b>{{hoso.mat_kk_matphai</b></font><font
+                                size="3"
+                                style="font-size: 13pt">|default('……',true)</font><font
+                                size="3"
+                                style="font-size: 13pt"><b>}}</b></font><font
+                                size="3" style="font-size: 13pt">;
+                                Mắt trái </font><font size="3"
+                                style="font-size: 13pt"><b>{{hoso.mat_kk_mattrai</b></font><font
+                                size="3"
+                                style="font-size: 13pt">|default('……',true)</font><font
+                                size="3"
+                                style="font-size: 13pt"><b>}}</b></font></font></p>
+                    <p class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0.08in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt">+
+                                Có kính: Mắt phải
+                            </font><font size="3"
+                                style="font-size: 13pt"><b>{{hoso.mat_ck_matphai</b></font><font
+                                size="3"
+                                style="font-size: 13pt">|default('……',true)</font><font
+                                size="3"
+                                style="font-size: 13pt"><b>}}</b></font><font
+                                size="3" style="font-size: 13pt">;
+                                Mắt trái </font><font size="3"
+                                style="font-size: 13pt"><b>{{hoso.mat_ck_mattrai</b></font><font
+                                size="3"
+                                style="font-size: 13pt">|default('……',true)</font><font
+                                size="3"
+                                style="font-size: 13pt"><b>}}</b></font></font></p>
+                </td>
+                <td rowspan="3" width="180"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western" align="center"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt"><b>{{hoso.mat_sign}}</b></font></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" width="491" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt"><i>Các
+                                    bệnh về mắt (nếu có):
+                                    {{hoso.mat_benh</i></font><font size="3"
+                                style="font-size: 13pt">|default('',true)</font><font
+                                size="3"
+                                style="font-size: 13pt"><i>}}</i></font></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" width="491" height="12"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt">Phân
+                                loại: </font><font size="3"
+                                style="font-size: 13pt">{{'Loại
+                                ' ~ </font><font size="3"
+                                style="font-size: 13pt">hoso.mat_pl</font><font
+                                size="3" style="font-size: 13pt">|default('Chưa
+                                phân loại.', true)}}</font></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td width="19" height="20"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt"><b>5.</b></font></font></p>
+                </td>
+                <td colspan="3" width="653"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt"><b>Tai
+                                    – Mũi – Họng</b></font></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" width="491" valign="top"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt"><i>Kết
+                                    quả khám thính lực:</i></font></font></p>
+                    <p class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt"><i>+
+                                    Tai trái: Nói thường
+                                </i></font><font size="3"
+                                style="font-size: 13pt"><i><b>{{hoso.tmh_tt_noithuong</b></i></font><font
+                                size="3"
+                                style="font-size: 13pt">|default('……',true)</font><font
+                                size="3"
+                                style="font-size: 13pt"><i><b>}}</b></i></font><font
+                                size="3" style="font-size: 13pt"><i>
+                                    m; Nói thầm: </i></font><font size="3"
+                                style="font-size: 13pt"><i><b>{{hoso.tmh_tt_noitham</b></i></font><font
+                                size="3"
+                                style="font-size: 13pt">|default('……',true)</font><font
+                                size="3"
+                                style="font-size: 13pt"><i><b>}}</b></i></font><font
+                                size="3" style="font-size: 13pt"><i>
+                                    m</i></font></font></p>
+                    <p class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt"><i>+
+                                    Tai phải: Nói thường
+                                </i></font><font size="3"
+                                style="font-size: 13pt"><i><b>{{hoso.tmh_tp_noithuong</b></i></font><font
+                                size="3"
+                                style="font-size: 13pt"><b>|default('……',true)</b></font><font
+                                size="3"
+                                style="font-size: 13pt"><i><b>}}</b></i></font><font
+                                size="3" style="font-size: 13pt"><i>
+                                    m; Nói thầm: </i></font><font size="3"
+                                style="font-size: 13pt"><i><b>{{hoso.tmh_tp_noitham</b></i></font><font
+                                size="3"
+                                style="font-size: 13pt"><b>|default('……',true)</b></font><font
+                                size="3"
+                                style="font-size: 13pt"><i><b>}}</b></i></font><font
+                                size="3" style="font-size: 13pt"><i>
+                                    m</i></font></font></p>
+                </td>
+                <td rowspan="3" width="180"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western" align="center"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt"><b>{{hoso.tmh_sign}}</b></font></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" width="491" height="20"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt"><i>Các
+                                    bệnh về tai mũi họng (nếu có):
+                                    {{hoso.tmh_benh|default('',true)}}</i></font></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" width="491" height="20"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt">Phân
+                                loại: </font><font size="3"
+                                style="font-size: 13pt">{{'Loại
+                                ' ~ </font><font size="3"
+                                style="font-size: 13pt">hoso.tmh_pl</font><font
+                                size="3" style="font-size: 13pt">|default('Chưa
+                                phân loại.', true)}}</font></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td width="19" height="20"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt"><b>6.</b></font></font></p>
+                </td>
+                <td colspan="3" width="653"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt"><b>Răng
+                                    – Hàm – Mặt</b></font></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" width="491" height="20"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt">Kết
+                                quả khám: Hàm trên:
+                                {{hoso.rhm_hamtren|default('',true)}};
+                                Hàm dưới:
+                                {{hoso.rhm_hamduoi|default('',true)}}</font></font></p>
+                </td>
+                <td rowspan="3" width="180"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western" align="center"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt"><b>{{hoso.rhm_sign}}</b></font></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" width="491" height="20"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt">Các
+                                bệnh về răng hàm mặt (nếu có):
+                                {{hoso.rhm_benh}}</font></font></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" width="491" height="19"
+                    style="border: 1px solid #000000; padding: 0in 0.08in"><p
+                        class="western"
+                        style="page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+                        <font size="4" style="font-size: 14pt"><font size="3"
+                                style="font-size: 13pt">Phân
+                                loại: </font><font size="3"
+                                style="font-size: 13pt">{{'Loại
+                                ' ~ </font><font size="3"
+                                style="font-size: 13pt">hoso.rhm_pl</font><font
+                                size="3" style="font-size: 13pt">|default('Chưa
+                                phân loại.', true)}}</font></font></p>
+                </td>
+            </tr>
+        </table>
+        <p lang="vi-VN" class="western" align="justify"
+            style="margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="3" style="font-size: 13pt"><span lang="en-US"><i>*Trường
+                        hợp người lao động đã khám sức khỏe tuyển dụng/khám
+                        sức khỏe định kỳ còn giá trị sử dụng theo quy định
+                        tại Thông tư 32/2023/TT-BYT ngày 31/12/2023 của Bộ Y tế
+                        hướng dẫn luật khám chữa bệnh sẽ không phải khám
+                        lại nội dung này.</i></span></font></p>
+        <p lang="vi-VN" class="western"
+            style="margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="3" style="font-size: 13pt"><span lang="en-US"><b>2. Khám
+                        phát hiện bệnh liên quan đến vị trí
+                        làm</b></span></font></p>
+        <p lang="vi-VN" class="western"
+            style="margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="3" style="font-size: 13pt"><span lang="en-US"><b>2.1.
+                        Lâm
+                        sàng: </b></span></font><font size="3"
+                style="font-size: 13pt">{{hoso.</font><font size="3"
+                style="font-size: 13pt"><span
+                    lang="en-US">lamsang</span></font><font size="3"
+                style="font-size: 13pt">|default('Chưa
+                phân loại.', true)}}</font></p>
+        <p lang="vi-VN" class="western"
+            style="margin-top: 0.04in; margin-bottom: 0.04in">
+            <font size="3" style="font-size: 13pt"><span lang="en-US"><b>2.2.
+                        Cận
+                        lâm sàng:</b></span></font><font size="3"
+                style="font-size: 13pt">
+                {{hoso.</font><font size="3" style="font-size: 13pt"><span
+                    lang="en-US">canlamsang</span></font><font size="3"
+                style="font-size: 13pt">|default('Chưa
+                phân loại.', true)}}</font></p>
+        <p class="western"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt"><b>IV.
+                        KẾT LUẬN</b></font></font></p>
+        <p class="western"
+            style="line-height: 150%; orphans: 2; widows: 2; margin-top: 0in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt"><b>1.
+                        Phân loại sức khỏe: </b></font><font size="3"
+                    style="font-size: 13pt">{{hoso.kl_TenPL}}</font></font></p>
+        <p class="western"
+            style="line-height: 150%; orphans: 2; widows: 2; margin-top: 0in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt"><b>2.
+                        Các bệnh, tật (nếu có):</b></font><font size="3"
+                    style="font-size: 13pt">
+                    {{hoso.kl_tenBenh|default('',true)}}</font></font></p>
+        <p class="western"
+            style="line-height: 150%; orphans: 2; widows: 2; margin-top: 0in">
+            <font size="4" style="font-size: 14pt"><font size="3"
+                    style="font-size: 13pt"><b>3.
+                        Hiện tại đủ/không đủ khám sức khỏe làm việc cho
+                        ngành nghề, công việc (Ghi cụ thể nếu có), hướng giải
+                        quyết (nếu có): </b></font></font>
+        </p>
+        <p class="western"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-right: -0.1in; margin-top: 0.08in; page-break-after: avoid">
+            <font size="4" style="font-size: 14pt"><font color="#000000"><font
+                        size="3" style="font-size: 13pt"><span
+                            style="letter-spacing: -0.3pt">
+                        </span></font></font><font color="#000000"><font
+                        size="3" style="font-size: 13pt"><span
+                            style="letter-spacing: -0.3pt"><i>Cần
+                                Thơ, {%if hoso.kl_ngayKL %}ngày
+                                {{hoso.kl_ngayKL.strftime("%d")}}
+                                tháng {{hoso.kl_ngayKL.strftime("%m")}} năm
+                                {{hoso.kl_ngayKL.strftime("%Y")}}{% else
+                                %}ngày…… tháng …
+                                … năm ……{% endif %}
+                            </i></span></font></font></font>
+        </p>
+        <p class="western"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-right: -0.1in; margin-top: 0in; page-break-after: avoid">
+            <font size="4" style="font-size: 14pt"><font color="#000000"><font
+                        size="3" style="font-size: 13pt"><span
+                            style="letter-spacing: -0.3pt">
+                        </span></font></font><font color="#000000"><font
+                        size="3" style="font-size: 13pt"><span
+                            style="letter-spacing: -0.3pt"><b>NGƯỜI
+                                KẾT LUẬN GIÁM
+                                ĐỐC</b></span></font></font></font></p>
+        <p class="western"
+            style="line-height: 115%; orphans: 2; widows: 2; margin-top: 0in; page-break-after: avoid">
+            <font size="4" style="font-size: 14pt"><font color="#000000"><font
+                        size="3" style="font-size: 13pt"><span
+                            style="letter-spacing: -0.3pt"><b>
+                            </b></span></font></font><font color="#000000"><font
+                        size="3" style="font-size: 13pt"><span
+                            style="letter-spacing: -0.3pt"><i>(Ký
+                                và ghi rõ họ, tên) (Ký và ghi rõ họ,
+                                tên)</i></span></font></font></font></p>
+        <p class="western"
+            style="line-height: 115%; page-break-inside: avoid; orphans: 2; widows: 2; margin-top: 0in">
+            <font size="4" style="font-size: 14pt"><font color="#000000"><font
+                        size="3" style="font-size: 13pt"><span
+                            style="letter-spacing: -0.3pt"><b>
+                                {{hoso.kl_sign}}</b></span></font></font></font></p>
+
+    </body>
+</html>
